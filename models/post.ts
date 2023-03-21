@@ -3,7 +3,7 @@ export interface Post {
   title: string;
   content: string;
   user_id: number;
-  subreddit_id: number;
+  branch_id: number;
   created_at: Date;
   updated_at: Date;
   comments: Comment[];
@@ -15,7 +15,7 @@ export interface Post {
 //   "title": String,
 //   "content": String,
 //   "user_id": Number,
-//   "subreddit_id": Number,
+//   "branch_id": Number,
 //   "created_at": Date,
 //   "updated_at": Date,
 //   "comments": [
