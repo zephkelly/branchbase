@@ -1,7 +1,11 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+//@ts-ignore
+import pg from 'pg';
+import { Nitro } from 'nitropack';
 
-export const pool = new Pool({
+import dotenv from 'dotenv';
+dotenv.config();
+
+export const pool = new pg.Pool({
   user: process.env.POSTGRES_USER,
   database: process.env.POSTGRES_DB,
   password: process.env.POSTGRES_PASSWORD,
@@ -9,7 +13,7 @@ export const pool = new Pool({
   host: process.env.POSTGRES_HOST,
 });
 
-export default defineNuxtPlugin(async (nuxtContext) => {
+export default async (_nitroApp: Nitro) => {
   try {
     await pool.connect();
     console.log("DB connection established.");
@@ -17,4 +21,4 @@ export default defineNuxtPlugin(async (nuxtContext) => {
   catch (err) {
     console.error("DB connection failed.", err);
   }
-});
+}

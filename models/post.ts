@@ -1,4 +1,4 @@
-import { mongoose } from "@/plugins/mongo";
+import mongoose from "mongoose";
 
 export interface Post {
   id: string;
