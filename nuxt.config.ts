@@ -9,4 +9,7 @@ export default defineNuxtConfig({
     //Image processing
     { src: '~/plugins/sharp.ts' },
   ],
+  serverMiddleware: [
+    { path: '/api', handler: '~/api/createBranch.ts' }
+  ],
 })
