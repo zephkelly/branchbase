@@ -1,10 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   plugins: [
-    // PostgreSQL plugin
+    //Database connections
     { src: '~/plugins/postgres.ts' },
-
-    // MongoDB plugin
     { src: '~/plugins/mongo.ts' },
+    //File upload
+    { src: '~/plugins/multer.ts' },
+    //Image processing
+    { src: '~/plugins/sharp.ts' },
   ],
 })
