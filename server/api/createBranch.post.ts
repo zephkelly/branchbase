@@ -23,10 +23,18 @@ export default defineEventHandler(async (event) => {
     }
 
     await insertReferenceToBranchCollection(name, name);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Branch created successfully." }),
+    };
   }
   catch (err) {
     console.error(err);
-    throw err;
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Branch creation failed." + err }),
+    };
   }
 });
 
