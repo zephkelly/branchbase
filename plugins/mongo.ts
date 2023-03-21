@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+export const mongoose = require('mongoose');
 require('dotenv').config();
 
 export default defineNuxtPlugin(async (nuxtContext) => {
