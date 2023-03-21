@@ -2,9 +2,9 @@
 export default defineNuxtConfig({
   plugins: [
     // PostgreSQL plugin
-    { src: '~/plugins/postgres.js' },
+    { src: '~/plugins/postgres.ts' },
 
     // MongoDB plugin
-    { src: '~/plugins/mongo.js' },
+    { src: '~/plugins/mongo.ts' },
   ],
 })
