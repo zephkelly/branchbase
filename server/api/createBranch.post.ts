@@ -1,70 +1,45 @@
-// import { mongoose } from '~~/server/mongo';
-// import { pool } from '~~/server/postgres';
-// require('dotenv').config();
+import { pool } from '~~/server/postgres';
+import { BranchModel } from '~~/models/branches';
 
-// export default defineEventHandler(async (event) => {
-//   const body = await readBody(event);
-//   const { name, description } = await JSON.parse(body);
+import dotenv from 'dotenv';
+dotenv.config();
 
-//   try {
-//     if (await !doesTableExist(name)) {
-//       console.error("Branch already exists.");
-//       throw new Error("Branch already exists.");
-//     }
+export default eventHandler(async (event) => {
+  const body = await readBody(event);
+  const { name, description } = body;
 
-//     if (await createBranchMeta(name, description)) {
-//       console.error("Branch meta creation failed.");
-//       throw new Error("Branch meta creation failed.");
-//     }
+  const doesExist = await doesBranchExist(name);
+  if (doesExist.rows[0].exists) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Branch already exists.' }),
+    };
+  }
+  
+  await createBranchMeta(name, description, name);
+  await createBranchPostsCollection(name, description);
 
-//     if (await createBranchCollection(name)) {
-//       console.error("Branch collection creation failed.");
-//       throw new Error("Branch collection creation failed.");
-//     }
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Branch created successfully.' }),
+  };
+});
 
-//     await insertReferenceToBranchCollection(name, name);
+async function doesBranchExist(branchName: string) {
+  return await pool.query(
+    'SELECT EXISTS (SELECT FROM branches WHERE name = $1)',
+    [branchName]
+  );
+}
 
-//     return {
-//       statusCode: 200,
-//       body: JSON.stringify({ message: "Branch created successfully." }),
-//     };
-//   }
-//   catch (err) {
-//     console.error(err);
-//     return {
-//       statusCode: 500,
-//       body: JSON.stringify({ message: "Branch creation failed." + err }),
-//     };
-//   }
-// });
+async function createBranchMeta(name: string, description: string, posts_collection: string) {
+  return await pool.query(
+    'INSERT INTO branches (name, description, posts_collection) VALUES ($1, $2, $3) RETURNING *',
+    [name, description, posts_collection]
+  );
+}
 
-// async function doesTableExist(tableName: string) {
-//   return await pool.query(
-//     'SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = $1)',
-//     [tableName]
-//   );
-// }
-
-// async function createBranchMeta(name: string, description: string) {
-//   return await pool.query(
-//     'INSERT INTO branches (name, description) VALUES ($1, $2) RETURNING *',
-//     [name, description]
-//   );
-// }
-
-// async function createBranchCollection(name: string) {
-//   return await mongoose.createConnection(
-//       `${process.env.MONGO_CONNECTION + name}`,
-//       {
-//         useNewUrlParser: true,
-//         useUnifiedTopology: true,
-//       }
-//   );
-// }
-
-// async function insertReferenceToBranchCollection(name: string, collection: string) {
-//   return await pool.query(
-//     'UPDATE branches SET posts_collection = $1 WHERE id = $2',
-//     [collection, name]
-//   );
-// }
+async function createBranchPostsCollection(name: string, description: string) {
+  const newBranch = await BranchModel.create({ branch_id: name });
+  return await newBranch.save();
+}

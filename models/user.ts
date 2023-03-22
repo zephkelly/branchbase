@@ -1,3 +1,11 @@
+export enum AuthProvider {
+  standard = 'standard',
+  facebook = 'facebook',
+  google = 'google',
+  github = 'github',
+  twitter = 'twitter'
+} 
+
 export interface User {
   id: number;
   username: string;

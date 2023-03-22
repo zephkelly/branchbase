@@ -6,4 +6,7 @@ export default defineNuxtConfig({
       '~/server/postgres.ts'
     ]
   }
+  // serverMiddleware: [
+  //   '~/server/middleware/index.ts'
+  // ],
 })
