@@ -1,9 +1,6 @@
 import { pool } from '~~/server/postgres';
 import { BranchModel } from '~~/models/branches';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 export default eventHandler(async (event) => {
   const body = await readBody(event);
   const { name, description } = body;

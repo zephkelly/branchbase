@@ -11,10 +11,10 @@
     <nav>
       <ul>
         <li>
-          <nuxt-link class="nav-link" to="/">Home</nuxt-link>
+          <nuxt-link to="/">Home</nuxt-link>
         </li>
         <li>
-          <nuxt-link class="nav-link" to="/about">About</nuxt-link>
+          <nuxt-link to="/about">About</nuxt-link>
         </li>
       </ul>
     </nav>
@@ -32,20 +32,21 @@
     height: 3.5rem;
     flex-direction: row;
     box-sizing: border-box;
-    padding: 0.4rem 1rem;
+    padding: 0.4rem 2rem;
     background-color: rgb(14, 15, 16);
   }
 
   .logo {
-    width: 80px;
+    width: 70px;
     height: 100%;
     overflow: hidden;
 
     img {
-      width: 120%;
-      height: 120%;
+      width: 140%;
+      height: 140%;
       object-fit: cover;
-      margin-top: -0.1rem;
+      margin-top: -0.5rem;
+      margin-left: -0.9rem;
     }
   }
 
