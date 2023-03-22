@@ -8,9 +8,7 @@
 <style lang="scss" scoped>
   main {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    height: 100vh;
   }
 </style>
 

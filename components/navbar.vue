@@ -10,12 +10,6 @@
     </div>
     <nav>
       <ul>
-        <li>
-          <nuxt-link to="/">Home</nuxt-link>
-        </li>
-        <li>
-          <nuxt-link to="/about">About</nuxt-link>
-        </li>
       </ul>
     </nav>
   </header>
@@ -29,11 +23,12 @@
     position: fixed;
     display: flex;
     width: 100%;
-    height: 3.5rem;
+    height: 3rem;
     flex-direction: row;
     box-sizing: border-box;
-    padding: 0.4rem 2rem;
-    background-color: rgb(14, 15, 16);
+    padding: 0.4rem 1.5rem;
+    background-color: var(--panel-color);
+    border-bottom: 1px solid rgb(54, 54, 54);
   }
 
   .logo {

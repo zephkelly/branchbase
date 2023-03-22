@@ -1,8 +1,27 @@
 //Global variables
 :root {
+  --background-color-dark: rgb(8, 8, 9);
+  --background-color-light: rgb(255, 255, 255);
 
+  --panel-color-dark: rgb(22, 22, 23);
+  --panel-color-light: rgb(255, 255, 255);
+
+  --text-color-dark: #d6d6d6;
+  --text-color-light: #000000;
 }
 
 :root {
   color-scheme: dark;
+
+  --background-color: var(--background-color-dark);
+  --panel-color: var(--panel-color-dark);
+  --text-color: var(--text-color-dark);
+}
+
+@media screen and (prefers-color-scheme: light) {
+  :root {
+    --background-color: var(--background-color-light);
+    --panel-color: var(--panel-color-light);
+    --text-color: var(--text-color-light);
+  }
 }
