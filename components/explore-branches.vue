@@ -32,8 +32,8 @@ const loadMoreBranches = ref(false);
 const showViewAll = ref(false);
 const limit: number = 6;
 
-const { data: branches, pending, refresh, error } = useFetch(`/api/branches?page=1&limit=${limit}`);
-const moreBranches = useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
+const { data: branches, pending, refresh, error } = await useFetch(`/api/branches?page=1&limit=${limit}`);
+const moreBranches = await useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
 
 function loadMore() {
   loadMoreBranches.value = true;

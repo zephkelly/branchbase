@@ -1,37 +1,50 @@
+import mongoose from 'mongoose';
+
 export enum AuthProvider {
-  standard = 'standard',
-  facebook = 'facebook',
-  google = 'google',
-  github = 'github',
-  twitter = 'twitter'
+  github = 'github'
 } 
 
 export interface User {
-  id: number;
-  username: string;
-  bio: string;
   email: string;
   password: string; //Hashed
+  auth_provider: AuthProvider;
   created_at: Date;
   updated_at: Date;
 }
 
 export interface UserProfile {
-  user_id: number;
-  display_name: string;
+  email: number;
+  handle: string;
   bio: string;
   avatar_url: string;
 }
 
-//SQL for creating the tables:
-// CREATE TABLE users (
-//   id SERIAL PRIMARY KEY,
-//   username VARCHAR(255) UNIQUE NOT NULL,
-//   email VARCHAR(255) UNIQUE NOT NULL,
-//   password VARCHAR(255) NOT NULL,
-//   created_at TIMESTAMP NOT NULL,
-//   updated_at TIMESTAMP NOT NULL
-// );
+export const UserSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  auth_provider: {
+    type: String,
+    enum: Object.values(AuthProvider),
+    required: true
+  },
+  created_at: {
+    type: Date,
+    required: true
+  },
+  updated_at: {
+    type: Date,
+    required: true
+  }
+});
+
+export const UserModel = mongoose.model('User', UserSchema);
 
 // CREATE TABLE user_profiles (
 //   user_id INTEGER PRIMARY KEY REFERENCES users (id),

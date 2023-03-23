@@ -13,7 +13,16 @@
 <script lang="ts">
 const sideNav = ref(null);
 const closeButton = ref(null);
-//toggle side nav class to open or close
+
+function toggleSideNav() {
+  //@ts-expect-error
+  sideNav.value?.classList.toggle('minimise');
+
+  setTimeout(() => {
+    //@ts-expect-error
+    closeButton.value?.classList.toggle('add-border');
+  }, 300);
+}
 
 export default {
   setup() {
@@ -24,15 +33,6 @@ export default {
     }
   }
 }
-
-function toggleSideNav() {
-  console.log('toggle');
-  sideNav.value?.classList.toggle('minimise');
-
-  setTimeout(() => {
-    closeButton.value?.classList.toggle('add-border');
-  }, 300);
-}
 </script>
 
 <style lang="scss">
@@ -42,8 +42,8 @@ function toggleSideNav() {
     align-items: flex-start;
     justify-content: flex-start;
     box-sizing: border-box;
-    height: calc(100% - 3rem);
-    width: 220px;
+    height: calc(100vh - 3rem);
+    width: 240px;
     background-color: var(--panel-color);
     border-right: 1px solid rgb(54, 54, 54);
     margin-top: 3rem;
@@ -132,7 +132,7 @@ function toggleSideNav() {
     .close-button {
       width: 3rem;
       padding-left: 0.6rem;
-      transform: translate3d(220px, 0, 0);
+      transform: translate3d(240px, 0, 0);
       border-bottom: none;
       border-radius: 0rem 0.5rem 0.5rem 0rem;
 

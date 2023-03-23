@@ -12,4 +12,4 @@ export default async (_nitroApp: Nitro) => {
   } catch (err) {
     console.error("DB connection failed.", err);
   }
-}
+};
