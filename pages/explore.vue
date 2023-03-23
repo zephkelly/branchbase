@@ -1,12 +1,30 @@
 <template>
-  <aside class="side-nav">
+  <aside ref="sideNav" class="side-nav">
+    <button class="close-button" @click="toggleSideNav">
+      <img src="@/assets/images/svg/chevron_left.svg" alt="close" />
+    </button>
     <explore-feeds />
     <explore-branches />
   </aside>
 </template>
 
 <script lang="ts">
+const sideNav = ref(null);
+//toggle side nav class to open or close
 
+export default {
+  setup() {
+    return {
+      sideNav,
+      toggleSideNav
+    }
+  }
+}
+
+function toggleSideNav() {
+  console.log('toggle');
+  sideNav.value?.classList.toggle('minimise');
+}
 </script>
 
 <style lang="scss">
@@ -67,6 +85,34 @@
       padding-top: 0rem;
       padding-bottom: 0.4rem;
       opacity: 0.3;
+    }
+
+    .close-button {
+      width: 100%;
+      min-height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background-color: transparent;
+      border: none;
+      padding: 0rem 1.5rem;
+      opacity: 0.8;
+      cursor: pointer;
+
+      img {
+        filter: invert(1);
+        width: 1.8rem;
+        height: 1.8rem;
+        min-width: 1.8rem;
+        min-height: 1.8rem;
+        border-radius: 100%;
+        background-color: rgba(104, 104, 104, 0.297);
+      }
+
+      &:hover {
+        background-color: rgb(54, 54, 54);
+        opacity: 1;
+      }
     }
   }
 

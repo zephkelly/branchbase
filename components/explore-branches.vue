@@ -7,19 +7,19 @@
         Loading ...
       </div>
       <ul v-else>
-        <!-- <p class="label">BRANCHES</p> -->
+        <p class="label">BRANCHES</p>
         <li v-for="branch in branches?.body.branches" :title="branch.description">
           <img>
           <a>b/{{ branch.name }}</a>
         </li>
-        <div v-if="!loadMoreBranches" class="more-button">
-          <a v-on:click="loadMore">+ More</a>
+        <div v-if="!loadMoreBranches" v-on:click="loadMore" class="more-button">
+          <a>+ More</a>
         </div>
         <li v-else v-for="branch in moreBranches.data.value.body.branches" :title="branch.description">
           <img>
           <a>b/{{ branch.name }}</a>
         </li>
-        <div v-if="loadMoreBranches" class="more-button">
+        <div v-if="showViewAll" class="more-button">
             <a href="">+ View all</a>
         </div>
       </ul>
@@ -28,22 +28,24 @@
 </template>
 
 <script lang="ts" setup>
-const branchList = ref([]);
+const loadMoreBranches = ref(false);
+const showViewAll = ref(false);
 const limit: number = 6;
 
 const { data: branches, pending, refresh, error } = useFetch(`/api/branches?page=1&limit=${limit}`);
-
-const loadMoreBranches = ref(false);
 const moreBranches = useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
 
 function loadMore() {
   loadMoreBranches.value = true;
+
+  //@ts-ignore
+  moreBranches.data.value?.body.metadata.totalBranches > moreBranches.data.value?.body.branches.length
+    ? showViewAll.value = false
+    : showViewAll.value = true;
 }
 
 defineExpose({
-  branchList,
-  moreBranches,
-  loadMore,
+  moreBranches
 })
 </script>
 
@@ -59,7 +61,6 @@ defineExpose({
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      // margin-bottom: 0.5rem;
       font-family: 'Roboto', sans-serif;
       font-weight: 400;
       font-size: 1rem;
@@ -73,9 +74,9 @@ defineExpose({
         align-items: center;
         justify-content: flex-start;
         overflow: hidden;
+        cursor: pointer;
 
         &:hover {
-          cursor: pointer;
           background-color: rgb(54, 54, 54);
         }
 
@@ -99,7 +100,7 @@ defineExpose({
       font-family: 'Roboto', sans-serif;
       font-weight: 400;
       font-size: 1rem;
-      padding-left: 0.8rem;
+      padding-left: 1rem;
       padding-right: 1.5rem;
       text-overflow: ellipsis;
       overflow: hidden;

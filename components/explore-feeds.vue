@@ -71,7 +71,7 @@ section.feeds {
     }
 
     a {
-      padding-left: 0.8rem;
+      padding-left: 1rem;
       padding-right: 1.5rem;
       text-overflow: ellipsis;
       overflow: hidden;
