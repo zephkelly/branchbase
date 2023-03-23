@@ -29,18 +29,7 @@
 <style lang="scss" scoped>
 section.feeds {
   width: 100%;
-  margin-bottom: 4rem;
-
-  .title {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-    font-size: 1.6rem;
-    width: calc(100% - 3rem);
-    color: var(--text-color);
-    padding: 1.5rem;
-    padding-top: 2rem;
-    padding-bottom: 0.4rem;
-  }
+  margin-bottom: 2rem;
 
   nav {
     ul {

@@ -25,7 +25,7 @@
     justify-content: flex-start;
     box-sizing: border-box;
     height: calc(100% - 3rem);
-    width: 230px;
+    width: 220px;
     background-color: var(--panel-color);
     border-right: 1px solid rgb(54, 54, 54);
     margin-top: 3rem;
@@ -41,7 +41,6 @@
       width: calc(100% - 3rem);
       color: var(--text-color);
       padding: 1.5rem;
-      padding-top: 2rem;
       padding-bottom: 0.4rem;
     }
 
@@ -54,7 +53,7 @@
       padding: 1.5rem;
       padding-top: 0rem;
       padding-bottom: 0rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       opacity: 0.6;
     }
 

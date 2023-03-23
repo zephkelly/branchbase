@@ -2,26 +2,49 @@
   <section class="branches-explore">
     <h6 class="title">Explore Communities</h6>
     <p class="subtitle">Join the discussion</p>
-    <div v-if="pending">
-      Loading ...
-    </div>
-    <nav v-else>
-      <ul>
+    <nav>
+      <div v-if="pending">
+        Loading ...
+      </div>
+      <ul v-else>
         <!-- <p class="label">BRANCHES</p> -->
-        <li v-for="branch in branches?.body" :title="branch.description">
+        <li v-for="branch in branches?.body.branches" :title="branch.description">
           <img>
           <a>b/{{ branch.name }}</a>
         </li>
+        <div v-if="!loadMoreBranches" class="more-button">
+          <a v-on:click="loadMore">+ More</a>
+        </div>
+        <li v-else v-for="branch in moreBranches.data.value.body.branches" :title="branch.description">
+          <img>
+          <a>b/{{ branch.name }}</a>
+        </li>
+        <div v-if="loadMoreBranches" class="more-button">
+            <a href="">+ View all</a>
+        </div>
       </ul>
-      <div class="more">
-        <a>+ More</a>
-      </div>
     </nav>
   </section>
 </template>
 
 <script lang="ts" setup>
-const { pending, data: branches } = useLazyFetch('/api/branches');
+const branchList = ref([]);
+const limit: number = 6;
+
+const { data: branches, pending, refresh, error } = useFetch(`/api/branches?page=1&limit=${limit}`);
+
+const loadMoreBranches = ref(false);
+const moreBranches = useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
+
+function loadMore() {
+  loadMoreBranches.value = true;
+}
+
+defineExpose({
+  branchList,
+  moreBranches,
+  loadMore,
+})
 </script>
 
 <style lang="scss" scoped>
@@ -36,7 +59,7 @@ const { pending, data: branches } = useLazyFetch('/api/branches');
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
-      margin-bottom: 0.5rem;
+      // margin-bottom: 0.5rem;
       font-family: 'Roboto', sans-serif;
       font-weight: 400;
       font-size: 1rem;
@@ -83,11 +106,31 @@ const { pending, data: branches } = useLazyFetch('/api/branches');
       white-space: nowrap;
     }
 
-    .more {
+    .more-button {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 2.4rem;
+      margin-top: 0.5rem;
+      opacity: 0.8;
+      cursor: pointer;
+
+      a {
+        padding-left: 1.5rem;
+      }
+
+      &:hover {
+        background-color: rgb(40, 40, 40);
+      }
+    }
+
+    .all {
       display: flex;
       align-items: center;
       height: 2.4rem;
+      margin-top: 0.5rem;
       opacity: 0.7;
+      cursor: pointer;
 
       a {
         padding-left: 1.5rem;
