@@ -16,12 +16,12 @@ const closeButton = ref(null);
 
 function toggleSideNav() {
   //@ts-expect-error
-  sideNav.value?.classList.toggle('minimise');
+  sideNav.value?.classList?.toggle('minimise');
 
   setTimeout(() => {
     //@ts-expect-error
-    closeButton.value?.classList.toggle('add-border');
-  }, 300);
+    closeButton.value?.classList?.toggle('add-border');
+  }, 50);
 }
 
 export default {
@@ -93,7 +93,7 @@ export default {
       justify-content: flex-start;
       background-color: transparent;
       border: none;
-      transition: transform 0.3s ease-in-out, border-bottom 0.3s ease-in-out, padding-left 0.3s ease-in-out, width 0.3s ease-in-out;
+      transition: transform 0.3s ease-in-out, padding-left 0.3s ease-in-out, width 0.3s ease-in-out;
       padding: 0rem 1.5rem;
       opacity: 0.8;
       cursor: pointer;

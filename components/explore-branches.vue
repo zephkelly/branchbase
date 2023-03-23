@@ -7,7 +7,7 @@
         Loading ...
       </div>
       <ul v-else>
-        <p class="label">BRANCHES</p>
+        <!-- <p class="label">BRANCHES</p> -->
         <li v-for="//@ts-ignore
         branch in branches?.body?.branches" :title="branch.description">
           <img>
@@ -114,7 +114,6 @@ defineExpose({
       align-items: center;
       width: 100%;
       height: 2.4rem;
-      margin-top: 0.5rem;
       opacity: 0.8;
       cursor: pointer;
 
