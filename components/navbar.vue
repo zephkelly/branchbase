@@ -10,7 +10,14 @@
     </div>
     <nav>
       <ul>
+        <li>
+          <nuxt-link to="/">Home</nuxt-link>
+        </li>
+        <li>
+          <nuxt-link to="/explore">Explore</nuxt-link>
+        </li>
       </ul>
+      <nuxt-link to="/login">Login</nuxt-link>
     </nav>
   </header>
 </template>
@@ -47,8 +54,9 @@
 
   nav {
     display: flex;
+    width: calc(100% - 70px);
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-left: 6rem;
 
     ul {

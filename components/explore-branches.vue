@@ -8,14 +8,16 @@
       </div>
       <ul v-else>
         <p class="label">BRANCHES</p>
-        <li v-for="branch in branches?.body.branches" :title="branch.description">
+        <li v-for="//@ts-ignore
+        branch in branches?.body?.branches" :title="branch.description">
           <img>
           <a>b/{{ branch.name }}</a>
         </li>
         <div v-if="!loadMoreBranches" v-on:click="loadMore" class="more-button">
           <a>+ More</a>
         </div>
-        <li v-else v-for="branch in moreBranches.data.value.body.branches" :title="branch.description">
+        <li v-else v-for="//@ts-ignore
+        branch in moreBranches?.data?.value?.body?.branches" :title="branch.description">
           <img>
           <a>b/{{ branch.name }}</a>
         </li>
@@ -32,14 +34,14 @@ const loadMoreBranches = ref(false);
 const showViewAll = ref(false);
 const limit: number = 6;
 
-const { data: branches, pending, refresh, error } = await useFetch(`/api/branches?page=1&limit=${limit}`);
+const { data: branches, pending } = await useFetch(`/api/branches?page=1&limit=${limit}`);
 const moreBranches = await useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
 
 function loadMore() {
   loadMoreBranches.value = true;
 
-  //@ts-ignore
-  moreBranches.data.value?.body.metadata.totalBranches > moreBranches.data.value?.body.branches.length
+  //@ts-expect-error
+  moreBranches.data.value.body.metadata.totalBranches > moreBranches.data.value.body.branches.length
     ? showViewAll.value = false
     : showViewAll.value = true;
 }
