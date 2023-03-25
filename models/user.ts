@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 
 export enum AuthProvider {
-  github = 'github'
+  email = 'email',
+  github = 'github',
+  google = 'google',
 } 
 
 export interface User {
@@ -14,9 +16,11 @@ export interface User {
 
 export interface UserProfile {
   email: number;
-  handle: string;
+  display_name: string;
   bio: string;
   avatar_url: string;
+  subscribed_branches: string[];
+  friends: string[];
 }
 
 export const UserSchema = new mongoose.Schema({
@@ -47,8 +51,11 @@ export const UserSchema = new mongoose.Schema({
 export const UserModel = mongoose.model('User', UserSchema);
 
 // CREATE TABLE user_profiles (
-//   user_id INTEGER PRIMARY KEY REFERENCES users (id),
-//   display_name VARCHAR(255),
+//   user_id SERIAL PRIMARY KEY,
+//   email VARCHAR(255) UNIQUE NOT NULL,
+//   handle VARCHAR(255),
 //   bio TEXT,
-//   avatar_url VARCHAR(255)
+//   avatar_url VARCHAR(255),
+//   subscribed_branches TEXT[],
+//   friends TEXT[]
 // );
