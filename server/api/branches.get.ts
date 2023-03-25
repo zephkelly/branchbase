@@ -1,4 +1,5 @@
 import { pool } from '~~/server/postgres';
+import { validateQuery } from '~~/utils/validateQuery';
 
 export default eventHandler(async (event: any) => {
   const query  = getQuery(event);
@@ -6,6 +7,15 @@ export default eventHandler(async (event: any) => {
   const page: number = query.page as number || 1;
   let limit: number = query.limit as number || 6;
   const lastLimit: number = query.lastLimit as number || limit;
+
+  const isValid = validateQuery(page, limit, lastLimit);
+
+  if (!isValid) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Invalid query.' }),
+    };
+  }
 
   if (limit <= 0) {
     limit = 100;

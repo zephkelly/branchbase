@@ -34,7 +34,7 @@ const loadMoreBranches = ref(false);
 const showViewAll = ref(false);
 const limit: number = 6;
 
-const { data: branches, pending } = await useFetch(`/api/branches?page=1&limit=${limit}`);
+const { data: branches, pending } = await useFetch(`/api/branches?page=1&limit=${limit}`, { pick: ['body']});
 const moreBranches = await useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
 
 function loadMore() {
@@ -101,7 +101,7 @@ defineExpose({
     a {
       font-family: 'Roboto', sans-serif;
       font-weight: 400;
-      font-size: 1rem;
+      font-size: 0.95rem;
       padding-left: 1rem;
       padding-right: 1.5rem;
       text-overflow: ellipsis;

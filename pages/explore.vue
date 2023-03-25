@@ -93,7 +93,7 @@ export default {
       justify-content: flex-start;
       background-color: transparent;
       border: none;
-      transition: transform 0.3s ease-in-out, padding-left 0.3s ease-in-out, width 0.3s ease-in-out;
+      transition: transform 0.3s ease-in-out, padding-left 0.3s ease-in-out, width 0.3s ease-in-out, justify-content 0.3s ease-in-out;
       padding: 0rem 1.5rem;
       opacity: 0.8;
       cursor: pointer;
@@ -123,6 +123,7 @@ export default {
       overflow: hidden;
       overflow-y: auto;
       padding-bottom: 4rem;
+      padding-top: 1rem;
     }
   }
 
@@ -130,7 +131,7 @@ export default {
     transform: translate3d(-100%, 0, 0);
 
     .close-button {
-      width: 3rem;
+      width: 3.1rem;
       padding-left: 0.6rem;
       transform: translate3d(240px, 0, 0);
       border-bottom: none;

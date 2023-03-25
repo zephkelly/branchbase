@@ -7,10 +7,6 @@
       <ul>
         <li>
           <img>
-          <nuxt-link>Explore</nuxt-link>
-        </li>
-        <li>
-          <img>
           <nuxt-link>News</nuxt-link>
         </li>
         <li>

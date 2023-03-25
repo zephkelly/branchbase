@@ -1,9 +1,19 @@
 import { pool } from '~~/server/postgres';
 import { BranchModel } from '~~/models/branches';
+import { validateQuery } from '~~/utils/validateQuery';
 
 export default eventHandler(async (event) => {
   const body = await readBody(event);
   const { name, description } = body;
+
+  const isValid = validateQuery(name, description);
+
+  if (!isValid) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'Invalid query.' }),
+    };
+  }
 
   const doesExist = await doesBranchExist(name);
   if (doesExist.rows[0].exists) {
