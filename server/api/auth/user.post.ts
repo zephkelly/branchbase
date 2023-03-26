@@ -8,7 +8,7 @@ export default eventHandler(async (event: any) => {
 
   const { email, password } = body as User;
   let { auth_provider } = body as User;
-  const { display_name, bio } = body as UserProfile;
+  const { display_name } = body as UserProfile;
   let { avatar_url } = body as UserProfile;
 
   if (validateQuery(email, password, auth_provider, avatar_url) == false) {
@@ -22,13 +22,6 @@ export default eventHandler(async (event: any) => {
     return {
       statusCode: 400,
       body: 'Invalid display name. Greater than 30 characters.'
-    }
-  }
-
-  if (validateQueryCustom(bio, 1, 160) == false) {
-    return {
-      statusCode: 400,
-      body: 'Invalid bio. Greater than 150 characters.'
     }
   }
 
@@ -92,8 +85,8 @@ export default eventHandler(async (event: any) => {
   await newUserModel.save();
   
   await pool.query(
-    'INSERT INTO user_profiles (email, handle, bio, avatar_url) VALUES ($1, $2, $3, $4)',
-    [ email, display_name, bio, avatar_url ]
+    'INSERT INTO user_profiles (email, display_name, bio, avatar_url) VALUES ($1, $2, $3, $4)',
+    [ email, display_name, '', avatar_url ]
   );
 
   return {
