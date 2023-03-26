@@ -53,7 +53,7 @@ export const UserModel = mongoose.model('User', UserSchema);
 // CREATE TABLE user_profiles (
 //   user_id SERIAL PRIMARY KEY,
 //   email VARCHAR(255) UNIQUE NOT NULL,
-//   handle VARCHAR(255),
+//   display_name VARCHAR(255),
 //   bio TEXT,
 //   avatar_url VARCHAR(255),
 //   subscribed_branches TEXT[],

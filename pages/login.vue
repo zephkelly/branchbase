@@ -34,7 +34,7 @@ async function queryDatabase(email: string) {
   const data = await response.data.value;
 
   //@ts-expect-error
-  if (data?.body?.userExists) {
+  if (data.body.userExists) {
     router.push('/?loggedIn=true');
   } else {
     router.push(`/register?authSignup=true&provider=${route.query.provider}`);

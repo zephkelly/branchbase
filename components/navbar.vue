@@ -35,7 +35,7 @@
     box-sizing: border-box;
     padding: 0.4rem 1.5rem;
     background-color: var(--panel-color);
-    border-bottom: 1px solid rgb(54, 54, 54);
+    border-bottom: 1px solid var(--panel-border-color);
   }
 
   .logo {

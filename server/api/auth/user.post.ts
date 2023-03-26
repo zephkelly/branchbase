@@ -74,8 +74,16 @@ export default eventHandler(async (event: any) => {
     });
   }
   else {
+    if (auth_provider === 'google') {
+      auth_provider = AuthProvider.google;
+    }
+    else if (auth_provider === 'github') {
+      auth_provider = AuthProvider.github;
+    }
+
     newUserModel = new UserModel({
       email: email,
+      auth_provider: auth_provider,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });

@@ -6,8 +6,12 @@
   --panel-color-dark: rgb(22, 22, 23);
   --panel-color-light: rgb(255, 255, 255);
 
+  --panel-border-dark: rgb(54, 54, 54);
+  
   --text-color-dark: #d6d6d6;
   --text-color-light: #000000;
+
+  --input-focus-dark: rgb(70, 128, 198);
 }
 
 :root {
@@ -15,7 +19,9 @@
 
   --background-color: var(--background-color-dark);
   --panel-color: var(--panel-color-dark);
+  --panel-border-color: var(--panel-border-dark);
   --text-color: var(--text-color-dark);
+  --input-focus-color: var(--input-focus-dark);
 }
 
 @media screen and (prefers-color-scheme: light) {
