@@ -22,9 +22,13 @@
         </div>
         <p class="or">OR</p>
         <div class="wrapper regular">
-          <div class="">
+          <div>
             <label class="animated-label email" ref="emailLabel" for="email">Email</label>
             <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="emailInput" type="email" required/>
+          </div>
+          <div>
+            <label class="animated-label password" ref="passwordLabel" for="password">Password</label>
+            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="passwordInput" type="password" required/>
           </div>
           <!-- -->
           <button class="email-login" v-on:click="handleEmailSignIn" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
@@ -117,16 +121,12 @@ h1 {
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-
-      &:last-child {
-        height: 12rem;
-      }
     }
 
     p.or {
       font-size: 0.8rem;
       font-weight: 500;
-      margin: 3rem 0;
+      margin: 2rem 0;
       margin-top: 3.2rem;
       cursor: default;
       user-select: none;

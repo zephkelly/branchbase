@@ -1,10 +1,7 @@
 <template>
   <section class="register-panel">
-    <div v-if="setupProfile" class="setup">
-
-    </div>
-    <div v-else class="register">
-      <form >
+    <div v-show="initialPanel" class="register">
+      <form ref="form" v-on:submit="preventSubmit">
         <h1>Sign up below</h1>
         <div class="wrapper oauth">
           <a v-on:click="handleGithubSignIn" alt="Connect your GitHub account" title="Connect your GitHub account">
@@ -24,36 +21,44 @@
         <div class="wrapper regular">
           <div class="">
             <label class="animated-label email" ref="emailLabel" for="email">Email</label>
-            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="emailInput" type="email" required/>
+            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" v-on:input="canSubmit" class="email" v-model="emailInput" type="email" required/>
           </div>
           <!-- -->
-          <button class="email-signup" v-on:click="handleEmailSignIn" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
+          <button ref="emailSubmit" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
           <p class="swap">Already signed up? <nuxt-link to="/login">Log in here</nuxt-link></p>
         </div>
       </form>
     </div>
+    <div v-show="onboardOAuth" class="oauth-onboard">
+    </div>
+    <div v-show="onboardCredentials" class="creds-onboard"></div>
   </section>
 </template>
 
 <script lang="ts" setup>
-const route = useRoute();
-const router = useRouter();
-const setupProfile = ref(false);
-
-const emailInput = ref(null);
-const emailLabel = ref(null);
-
-const passwordInput = ref(null);
-const passwordLabel = ref(null);
-
-
 const { getSession, signIn, data } = useSession();
 
+const route = useRoute();
+const router = useRouter();
+
+const form = ref(null);
+const emailSubmit: Ref = ref(null);
+
+const emailLabel: Ref = ref(null);
+const emailInput: Ref = ref(null);
+
+const passwordLabel = ref(null);
+const passwordInput = ref(null);
+
+const initialPanel = ref(true);
+const onboardCredentials = ref(false);
+const onboardOAuth = ref(false);
+
 if (data.value?.user !== null) {
+  //OAuth
   if (route.query.authSignup === 'true') {
     //@ts-expect-error
     if (await queryDatabase(data?.value?.user?.email)) {
-      console.log('User already exists');
       router.push('/');
     }
 
@@ -68,20 +73,13 @@ if (data.value?.user !== null) {
       return false;
     }
 
-    setupProfile.value = true;
-    // await useFetch('/api/auth/user', {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     email: data?.value?.user?.email,
-    //     password: '',
-    //     displayName: data?.value?.user?.name,
-    //     auth_provider: route.query.provider,
-    //     avatar_url: data?.value?.user?.image,
-    //     bio: '',
-    //   }),
-    // });
+    initialPanel.value = false;
+    onboardOAuth.value = true;
+    //wait for user to enter their info
   }
 
+  //Regular
+  console.log(emailInput.value);
   // router.push('/');
 }
 
@@ -93,7 +91,6 @@ const toggleEmailLabel = (shouldToggle: boolean, isFocused: boolean = false) => 
   }
 
   if (shouldToggle) {
-    // @ts-expect-error
     emailLabel.value.classList.add('focus');
     return;
   }
@@ -101,12 +98,31 @@ const toggleEmailLabel = (shouldToggle: boolean, isFocused: boolean = false) => 
     if (isEmailFocused) return;
 
     if (emailInput.value === null || emailInput.value === '') {
-      // @ts-expect-error
       emailLabel.value.classList.remove('focus');
       return;
     }
   }
 };
+
+function preventSubmit(e: Event) {
+  e.preventDefault();
+  
+  if (emailSubmit.value.classList.contains('disabled')) return;
+  
+  initialPanel.value = false;
+  onboardCredentials.value = true;
+}
+
+function canSubmit() {
+  const emailRegex = /@/;
+  
+  if (emailRegex.test(emailInput.value) && emailInput.value !== '') {
+    emailSubmit.value.classList.remove('disabled');
+  }
+  else {
+    emailSubmit.value.classList.add('disabled');
+  }
+}
 
 const handleGithubSignIn = async () => {
   await signIn('github', {
@@ -120,11 +136,10 @@ const handleGoogleSignIn = async () => {
   });
 };
 
-//@ts-expect-error
-const email: string = emailInput.value;
-const password = '';
-
 const handleEmailSignIn = async () => {
+  const email = emailInput.value;
+  const password = '';
+
   handleCredentialsSignIn({ email, password })
 };
 
@@ -135,7 +150,6 @@ const handleCredentialsSignIn = async ({ email, password }: { email: string, pas
     // Do your custom error handling here
     alert('You have made a terrible mistake while entering your credentials')
   } else {
-    // No error, continue with the sign in, e.g., by following the returned redirect:
     return navigateTo(url, { external: true })
   }
 }
@@ -195,10 +209,6 @@ h1 {
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-
-      &:last-child {
-        height: 12rem;
-      }
     }
 
     p.or {
@@ -323,6 +333,14 @@ h1 {
       background-color: var(--accent-color);
       padding: 0rem;
       cursor: pointer;
+      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+
+      &.disabled {
+        color: rgba(255, 255, 255, 0.286);
+        background-color: var(--panel-border-color);
+        pointer-events: none;
+        cursor: none;
+      }
     }
   }
 }
