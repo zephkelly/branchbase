@@ -38,11 +38,16 @@
     </Transition>
     <Transition name="fade">
       <div v-show="onboardCredentials" class="creds-onboard">
-        <h1>Create account</h1>
-        <img src="" alt="" class="profile-image">
-        <h3 class="display-name">{{ displayName }}</h3>
+        <div class="profile-example">
+          <h1>Create account</h1>
+          <img src="" alt="" class="profile-image">
+          <h3 class="display-name">{{ displayName }}</h3>
+        </div>
         <form ref="formOnboardCreds" v-on:submit="submitOnboardCreds">
-
+          <div>
+            <label class="animated-label display focus" ref="displayNameLabel" for="displayName">Display Name</label>
+            <input v-on:mouseenter="toggleDisplayNameLabel(true)" v-on:mouseleave="toggleDisplayNameLabel(false)" v-on:focus="toggleDisplayNameLabel(true, true)" v-on:focusout="toggleDisplayNameLabel(false, true)" v-on:input="canSubmit" v-on:submit="submitRegister"  class="display-name" v-model="displayNameInput" type="displayName" required/>
+          </div>
         </form>
       </div>
     </Transition>
@@ -70,6 +75,10 @@ const passwordInput = ref(null);
 
 //generate a random display name
 const displayName: Ref = ref(generateUsername());
+const displayNameInput: Ref = ref(null);
+displayNameInput.value = displayName.value;
+
+const displayNameLabel: Ref = ref(null);
 
 const initialPanel = ref(true);
 const onboardCredentials = ref(false);
@@ -111,6 +120,26 @@ const toggleEmailLabel = (shouldToggle: boolean, isFocused: boolean = false) => 
 
     if (emailInput.value === null || emailInput.value === '') {
       emailLabel.value.classList.remove('focus');
+      return;
+    }
+  }
+};
+
+let isDisplayNameFocused = false;
+const toggleDisplayNameLabel = (shouldToggle: boolean, isFocused: boolean = false) => {
+  if (isFocused) {
+    isDisplayNameFocused = !isDisplayNameFocused;
+  }
+
+  if (shouldToggle) {
+    displayNameLabel.value.classList.add('focus');
+    return;
+  }
+  else {
+    if (isDisplayNameFocused) return;
+
+    if (displayNameInput.value === null || displayNameInput.value === '') {
+      displayNameLabel.value.classList.remove('focus');
       return;
     }
   }
@@ -401,19 +430,41 @@ p.error {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+
+  .profile-example {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+
+    .display-name {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+    }
+  }
+
+  h1 {
+    align-self: center;
+  }
 
   img {
     align-self: center;
     height: 9rem;
     width: 9rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     border-radius: 100%;
     background-color: rgb(187, 187, 187);
   }
 
-  .display-name {
-    margin-top: 1rem;
-    font-size: 1.1rem;
+  label.display {
+    transform: translate3d(1rem, 0.75rem, 0);
+
+    &.focus {
+      transform: translate3d(0.8rem, -1.2rem, 0);
+      font-size: 0.8rem;
+    }
   }
 }
 
