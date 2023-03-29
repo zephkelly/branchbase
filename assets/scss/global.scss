@@ -19,12 +19,16 @@
   --text-color-light: #000000;
 
   --input-focus-dark: rgb(70, 128, 198);
+  --input-valid-dark: rgba(0, 255, 0, 0.5);
+  --input-invalid-dark: rgba(255, 0, 0, 0.5);
   
   --accent-color: rgb(31, 115, 172);
 }
 
 :root {
   color-scheme: dark;
+
+  --text-color: var(--text-color-dark);
 
   --background-color: var(--background-color-dark);
   --background-color-inverted: var(--background-color-light);
@@ -34,12 +38,16 @@
   --panel-border-color: var(--panel-border-dark);
   --panel-border-hover-color: var(--panel-border-hover-color-dark);
 
-  --text-color: var(--text-color-dark);
   --input-focus-color: var(--input-focus-dark);
+  --input-valid-color: var(--input-valid-dark);
+  --input-invalid-color: var(--input-invalid-dark);
+
 }
 
 @media screen and (prefers-color-scheme: light) {
   :root {
+    color-scheme: light;
+
     --background-color: var(--background-color-light);
     --panel-color: var(--panel-color-light);
     --text-color: var(--text-color-light);

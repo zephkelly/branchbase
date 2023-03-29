@@ -4,7 +4,7 @@
       <div v-show="initialPanel" class="register">
         <form ref="form" v-on:submit="submitRegister">
           <h1 class="landing">Sign up below</h1>
-          <p v-if="showError" class="error">{{ errorMessage }}</p>
+          <p v-if="showErrorInitial" class="error">{{ errorMessageInitial }}</p>
           <div class="wrapper oauth">
             <a v-on:click="handleGithubSignIn" alt="Connect your GitHub account" title="Connect your GitHub account">
               <svg viewBox="0 0 128 128">
@@ -23,8 +23,6 @@
           <div class="wrapper regular">
             <div>
               <label class="animated-label email" ref="emailLabel" for="email">Email</label>
-              <!-- v-on:mouseenter="toggleLable('email', true)"
-              v-on:mouseleave="toggleLable('email', false)" -->
               <input class="email" v-model="emailInput" type="email"  
                 v-on:focus="toggleLable('email', true, true)"
                 v-on:focusout="toggleLable('email', false, true)"
@@ -54,31 +52,30 @@
         <form ref="formOnboardCreds" v-on:submit="submitOnboardCreds">
           <div class="input-field">
             <label class="animated-label display focus" ref="displayNameLabel" for="displayName">Display Name</label>
-            <!-- v-on:mouseenter="toggleLable('displayName', true)"
-            v-on:mouseleave="toggleLable('displayName', false)" -->
             <input id="displayName" class="display-name" v-model="displayNameInput"
               v-on:focus="toggleLable('displayName', true, true)"
               v-on:focusout="toggleLable('displayName', false, true)" 
               v-on:input="updateDisplayName"
               required/>
           </div>
+          <p v-if="showErrorCreds" class="error creds">{{ errorMessageCreds }}</p> 
           <div class="input-field">
             <label class="animated-label password-creds" ref="passwordLabelCreds" for="passwordInputCreds">Password</label>
-            <!-- v-on:mouseenter="toggleLable('passwordCreds', true)"
-            v-on:mouseleave="toggleLable('passwordCreds', false)" -->
-            <input id="passwordInputCreds" class="password" v-model="passwordInputCreds" type="password"
+            <input id="passwordInputCreds" class="password" ref="passWordInputCredsRef" v-model="passwordInputCredsModel" type="password"
               v-on:focus="toggleLable('passwordCreds', true, true)"
-              v-on:focusout="toggleLable('passwordCreds', false, true)" required/>
+              v-on:focusout="toggleLable('passwordCreds', false, true), checkPasswordMatch"
+              v-on:input="checkPasswordMatch"
+              required/>
           </div>
           <div class="input-field">
             <label class="animated-label password-check-creds" ref="passwordLabelCheckCreds" for="passwordInputCheckCreds">Confirm Password</label>
-            <!-- v-on:mouseenter="toggleLable('passwordCheckCreds', true)"
-            v-on:mouseleave="toggleLable('passwordCheckCreds', false)" -->
-            <input class="password-check" v-model="passwordInputCheckCreds" type="password"
+            <input id="passwordInputCheckCreds" class="password-check" v-model="passwordInputCheckCredsModel" ref="passwordInputCheckCredsRef" type="password"
               v-on:focus="toggleLable('passwordCheckCreds', true, true)"
-              v-on:focusout="toggleLable('passwordCheckCreds', false, true)" required/>
+              v-on:focusout="toggleLable('passwordCheckCreds', false, true), checkPasswordMatch"
+              v-on:input="checkPasswordMatch"
+              required/>
           </div>
-          <button ref="2" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
+          <button ref="credsOnboardSubmit" class="creds-onboard-submit disabled" alt="Create your account" title="Create your account">Create account</button>
         </form>
       </div>
     </Transition>
@@ -96,17 +93,21 @@ const registerPanel: Ref = ref(null);
 const form = ref(null);
 const emailSubmit: Ref = ref(null);
 
-const showError: Ref = ref(false);
-const errorMessage: Ref = ref('');
+const showErrorInitial: Ref = ref(false);
+const showErrorCreds: Ref = ref(false);
+const errorMessageInitial: Ref = ref('');
+const errorMessageCreds: Ref = ref('');
 
 const emailLabel: Ref = ref(null);
 const emailInput: Ref = ref(null);
 
 const passwordLabelCreds: Ref = ref(null);
-const passwordInputCreds: Ref = ref(null);
+const passwordInputCredsModel: Ref = ref(null);
+const passWordInputCredsRef: Ref = ref(null);
 
 const passwordLabelCheckCreds: Ref = ref(null);
-const passwordInputCheckCreds: Ref = ref(null);
+const passwordInputCheckCredsModel: Ref = ref(null);
+const passwordInputCheckCredsRef: Ref = ref(null);
 
 const displayName: Ref = ref(generateUsername());
 const displayNameInput: Ref = ref(null);
@@ -172,7 +173,7 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
       break;
     case 'passwordCreds':
       currentLabel = passwordLabelCreds;
-      currentInput = passwordInputCreds;
+      currentInput = passwordInputCredsModel;
 
       if (isFocused) {
         isPasswordCredsFocused = !isPasswordCredsFocused;
@@ -182,7 +183,7 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
       break;
     case 'passwordCheckCreds':
       currentLabel = passwordLabelCheckCreds;
-      currentInput = passwordInputCheckCreds;
+      currentInput = passwordInputCheckCredsModel;
 
       if (isFocused) {
         isPasswordCheckCredsFocused = !isPasswordCheckCredsFocused;
@@ -222,6 +223,35 @@ function updateDisplayName() {
   displayName.value = displayNameInput.value;
 }
 
+function checkPasswordMatch() {
+  if (passwordInputCheckCredsModel.value === null || passwordInputCheckCredsModel.value === '') {
+    passWordInputCredsRef.value.classList.remove('valid');
+    passWordInputCredsRef.value.classList.remove('invalid');
+
+    passwordInputCheckCredsRef.value.classList.remove('valid');
+    passwordInputCheckCredsRef.value.classList.remove('invalid');
+    resetCredsErrorMessage();
+    return;
+  }
+
+  if (runPasswordChecks() && passwordInputCheckCredsModel.value === passwordInputCredsModel.value) {
+    passWordInputCredsRef.value.classList.add('valid');
+    passWordInputCredsRef.value.classList.remove('invalid');
+
+    passwordInputCheckCredsRef.value.classList.add('valid');
+    passwordInputCheckCredsRef.value.classList.remove('invalid');
+
+    resetCredsErrorMessage();
+  }
+  else {
+    passWordInputCredsRef.value.classList.add('invalid');
+    passWordInputCredsRef.value.classList.remove('valid');
+    
+    passwordInputCheckCredsRef.value.classList.add('invalid');
+    passwordInputCheckCredsRef.value.classList.remove('valid');
+  }
+}
+
 async function submitRegister(e: Event) {
   e.preventDefault();
   
@@ -232,14 +262,78 @@ async function submitRegister(e: Event) {
   if (await queryDatabase(emailInput.value)) {
     backToInitial();
 
-    showError.value = true;
-    errorMessage.value = 'That email is already in use';
+    showErrorInitial.value = true;
+    errorMessageInitial.value = 'That email is already in use';
   }
 }
 
+
 function submitOnboardCreds(e: Event) {
   e.preventDefault();
-  
+
+  if (displayNameInput.value === null || displayNameInput.value === '') {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'Please enter a display name';
+    return;
+  }
+
+  if (runPasswordChecks()) {
+
+  }
+}
+
+const cascadingNumbersRegex = /\d{5}/;
+const repeatingCharacter = /(.)\1{7}/;
+
+function runPasswordChecks() {
+  if (passwordInputCheckCredsModel.value === null || passwordInputCheckCredsModel.value === '') {
+    errorMessageCreds.value = 'Please enter a password';
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  if (passwordInputCheckCredsModel.value.length < 8) {
+    errorMessageCreds.value = 'Password must be at least 8 characters';
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  if (passwordInputCheckCredsModel.value.length > 128) {
+    errorMessageCreds.value = 'Password must be less than 128 characters';
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  if (passwordInputCredsModel.value !== passwordInputCheckCredsModel.value) {
+    errorMessageCreds.value = 'Passwords do not match';
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  if (cascadingNumbersRegex.test(passwordInputCheckCredsModel.value)) {
+    errorMessageCreds.value = "Cascading numbers aren't very secure!";
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  if (repeatingCharacter.test(passwordInputCheckCredsModel.value)) {
+    errorMessageCreds.value = "Repeating characters aren't very secure!";
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  if (passwordInputCredsModel.value === 'password' || passwordInputCredsModel.value === 'Password' || passwordInputCredsModel.value === 'PASSWORD') {
+    errorMessageCreds.value = "Please choose a more secure password!";
+    showErrorCreds.value = true;
+    return false;
+  }
+
+  return true;
+}
+
+function resetCredsErrorMessage() {
+  errorMessageCreds.value = '';
+  showErrorCreds.value = false;
 }
 
 function canSubmit() {
@@ -252,9 +346,9 @@ function canSubmit() {
     emailSubmit.value.classList.add('disabled');
   }
 
-  if (showError.value = true) {
-    showError.value = false;
-    errorMessage.value = '';
+  if (showErrorInitial.value = true) {
+    showErrorInitial.value = false;
+    errorMessageInitial.value = '';
   }
 }
 
@@ -346,6 +440,13 @@ p.error {
   align-self: flex-start;
   margin-bottom: 1rem;
   color: red;
+
+  &.creds {
+    align-self: center;
+    position: absolute;
+    bottom: -3rem;
+    font-size: 0.8rem;
+  }
 }
 .register-panel {
   position: relative;
@@ -529,7 +630,6 @@ p.error {
       height: 2.5rem;
       width: 100%;
       transition: border 0.1s ease-out;
-      // letter-spacing: 0.1rem;
       font-size: 1rem;
       z-index: 0;
 
@@ -541,9 +641,19 @@ p.error {
       &.display-name {
         margin-bottom: 3rem;
       }
+
+      &.valid {
+        transition: border 0.35s ease-out;
+        border: 1px solid var(--input-valid-color);
+      }
+
+      &.invalid {
+        transition: border 0.35s ease-out;
+        border: 1px solid var(--input-invalid-color);
+      }
     }
 
-    .email-signup {
+    .email-signup, .creds-onboard-submit {
       font-size: 1.1rem;
       font-weight: 500;
       width: 100%;
