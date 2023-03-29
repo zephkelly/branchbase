@@ -36,6 +36,7 @@
     padding: 0.4rem 1.5rem;
     background-color: var(--panel-color);
     border-bottom: 1px solid var(--panel-border-color);
+    z-index: 100;
   }
 
   .logo {

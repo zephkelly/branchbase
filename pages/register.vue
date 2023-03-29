@@ -1,9 +1,9 @@
 <template>
-  <section class="register-panel">
+  <section ref="registerPanel" class="register-panel">
     <Transition name="fade">
       <div v-show="initialPanel" class="register">
         <form ref="form" v-on:submit="submitRegister">
-          <h1>Sign up below</h1>
+          <h1 class="landing">Sign up below</h1>
           <p v-if="showError" class="error">{{ errorMessage }}</p>
           <div class="wrapper oauth">
             <a v-on:click="handleGithubSignIn" alt="Connect your GitHub account" title="Connect your GitHub account">
@@ -23,7 +23,12 @@
           <div class="wrapper regular">
             <div>
               <label class="animated-label email" ref="emailLabel" for="email">Email</label>
-              <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" v-on:input="canSubmit" v-on:submit="submitRegister"  class="email" v-model="emailInput" type="email" required/>
+              <!-- v-on:mouseenter="toggleLable('email', true)"
+              v-on:mouseleave="toggleLable('email', false)" -->
+              <input class="email" v-model="emailInput" type="email"  
+                v-on:focus="toggleLable('email', true, true)"
+                v-on:focusout="toggleLable('email', false, true)"
+                v-on:input="canSubmit" v-on:submit="submitRegister" required/>
             </div>
             <!-- -->
             <button ref="emailSubmit" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
@@ -38,16 +43,42 @@
     </Transition>
     <Transition name="fade">
       <div v-show="onboardCredentials" class="creds-onboard">
+        <button class="back-button" v-on:click="backToInitial">
+          <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M561 816 320 575l241-241 43 43-198 198 198 198-43 43Z"/></svg>
+        </button>
         <div class="profile-example">
-          <h1>Create account</h1>
+          <h1 class="creds">Create account</h1>
           <img src="" alt="" class="profile-image">
-          <h3 class="display-name">{{ displayName }}</h3>
+          <h3 ref="accountDisplayLabel" class="display-name">{{ displayName }}</h3>
         </div>
         <form ref="formOnboardCreds" v-on:submit="submitOnboardCreds">
-          <div>
+          <div class="input-field">
             <label class="animated-label display focus" ref="displayNameLabel" for="displayName">Display Name</label>
-            <input v-on:mouseenter="toggleDisplayNameLabel(true)" v-on:mouseleave="toggleDisplayNameLabel(false)" v-on:focus="toggleDisplayNameLabel(true, true)" v-on:focusout="toggleDisplayNameLabel(false, true)" v-on:input="canSubmit" v-on:submit="submitRegister"  class="display-name" v-model="displayNameInput" type="displayName" required/>
+            <!-- v-on:mouseenter="toggleLable('displayName', true)"
+            v-on:mouseleave="toggleLable('displayName', false)" -->
+            <input id="displayName" class="display-name" v-model="displayNameInput"
+              v-on:focus="toggleLable('displayName', true, true)"
+              v-on:focusout="toggleLable('displayName', false, true)" 
+              v-on:input="updateDisplayName"
+              required/>
           </div>
+          <div class="input-field">
+            <label class="animated-label password-creds" ref="passwordLabelCreds" for="passwordInputCreds">Password</label>
+            <!-- v-on:mouseenter="toggleLable('passwordCreds', true)"
+            v-on:mouseleave="toggleLable('passwordCreds', false)" -->
+            <input id="passwordInputCreds" class="password" v-model="passwordInputCreds" type="password"
+              v-on:focus="toggleLable('passwordCreds', true, true)"
+              v-on:focusout="toggleLable('passwordCreds', false, true)" required/>
+          </div>
+          <div class="input-field">
+            <label class="animated-label password-check-creds" ref="passwordLabelCheckCreds" for="passwordInputCheckCreds">Confirm Password</label>
+            <!-- v-on:mouseenter="toggleLable('passwordCheckCreds', true)"
+            v-on:mouseleave="toggleLable('passwordCheckCreds', false)" -->
+            <input class="password-check" v-model="passwordInputCheckCreds" type="password"
+              v-on:focus="toggleLable('passwordCheckCreds', true, true)"
+              v-on:focusout="toggleLable('passwordCheckCreds', false, true)" required/>
+          </div>
+          <button ref="2" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
         </form>
       </div>
     </Transition>
@@ -56,11 +87,12 @@
 
 <script lang="ts" setup>
 import generateUsername from '@/utils/generateUsername';
-const { getSession, signIn, data } = useSession();
+const { signIn, data } = useSession();
 
 const route = useRoute();
 const router = useRouter();
 
+const registerPanel: Ref = ref(null);
 const form = ref(null);
 const emailSubmit: Ref = ref(null);
 
@@ -70,14 +102,17 @@ const errorMessage: Ref = ref('');
 const emailLabel: Ref = ref(null);
 const emailInput: Ref = ref(null);
 
-const passwordLabel = ref(null);
-const passwordInput = ref(null);
+const passwordLabelCreds: Ref = ref(null);
+const passwordInputCreds: Ref = ref(null);
 
-//generate a random display name
+const passwordLabelCheckCreds: Ref = ref(null);
+const passwordInputCheckCreds: Ref = ref(null);
+
 const displayName: Ref = ref(generateUsername());
 const displayNameInput: Ref = ref(null);
 displayNameInput.value = displayName.value;
 
+const accountDisplayLabel: Ref = ref(null);
 const displayNameLabel: Ref = ref(null);
 
 const initialPanel = ref(true);
@@ -104,58 +139,98 @@ if (data.value?.user !== null) {
   }
 }
 
-
+//Input label toggling
 let isEmailFocused = false;
-const toggleEmailLabel = (shouldToggle: boolean, isFocused: boolean = false) => {
-  if (isFocused) {
-    isEmailFocused = !isEmailFocused;
-  }
-
-  if (shouldToggle) {
-    emailLabel.value.classList.add('focus');
-    return;
-  }
-  else {
-    if (isEmailFocused) return;
-
-    if (emailInput.value === null || emailInput.value === '') {
-      emailLabel.value.classList.remove('focus');
-      return;
-    }
-  }
-};
-
 let isDisplayNameFocused = false;
-const toggleDisplayNameLabel = (shouldToggle: boolean, isFocused: boolean = false) => {
-  if (isFocused) {
-    isDisplayNameFocused = !isDisplayNameFocused;
+let isPasswordCredsFocused = false;
+let isPasswordCheckCredsFocused = false;
+
+function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = false) {
+  let currentLabel: any = null;
+  let currentInput: any = null;
+
+  switch (label) {
+    case 'email':
+      currentLabel = emailLabel;
+      currentInput = emailInput;
+      
+      if (isFocused) {
+        isEmailFocused = !isEmailFocused;
+      }
+
+      toggle(isEmailFocused);
+      break;
+    case 'displayName':
+      currentLabel = displayNameLabel;
+      currentInput = displayNameInput;
+
+      if (isFocused) {
+        isDisplayNameFocused = !isDisplayNameFocused;
+      }
+
+      toggle(isDisplayNameFocused);
+      break;
+    case 'passwordCreds':
+      currentLabel = passwordLabelCreds;
+      currentInput = passwordInputCreds;
+
+      if (isFocused) {
+        isPasswordCredsFocused = !isPasswordCredsFocused;
+      }
+
+      toggle(isPasswordCredsFocused);
+      break;
+    case 'passwordCheckCreds':
+      currentLabel = passwordLabelCheckCreds;
+      currentInput = passwordInputCheckCreds;
+
+      if (isFocused) {
+        isPasswordCheckCredsFocused = !isPasswordCheckCredsFocused;
+      }
+
+      toggle(isPasswordCheckCredsFocused);
+      break;
+    default:
+      break;
   }
 
-  if (shouldToggle) {
-    displayNameLabel.value.classList.add('focus');
-    return;
-  }
-  else {
-    if (isDisplayNameFocused) return;
-
-    if (displayNameInput.value === null || displayNameInput.value === '') {
-      displayNameLabel.value.classList.remove('focus');
+  function toggle(inputFocused: boolean) {
+    if (shouldToggle) {
+      currentLabel.value.classList.add('focus');
       return;
     }
+    else {
+      if (inputFocused) return;
+
+      if (currentInput.value === null || currentInput.value === '') {
+        currentLabel.value.classList.remove('focus');
+        return;
+      }
+    }
   }
-};
+}
+
+const spacesRegex = /\s/g;
+const spacesOnlyRegex = /^\s+$/;
+function updateDisplayName() {
+  if (displayNameInput.value === null || displayNameInput.value === '' || spacesOnlyRegex.test(displayNameInput.value)) {
+    displayName.value = "Your display name"
+    return
+  }
+
+  displayNameInput.value = displayNameInput.value.replace(spacesRegex, '');
+  displayName.value = displayNameInput.value;
+}
 
 async function submitRegister(e: Event) {
   e.preventDefault();
   
   if (emailSubmit.value.classList.contains('disabled')) return;
   
-  initialPanel.value = false;
-  onboardCredentials.value = true;
+  backToCreds();
 
   if (await queryDatabase(emailInput.value)) {
-    initialPanel.value = true;
-    onboardCredentials.value = false;
+    backToInitial();
 
     showError.value = true;
     errorMessage.value = 'That email is already in use';
@@ -192,6 +267,31 @@ async function queryDatabase(email: string): Promise<boolean> {
   }
 
   return false;
+}
+
+function backToInitial() {
+  initialPanel.value = true;
+  onboardOAuth.value = false;
+  disableCredsPanel();
+}
+
+function backToOAuth() {
+  onboardOAuth.value = true;
+  initialPanel.value = false;
+  disableCredsPanel();
+}
+
+function backToCreds() {
+  onboardCredentials.value = true;
+  registerPanel.value.classList.add('creds-onboard');
+
+  onboardOAuth.value = false;
+  initialPanel.value = false;
+}
+
+function disableCredsPanel() {
+  onboardCredentials.value = false;
+  registerPanel.value.classList.remove('creds-onboard');
 }
 
 const handleGithubSignIn = async () => {
@@ -234,8 +334,12 @@ definePageMeta({
 h1 {
   font-size: 1.8rem;
   font-weight: 500;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   align-self: flex-start;
+
+  &.creds {
+    margin-bottom: 1rem;
+  }
 }
 
 p.error {
@@ -256,6 +360,12 @@ p.error {
   background-color: var(--panel-color);
   padding: 3.5rem 2rem;
   box-sizing: border-box;
+  z-index: 0;
+  transition: height 0.1s ease-out;
+
+  &.creds-onboard {
+    height: 700px;
+  }
 
   * {
     font-family: 'Roboto', sans-serif;
@@ -275,7 +385,11 @@ p.error {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: auto;
+    height: 100%;
+
+    .input-field {
+      width: 100%;
+    }
 
     .wrapper {
       width: 100%;
@@ -371,7 +485,8 @@ p.error {
       font-size: 1rem;
       color: var(--text-color);
       transform: translate3d(1rem, 1.75rem, 0);
-      transition: transform 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), font-size 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
+      opacity: 0.4;
+      transition: transform 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), font-size 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
       z-index: 1;
 
       &.email {
@@ -379,8 +494,28 @@ p.error {
         left: 0rem;
       }
 
+      &.display {
+        bottom: 17.3rem;
+        left: 0rem;
+
+        &.focus {
+          transform: translate3d(0.8rem, -0.2rem, 0);
+        }
+      
+      }
+
+      &.password-creds {
+        bottom: 11.45rem;
+
+      }
+
+      &.password-check-creds {
+        bottom: 6.95rem;
+      }
+
       &.focus {
-        transform: translate3d(0.8rem, -0.1rem, 0);
+        transform: translate3d(0.8rem, -0.2rem, 0);
+        opacity: 1;
         font-size: 0.8rem;
       }
     }
@@ -401,6 +536,10 @@ p.error {
       &:focus {
         outline: none;
         border: 1px solid var(--input-focus-color);
+      }
+
+      &.display-name {
+        margin-bottom: 3rem;
       }
     }
 
@@ -432,38 +571,59 @@ p.error {
   align-items: center;
   justify-content: space-between;
 
+  .back-button {
+    position: absolute;
+    top: -2.7rem;
+    left: -1.5rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+
+    &:hover {
+      color: var(--text-color);
+    }
+
+    svg {
+      filter: invert(1);
+      width: 2rem;
+      height: 2rem;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+
   .profile-example {
     display: flex;
     flex-direction: column;
     justify-content: center;
     width: 100%;
+    margin-top: 1rem;
 
     .display-name {
       text-align: center;
       font-size: 1.1rem;
-      margin-top: 1.5rem;
+      margin-top: 1rem;
+      margin-bottom: 3.5rem;
+
+      &.empty {
+        opacity: 0.4;
+      }
     }
-  }
 
-  h1 {
-    align-self: center;
-  }
+    h1 {
+      align-self: center;
+    }
 
-  img {
-    align-self: center;
-    height: 9rem;
-    width: 9rem;
-    margin-top: 1.5rem;
-    border-radius: 100%;
-    background-color: rgb(187, 187, 187);
-  }
-
-  label.display {
-    transform: translate3d(1rem, 0.75rem, 0);
-
-    &.focus {
-      transform: translate3d(0.8rem, -1.2rem, 0);
-      font-size: 0.8rem;
+    img {
+      align-self: center;
+      height: 9rem;
+      width: 9rem;
+      margin-top: 1rem;
+      border-radius: 100%;
+      background-color: rgb(187, 187, 187);
     }
   }
 }
