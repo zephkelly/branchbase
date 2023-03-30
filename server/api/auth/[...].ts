@@ -30,30 +30,28 @@ export default NuxtAuthHandler({
       id: 'credentials',
       name: 'Credentials',
       async authorize(credentials: any) {
-          const { email, password } = credentials;
+        const { email, password } = credentials;
+        const user: any = await UserModel.find({ email: email });
 
-          const user = await UserModel.find({ email: email });
+        if (user.length == 0) {
+          console.log("user not found")
+          return null
+        }
+        
+        const match = await bcrypt.compare(password, user[0].password);
 
-          if (user.length == 0) {
-            return null
-          }
-          else {
-            // @ts-ignore
-            await bcrypt.compare(password, user[0].password, (err, match) => {
-              if (match) {
-                const userObject = {
-                  name: "Zeph",
-                  email: user[0].email,
-                  image: ""
-                }
+        if (!match) {
+          console.log("passwords don't match")
+          return null;
+        }
 
-                return userObject;
-              }
-              else {
-                return null;
-              }
-            });
-          }
+        const userObject = {
+          name: "Zeph",
+          email: user[0].email,
+          image: ""
+        };
+          
+        return userObject;
       }
     })
   ]

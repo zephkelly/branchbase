@@ -17,9 +17,9 @@ useHead({
     },],
 });
 
-const { status, getProviders, signOut, data } = useSession();
+const { status, signOut, data } = useSession();
 
-console.log(status.value, getProviders())
+console.log(status.value, data.value?.user)
 </script>
 
 <style lang="scss" scoped>

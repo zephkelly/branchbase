@@ -72,9 +72,7 @@ async function handleEmailSignIn() {
   //@ts-expect-error
   const password: string = passwordInput.value;
 
-  console.log(email, password)
-
-  await signIn('credentials', { email: email, password: password });
+  await signIn('credentials', { email: email, password: password, callbackUrl: '/' });
 }
 
 function submitCredsLogin(e: Event) {
