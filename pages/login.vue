@@ -24,14 +24,20 @@
         <div class="wrapper regular">
           <div>
             <label class="animated-label email" ref="emailLabel" for="email">Email</label>
-            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="emailInput" ref="emailInputRef" type="email" required/>
+            <input
+              v-on:focus="toggleLable('email', true, true)"
+              v-on:focusout="toggleLable('email', false, true)"
+              class="email" v-model="emailInput" ref="emailInputRef" type="email" required/>
           </div>
           <div>
             <label class="animated-label password" ref="passwordLabel" for="password">Password</label>
-            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="passwordInput" ref="passwordInputRef" type="password" required/>
+            <input
+              v-on:focus="toggleLable('password', true, true)"
+              v-on:focusout="toggleLable('password', false, true)"
+              class="email" v-model="passwordInput" ref="passwordInputRef" type="password" required/>
           </div>
           <!-- -->
-          <button class="email-login" v-on:click="handleEmailSignIn" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
+          <button class="email-login" alt="Sign up with your email" title="Sign up with your email">Log in</button>
           <p class="swap">Need to sign up? <nuxt-link to="/register">Register here</nuxt-link></p>
         </div>
       </form>
@@ -46,42 +52,105 @@ const route = useRoute();
 const router = useRouter();
 const setupProfile = ref(false);
 
-const emailInput = ref(null);
-const emailInputRef = ref(null);
-const emailLabel = ref(null);
+const emailInput: Ref = ref(null);
+const emailInputRef: Ref = ref(null);
+const emailLabel: Ref = ref(null);
 
-const passwordInput = ref(null);
-const passwordInputRef = ref(null);
-const passwordLabel = ref(null);
+const passwordInput: Ref = ref(null);
+const passwordInputRef: Ref = ref(null);
+const passwordLabel: Ref = ref(null);
 
-function toggleEmailLabel(bool: boolean, bool2: boolean = false) {
+//Input label toggling
+let isEmailFocused = false;
+let isPasswordFocused = false;
 
+function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = false) {
+  let currentLabel: any = null;
+  let currentInput: any = null;
+
+  switch (label) {
+    case 'email':
+      currentLabel = emailLabel;
+      currentInput = emailInput;
+      
+      if (isFocused) {
+        isEmailFocused = !isEmailFocused;
+      }
+
+      toggle(isEmailFocused);
+      break;
+    case 'password':
+      currentLabel = passwordLabel;
+      currentInput = passwordInput;
+
+      if (isFocused) {
+        isPasswordFocused = !isPasswordFocused;
+      }
+
+      toggle(isPasswordFocused);
+      break;
+    default:
+      break;
+  }
+
+  function toggle(inputFocused: boolean) {
+    if (shouldToggle) {
+      currentLabel.value.classList.add('focus');
+      return;
+    }
+    else {
+      if (inputFocused) return;
+
+      if (currentInput.value === null || currentInput.value === '') {
+        currentLabel.value.classList.remove('focus');
+        return;
+      }
+    }
+  }
 }
 
-function handleGoogleSignIn() {
-  console.log('google sign in');
+async function handleGoogleSignIn() {
+  await signIn('google', { callbackUrl: '/' });
 }
 
 async function handleGithubSignIn() {
-  await signIn('github');
+  await signIn('github', { callbackUrl: '/' });
+}
+
+const emailRegex = /.+@.+/;
+function submitCredsLogin(e: Event) {
+  e.preventDefault();
+
+  if (!emailRegex.test(emailInput.value)) {
+    emailInputRef.value.classList.add('invalid');
+    emailInputRef.value.classList.remove('valid');
+    return;
+  }
+  
+  handleEmailSignIn();
 }
 
 async function handleEmailSignIn() {
-  //@ts-expect-error
   const email: string = emailInput.value;
-  //@ts-expect-error
   const password: string = passwordInput.value;
 
   await signIn('credentials', { email: email, password: password, callbackUrl: '/' });
 }
 
-function submitCredsLogin(e: Event) {
-  e.preventDefault();
-}
-
 definePageMeta({
   auth: false,
   layout: 'center-align',
+})
+
+onMounted(() => {
+  setTimeout(() => {
+    if (emailInput.value) {
+      emailLabel.value.classList.add('focus');
+    }
+    if (passwordInput.value) {
+      passwordLabel.value.classList.add('focus');
+    }
+  }, 50);
 })
 </script>
 
@@ -216,6 +285,7 @@ h1 {
       color: var(--text-color);
       transform: translate3d(1rem, 1.75rem, 0);
       transition: transform 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), font-size 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
+      opacity: 0.4;
       z-index: 1;
 
       &.email {
@@ -223,9 +293,15 @@ h1 {
         left: 0rem;
       }
 
+      &.password {
+        top: 3.15rem;
+        left: 0rem;
+      }
+
       &.focus {
         transform: translate3d(0.8rem, -0.1rem, 0);
         font-size: 0.8rem;
+        opacity: 1;
       }
     }
 

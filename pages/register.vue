@@ -113,7 +113,7 @@ const passwordInputCheckCredsRef: Ref = ref(null);
 const displayName: Ref = ref(generateUsername());
 const displayNameInput: Ref = ref(null);
 const displayNameInputRef: Ref = ref(null);
-  displayNameInput.value = displayName.value;
+displayNameInput.value = displayName.value;
 
 const accountDisplayLabel: Ref = ref(null);
 const displayNameLabel: Ref = ref(null);

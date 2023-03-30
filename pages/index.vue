@@ -5,6 +5,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   </Head>
   <section class="landing">
+    <p v-if="status === 'authenticated'" style="margin-top: 10rem;">Welcome {{ data?.user?.name }}</p>
+    <a v-if="status === 'authenticated'" v-on:click="signOut()" style="cursor: pointer;">Sign out</a>
   </section>
 </template>
 
@@ -12,14 +14,15 @@
 useHead({
   title: 'Home',
   meta: [{
-      name: 'description',
-      content: 'This is the home page',
-    },],
+    name: 'description',
+    content: 'This is the home page',
+  },],
 });
 
 const { status, signOut, data } = useSession();
+const showMessage = ref(false);
 
-console.log(status.value, data.value?.user)
+console.log(status.value)
 </script>
 
 <style lang="scss" scoped>
