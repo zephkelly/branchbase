@@ -26,7 +26,7 @@
               <input class="email" v-model="emailInput" type="email"  
                 v-on:focus="toggleLable('email', true, true)"
                 v-on:focusout="toggleLable('email', false, true)"
-                v-on:input="canSubmit" v-on:submit="submitRegister" required/>
+                v-on:input="canSubmitEmail" v-on:submit="submitRegister" required/>
             </div>
             <!-- -->
             <button ref="emailSubmit" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
@@ -52,10 +52,10 @@
         <form ref="formOnboardCreds" v-on:submit="submitOnboardCreds">
           <div class="input-field">
             <label class="animated-label display focus" ref="displayNameLabel" for="displayName">Display Name</label>
-            <input id="displayName" class="display-name" v-model="displayNameInput"
+            <input id="displayName" class="display-name" v-model="displayNameInput" ref="displayNameInputRef"
               v-on:focus="toggleLable('displayName', true, true)"
-              v-on:focusout="toggleLable('displayName', false, true)" 
-              v-on:input="updateDisplayName"
+              v-on:focusout="toggleLable('displayName', false, true), queryCheckDisplayName()" 
+              v-on:input="canSubmitCreds(), checkDisplayName()"
               required/>
           </div>
           <p v-if="showErrorCreds" class="error creds">{{ errorMessageCreds }}</p> 
@@ -63,19 +63,19 @@
             <label class="animated-label password-creds" ref="passwordLabelCreds" for="passwordInputCreds">Password</label>
             <input id="passwordInputCreds" class="password" ref="passWordInputCredsRef" v-model="passwordInputCredsModel" type="password"
               v-on:focus="toggleLable('passwordCreds', true, true)"
-              v-on:focusout="toggleLable('passwordCreds', false, true), checkPasswordMatch"
-              v-on:input="checkPasswordMatch"
+              v-on:focusout="toggleLable('passwordCreds', false, true), checkPasswordMatch()"
+              v-on:input="canSubmitCreds(), checkPasswordMatch()"
               required/>
           </div>
           <div class="input-field">
             <label class="animated-label password-check-creds" ref="passwordLabelCheckCreds" for="passwordInputCheckCreds">Confirm Password</label>
             <input id="passwordInputCheckCreds" class="password-check" v-model="passwordInputCheckCredsModel" ref="passwordInputCheckCredsRef" type="password"
               v-on:focus="toggleLable('passwordCheckCreds', true, true)"
-              v-on:focusout="toggleLable('passwordCheckCreds', false, true), checkPasswordMatch"
-              v-on:input="checkPasswordMatch"
+              v-on:focusout="toggleLable('passwordCheckCreds', false, true), checkPasswordMatch()"
+              v-on:input="canSubmitCreds(), checkPasswordMatch()"
               required/>
           </div>
-          <button ref="credsOnboardSubmit" class="creds-onboard-submit disabled" alt="Create your account" title="Create your account">Create account</button>
+          <button ref="credsSubmit" class="creds-onboard-submit disabled" alt="Create your account" title="Create your account">Create account</button>
         </form>
       </div>
     </Transition>
@@ -92,6 +92,7 @@ const router = useRouter();
 const registerPanel: Ref = ref(null);
 const form = ref(null);
 const emailSubmit: Ref = ref(null);
+const credsSubmit: Ref = ref(null);
 
 const showErrorInitial: Ref = ref(false);
 const showErrorCreds: Ref = ref(false);
@@ -111,7 +112,8 @@ const passwordInputCheckCredsRef: Ref = ref(null);
 
 const displayName: Ref = ref(generateUsername());
 const displayNameInput: Ref = ref(null);
-displayNameInput.value = displayName.value;
+const displayNameInputRef: Ref = ref(null);
+  displayNameInput.value = displayName.value;
 
 const accountDisplayLabel: Ref = ref(null);
 const displayNameLabel: Ref = ref(null);
@@ -214,13 +216,47 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
 const spacesRegex = /\s/g;
 const spacesOnlyRegex = /^\s+$/;
 function updateDisplayName() {
-  if (displayNameInput.value === null || displayNameInput.value === '' || spacesOnlyRegex.test(displayNameInput.value)) {
-    displayName.value = "Your display name"
-    return
-  }
-
   displayNameInput.value = displayNameInput.value.replace(spacesRegex, '');
   displayName.value = displayNameInput.value;
+}
+
+function checkDisplayName(): boolean {
+  updateDisplayName();
+
+  if (displayNameInput.value === null || displayNameInput.value === '' || spacesOnlyRegex.test(displayNameInput.value)) {
+    displayName.value = "Your display name"
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'Display name cannot be empty';
+
+    displayNameInputRef.value.classList.remove('valid');
+    displayNameInputRef.value.classList.add('invalid');
+    return false;
+  }
+  else if (displayNameInput.value.length > 25) {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = "Name can't be longer than 25 characters";
+
+    displayNameInputRef.value.classList.remove('valid');
+    displayNameInputRef.value.classList.add('invalid');
+    return false;
+  }
+
+  showErrorCreds.value = false;
+  errorMessageCreds.value = '';
+
+  displayNameInputRef.value.classList.remove('invalid');
+  displayNameInputRef.value.classList.add('valid');
+  return true;
+}
+
+async function queryCheckDisplayName() {
+  if (await queryDatabaseDisplay(displayNameInput.value)) {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'Display name already taken';
+
+    displayNameInputRef.value.classList.remove('valid');
+    displayNameInputRef.value.classList.add('invalid');
+  }
 }
 
 function checkPasswordMatch() {
@@ -256,10 +292,11 @@ async function submitRegister(e: Event) {
   e.preventDefault();
   
   if (emailSubmit.value.classList.contains('disabled')) return;
-  
+
+  checkDisplayName();
   backToCreds();
 
-  if (await queryDatabase(emailInput.value)) {
+  if (await queryDatabaseEmail(emailInput.value)) {
     backToInitial();
 
     showErrorInitial.value = true;
@@ -268,61 +305,96 @@ async function submitRegister(e: Event) {
 }
 
 
-function submitOnboardCreds(e: Event) {
+async function submitOnboardCreds(e: Event) {
   e.preventDefault();
 
-  if (displayNameInput.value === null || displayNameInput.value === '') {
-    showErrorCreds.value = true;
-    errorMessageCreds.value = 'Please enter a display name';
+  if (credsSubmit.value.classList.contains('disabled')) return;
+
+  if (!runPasswordChecks()) {
     return;
   }
 
-  if (runPasswordChecks()) {
+  if (await queryDatabaseDisplay(displayNameInput.value)) {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'That display name is already in use';
+    return;
+  }
 
+  const email = emailInput.value;
+  const password = passwordInputCredsModel.value;
+  const displayName = displayNameInput.value;
+  const auth_provider = 'email';
+
+  //send to database
+  const response = await useFetch('/api/auth/user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password,
+      display_name: displayName,
+      auth_provider: auth_provider
+    })
+  });
+
+  if (response.data.value?.statusCode == 200) {
+    window.location.href = '/';
+  }
+  else {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = response.data.value?.body;
   }
 }
 
 const cascadingNumbersRegex = /\d{5}/;
 const repeatingCharacter = /(.)\1{7}/;
-
-function runPasswordChecks() {
+function runPasswordChecks(showErrors: boolean = true) {
   if (passwordInputCheckCredsModel.value === null || passwordInputCheckCredsModel.value === '') {
+    if (!showErrors) return false;
     errorMessageCreds.value = 'Please enter a password';
     showErrorCreds.value = true;
     return false;
   }
 
   if (passwordInputCheckCredsModel.value.length < 8) {
+    if (!showErrors) return false;
     errorMessageCreds.value = 'Password must be at least 8 characters';
     showErrorCreds.value = true;
     return false;
   }
 
   if (passwordInputCheckCredsModel.value.length > 128) {
+    if (!showErrors) return false;
     errorMessageCreds.value = 'Password must be less than 128 characters';
     showErrorCreds.value = true;
     return false;
   }
 
   if (passwordInputCredsModel.value !== passwordInputCheckCredsModel.value) {
+    if (!showErrors) return false;
     errorMessageCreds.value = 'Passwords do not match';
     showErrorCreds.value = true;
     return false;
   }
 
   if (cascadingNumbersRegex.test(passwordInputCheckCredsModel.value)) {
+    if (!showErrors) return false;
     errorMessageCreds.value = "Cascading numbers aren't very secure!";
     showErrorCreds.value = true;
     return false;
   }
 
   if (repeatingCharacter.test(passwordInputCheckCredsModel.value)) {
+    if (!showErrors) return false;
     errorMessageCreds.value = "Repeating characters aren't very secure!";
     showErrorCreds.value = true;
     return false;
   }
 
   if (passwordInputCredsModel.value === 'password' || passwordInputCredsModel.value === 'Password' || passwordInputCredsModel.value === 'PASSWORD') {
+    if (!showErrors) return false;
     errorMessageCreds.value = "Please choose a more secure password!";
     showErrorCreds.value = true;
     return false;
@@ -336,7 +408,7 @@ function resetCredsErrorMessage() {
   showErrorCreds.value = false;
 }
 
-function canSubmit() {
+function canSubmitEmail() {
   const emailRegex = /@/;
   
   if (emailRegex.test(emailInput.value) && emailInput.value !== '') {
@@ -352,11 +424,46 @@ function canSubmit() {
   }
 }
 
-async function queryDatabase(email: string): Promise<boolean> {
+async function canSubmitCreds(showErrors: boolean = false) {
+  if (!runPasswordChecks(showErrors)) {
+    credsSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  if (await queryDatabaseDisplay(displayName.value)) {
+    credsSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  if (!checkDisplayName()) {
+    credsSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  credsSubmit.value.classList.remove('disabled');
+   
+  if (showErrorCreds.value = true) {
+    showErrorCreds.value = false;
+    errorMessageCreds.value = '';
+  }
+}
+
+async function queryDatabaseEmail(email: string): Promise<boolean> {
   const response = await useFetch(`/api/auth/check-user?email=${email}`);
   const data: any = await response.data.value;
 
   if (data.body.userExists) {
+    return true
+  }
+
+  return false;
+}
+
+async function queryDatabaseDisplay(name: string): Promise<boolean> {
+  const response = await useFetch(`/api/auth/check-display?name=${name}`);
+  const data: any = await response.data.value;
+
+  if (data.body.nameExists) {
     return true
   }
 
@@ -404,7 +511,7 @@ const handleEmailSignIn = async () => {
   const email = emailInput.value;
   const password = '';
 
-  handleCredentialsSignIn({ email, password })
+  //handleCredentialsSignIn({ email, password })
 };
 
 const handleCredentialsSignIn = async ({ email, password }: { email: string, password: string }) => {
@@ -596,7 +703,7 @@ p.error {
       }
 
       &.display {
-        bottom: 17.3rem;
+        bottom: 17.2rem;
         left: 0rem;
 
         &.focus {
@@ -606,7 +713,7 @@ p.error {
       }
 
       &.password-creds {
-        bottom: 11.45rem;
+        bottom: 11.4rem;
 
       }
 

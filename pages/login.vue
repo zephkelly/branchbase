@@ -4,7 +4,7 @@
 
     </div>
     <div v-else class="logim">
-      <form >
+      <form v-on:submit="submitCredsLogin">
         <h1>Log in below</h1>
         <div class="wrapper oauth">
           <a v-on:click="handleGithubSignIn" alt="Connect your GitHub account" title="Connect your GitHub account">
@@ -24,11 +24,11 @@
         <div class="wrapper regular">
           <div>
             <label class="animated-label email" ref="emailLabel" for="email">Email</label>
-            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="emailInput" type="email" required/>
+            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="emailInput" ref="emailInputRef" type="email" required/>
           </div>
           <div>
             <label class="animated-label password" ref="passwordLabel" for="password">Password</label>
-            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="passwordInput" type="password" required/>
+            <input v-on:mouseenter="toggleEmailLabel(true)" v-on:mouseleave="toggleEmailLabel(false)" v-on:focus="toggleEmailLabel(true, true)" v-on:focusout="toggleEmailLabel(false, true)" class="email" v-model="passwordInput" ref="passwordInputRef" type="password" required/>
           </div>
           <!-- -->
           <button class="email-login" v-on:click="handleEmailSignIn" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
@@ -40,14 +40,18 @@
 </template>
 
 <script lang="ts" setup>
+const { signIn } = useSession();
+
 const route = useRoute();
 const router = useRouter();
 const setupProfile = ref(false);
 
 const emailInput = ref(null);
+const emailInputRef = ref(null);
 const emailLabel = ref(null);
 
 const passwordInput = ref(null);
+const passwordInputRef = ref(null);
 const passwordLabel = ref(null);
 
 function toggleEmailLabel(bool: boolean, bool2: boolean = false) {
@@ -58,12 +62,23 @@ function handleGoogleSignIn() {
   console.log('google sign in');
 }
 
-function handleGithubSignIn() {
-  console.log('github sign in');
+async function handleGithubSignIn() {
+  await signIn('github');
 }
 
-function handleEmailSignIn() {
-  console.log('email sign in');
+async function handleEmailSignIn() {
+  //@ts-expect-error
+  const email: string = emailInput.value;
+  //@ts-expect-error
+  const password: string = passwordInput.value;
+
+  console.log(email, password)
+
+  await signIn('credentials', { email: email, password: password });
+}
+
+function submitCredsLogin(e: Event) {
+  e.preventDefault();
 }
 
 definePageMeta({

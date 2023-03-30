@@ -11,17 +11,19 @@ export default eventHandler(async (event: any) => {
   const { display_name } = body as UserProfile;
   let { avatar_url } = body as UserProfile;
 
-  if (validateQuery(email, password, auth_provider, avatar_url) == false) {
+  console.log("In user.post.ts");
+
+  if (validateQuery(email, password, auth_provider, display_name, ) == false) {
     return {
       statusCode: 400,
       body: 'Invalid query.'
     }
   }
 
-  if (validateQueryCustom(display_name, 1, 30) == false) {
+  if (validateQueryCustom(display_name, 1, 25) == false) {
     return {
       statusCode: 400,
-      body: 'Invalid display name. Greater than 30 characters.'
+      body: 'Invalid display name. Greater than 25 characters.'
     }
   }
 
@@ -61,7 +63,7 @@ export default eventHandler(async (event: any) => {
     newUserModel = new UserModel({
       email: email,
       password: hashedPassword,
-      auth_provider: auth_provider,
+      auth_provider: 'email',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -104,7 +106,7 @@ function checkAuthProvider(authProvider: string) {
 }
 
 function validateEmail(email: string) {
-  const re = /\S+@\S+\.\S+/;
+  const re = /@/;
   return re.test(email);
 }
 

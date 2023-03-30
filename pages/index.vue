@@ -16,6 +16,10 @@ useHead({
       content: 'This is the home page',
     },],
 });
+
+const { status, getProviders, signOut, data } = useSession();
+
+console.log(status.value, getProviders())
 </script>
 
 <style lang="scss" scoped>

@@ -10,5 +10,8 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { ssr: true },
-  }
+  },
+  // auth: {
+  //   origin: process.env.AUTH_ORIGIN,
+  // },
 })

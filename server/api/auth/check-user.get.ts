@@ -3,9 +3,9 @@ import { UserModel } from '~~/models/user';
 
 export default eventHandler(async (event: any) => {
   const query = getQuery(event);
-  const email = query.email as string;
+  const email: string = query.email as string;
 
-  const doesExist = await doesUserExist(email)
+  const doesExist: boolean = await doesUserExist(email)
 
   async function doesUserExist(email: string): Promise<boolean> {
     let foundResult = false;
