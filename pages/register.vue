@@ -147,7 +147,6 @@ let isEmailFocused = false;
 let isDisplayNameFocused = false;
 let isPasswordCredsFocused = false;
 let isPasswordCheckCredsFocused = false;
-
 function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = false) {
   let currentLabel: any = null;
   let currentInput: any = null;
@@ -213,6 +212,22 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
   }
 }
 
+function canSubmitEmail() {
+  const emailRegex = /@/;
+  
+  if (emailRegex.test(emailInput.value) && emailInput.value !== '') {
+    emailSubmit.value.classList.remove('disabled');
+  }
+  else {
+    emailSubmit.value.classList.add('disabled');
+  }
+
+  if (showErrorInitial.value = true) {
+    showErrorInitial.value = false;
+    errorMessageInitial.value = '';
+  }
+}
+
 const spacesRegex = /\s/g;
 const spacesOnlyRegex = /^\s+$/;
 function updateDisplayName() {
@@ -249,21 +264,11 @@ function checkDisplayName(): boolean {
   return true;
 }
 
-async function queryCheckDisplayName() {
-  if (await queryDatabaseDisplay(displayNameInput.value)) {
-    showErrorCreds.value = true;
-    errorMessageCreds.value = 'Display name already taken';
-
-    displayNameInputRef.value.classList.remove('valid');
-    displayNameInputRef.value.classList.add('invalid');
-  }
-}
-
 function checkPasswordMatch() {
   if (passwordInputCheckCredsModel.value === null || passwordInputCheckCredsModel.value === '') {
     passWordInputCredsRef.value.classList.remove('valid');
     passWordInputCredsRef.value.classList.remove('invalid');
-
+    
     passwordInputCheckCredsRef.value.classList.remove('valid');
     passwordInputCheckCredsRef.value.classList.remove('invalid');
     resetCredsErrorMessage();
@@ -276,7 +281,7 @@ function checkPasswordMatch() {
 
     passwordInputCheckCredsRef.value.classList.add('valid');
     passwordInputCheckCredsRef.value.classList.remove('invalid');
-
+    
     resetCredsErrorMessage();
   }
   else {
@@ -288,63 +293,13 @@ function checkPasswordMatch() {
   }
 }
 
-async function submitRegister(e: Event) {
-  e.preventDefault();
-  
-  if (emailSubmit.value.classList.contains('disabled')) return;
-
-  checkDisplayName();
-  backToCreds();
-
-  if (await queryDatabaseEmail(emailInput.value)) {
-    backToInitial();
-
-    showErrorInitial.value = true;
-    errorMessageInitial.value = 'That email is already in use';
-  }
-}
-
-
-async function submitOnboardCreds(e: Event) {
-  e.preventDefault();
-
-  if (credsSubmit.value.classList.contains('disabled')) return;
-
-  if (!runPasswordChecks()) {
-    return;
-  }
-
+async function queryCheckDisplayName() {
   if (await queryDatabaseDisplay(displayNameInput.value)) {
     showErrorCreds.value = true;
-    errorMessageCreds.value = 'That display name is already in use';
-    return;
-  }
+    errorMessageCreds.value = 'Display name already taken';
 
-  const email = emailInput.value;
-  const password = passwordInputCredsModel.value;
-  const displayName = displayNameInput.value;
-  const auth_provider = 'email';
-
-  //send to database
-  const response = await useFetch('/api/auth/user', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password,
-      display_name: displayName,
-      auth_provider: auth_provider
-    })
-  });
-
-  if (response.data.value?.statusCode == 200) {
-    window.location.href = '/';
-  }
-  else {
-    showErrorCreds.value = true;
-    errorMessageCreds.value = response.data.value?.body;
+    displayNameInputRef.value.classList.remove('valid');
+    displayNameInputRef.value.classList.add('invalid');
   }
 }
 
@@ -403,27 +358,6 @@ function runPasswordChecks(showErrors: boolean = true) {
   return true;
 }
 
-function resetCredsErrorMessage() {
-  errorMessageCreds.value = '';
-  showErrorCreds.value = false;
-}
-
-function canSubmitEmail() {
-  const emailRegex = /@/;
-  
-  if (emailRegex.test(emailInput.value) && emailInput.value !== '') {
-    emailSubmit.value.classList.remove('disabled');
-  }
-  else {
-    emailSubmit.value.classList.add('disabled');
-  }
-
-  if (showErrorInitial.value = true) {
-    showErrorInitial.value = false;
-    errorMessageInitial.value = '';
-  }
-}
-
 async function canSubmitCreds(showErrors: boolean = false) {
   if (!runPasswordChecks(showErrors)) {
     credsSubmit.value.classList.add('disabled');
@@ -448,6 +382,102 @@ async function canSubmitCreds(showErrors: boolean = false) {
   }
 }
 
+async function submitRegister(e: Event) {
+  e.preventDefault();
+  
+  if (emailSubmit.value.classList.contains('disabled')) return;
+
+  checkDisplayName();
+  backToCreds();
+
+  if (await queryDatabaseEmail(emailInput.value)) {
+    backToInitial();
+
+    showErrorInitial.value = true;
+    errorMessageInitial.value = 'That email is already in use';
+  }
+}
+
+async function submitOnboardCreds(e: Event) {
+  e.preventDefault();
+
+  if (credsSubmit.value.classList.contains('disabled')) return;
+
+  if (!runPasswordChecks()) {
+    return;
+  }
+
+  if (await queryDatabaseDisplay(displayNameInput.value)) {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'That display name is already in use';
+    return;
+  }
+
+  const email = emailInput.value;
+  const password = passwordInputCredsModel.value;
+  const displayName = displayNameInput.value;
+  const auth_provider = 'email';
+
+  //send to database
+  const response = await useFetch('/api/auth/user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: email,
+      password: password,
+      display_name: displayName,
+      auth_provider: auth_provider
+    })
+  });
+
+  if (response.data.value?.statusCode == 200) {
+    window.location.href = '/';
+  }
+  else {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = response.data.value?.body;
+  }
+}
+
+const handleGithubSignIn = async () => {
+  await signIn('github', {
+    callbackUrl: `/register?authSignup=true&provider=github`,
+  });
+};
+
+const handleGoogleSignIn = async () => {
+  await signIn('google', {
+    callbackUrl: `/register?authSignup=true&provider=google`,
+  });
+};
+
+function backToInitial() {
+  initialPanel.value = true;
+  onboardOAuth.value = false;
+  disableCredsPanel();
+}
+
+function backToOAuth() {
+  onboardOAuth.value = true;
+  initialPanel.value = false;
+  disableCredsPanel();
+}
+
+function backToCreds() {
+  onboardCredentials.value = true;
+  registerPanel.value.classList.add('creds-onboard');
+  
+  onboardOAuth.value = false;
+  initialPanel.value = false;
+}
+
+function disableCredsPanel() {
+  onboardCredentials.value = false;
+  registerPanel.value.classList.remove('creds-onboard');
+}
+
 async function queryDatabaseEmail(email: string): Promise<boolean> {
   const response = await useFetch(`/api/auth/check-user?email=${email}`);
   const data: any = await response.data.value;
@@ -470,59 +500,9 @@ async function queryDatabaseDisplay(name: string): Promise<boolean> {
   return false;
 }
 
-function backToInitial() {
-  initialPanel.value = true;
-  onboardOAuth.value = false;
-  disableCredsPanel();
-}
-
-function backToOAuth() {
-  onboardOAuth.value = true;
-  initialPanel.value = false;
-  disableCredsPanel();
-}
-
-function backToCreds() {
-  onboardCredentials.value = true;
-  registerPanel.value.classList.add('creds-onboard');
-
-  onboardOAuth.value = false;
-  initialPanel.value = false;
-}
-
-function disableCredsPanel() {
-  onboardCredentials.value = false;
-  registerPanel.value.classList.remove('creds-onboard');
-}
-
-const handleGithubSignIn = async () => {
-  await signIn('github', {
-    callbackUrl: `/register?authSignup=true&provider=github`,
-  });
-};
-
-const handleGoogleSignIn = async () => {
-  await signIn('google', {
-    callbackUrl: `/register?authSignup=true&provider=google`,
-  });
-};
-
-const handleEmailSignIn = async () => {
-  const email = emailInput.value;
-  const password = '';
-
-  //handleCredentialsSignIn({ email, password })
-};
-
-const handleCredentialsSignIn = async ({ email, password }: { email: string, password: string }) => {
-  const { error, url } = await signIn('credentials', { email, password, redirect: false })
-
-  if (error) {
-    // Do your custom error handling here
-    alert('You have made a terrible mistake while entering your credentials')
-  } else {
-    return navigateTo(url, { external: true })
-  }
+function resetCredsErrorMessage() {
+  errorMessageCreds.value = '';
+  showErrorCreds.value = false;
 }
 
 definePageMeta({
