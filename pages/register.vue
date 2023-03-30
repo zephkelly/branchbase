@@ -532,29 +532,6 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
-h1 {
-  font-size: 1.8rem;
-  font-weight: 500;
-  margin-bottom: 3rem;
-  align-self: flex-start;
-
-  &.creds {
-    margin-bottom: 1rem;
-  }
-}
-
-p.error {
-  align-self: flex-start;
-  margin-bottom: 1rem;
-  color: red;
-
-  &.creds {
-    align-self: center;
-    position: absolute;
-    bottom: -3rem;
-    font-size: 0.8rem;
-  }
-}
 .register-panel {
   position: relative;
   display: flex;
@@ -570,10 +547,6 @@ p.error {
   box-sizing: border-box;
   z-index: 0;
   transition: height 0.1s ease-out;
-
-  &.creds-onboard {
-    height: 700px;
-  }
 
   * {
     font-family: 'Roboto', sans-serif;
@@ -607,34 +580,7 @@ p.error {
       align-items: center;
       justify-content: flex-start;
     }
-
-    p.or {
-      font-size: 0.8rem;
-      font-weight: 500;
-      margin: 3rem 0;
-      margin-top: 3.2rem;
-      cursor: default;
-      user-select: none;
-    }
-
-    p.swap {
-      margin-top: 4rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-      // align-self: flex-start;
-
-      a {
-        cursor: pointer;
-        text-decoration: underline;
-        transition: color 0.15s ease-in-out;
-        color: var(--accent-color);
-        
-        &:hover {
-          color: var(--text-color);
-        }
-      }
-    }
-
+  
     .wrapper.regular {
       div {
         width: 100%;
@@ -683,48 +629,73 @@ p.error {
       }
     }
 
+    p.or {
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin: 3rem 0;
+      margin-top: 3.2rem;
+      cursor: default;
+      user-select: none;
+    }
+
+    p.swap {
+      margin-top: 4rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      // align-self: flex-start;
+
+      a {
+        cursor: pointer;
+        text-decoration: underline;
+        transition: color 0.15s ease-in-out;
+        color: var(--accent-color);
+        
+        &:hover {
+          color: var(--text-color);
+        }
+      }
+    }
+
     label {
       pointer-events: none;
       align-self: flex-start;
-    }
+      
+      &.animated-label {
+        position: absolute;
+        font-size: 1rem;
+        color: var(--text-color);
+        transform: translate3d(1rem, 1.75rem, 0);
+        opacity: 0.4;
+        transition: transform 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), font-size 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
+        z-index: 1;
 
-    .animated-label {
-      position: absolute;
-      font-size: 1rem;
-      color: var(--text-color);
-      transform: translate3d(1rem, 1.75rem, 0);
-      opacity: 0.4;
-      transition: transform 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), font-size 0.1s cubic-bezier(0.075, 0.82, 0.165, 1), opacity 0.1s cubic-bezier(0.075, 0.82, 0.165, 1);
-      z-index: 1;
+        &.email {
+          top: -1rem;
+          left: 0rem;
+        }
 
-      &.email {
-        top: -1rem;
-        left: 0rem;
-      }
+        &.display {
+          bottom: 17.2rem;
+          left: 0rem;
 
-      &.display {
-        bottom: 17.2rem;
-        left: 0rem;
+          &.focus {
+            transform: translate3d(0.8rem, -0.2rem, 0);
+          }
+        }
+
+        &.password-creds {
+          bottom: 11.4rem;
+        }
+
+        &.password-check-creds {
+          bottom: 6.95rem;
+        }
 
         &.focus {
           transform: translate3d(0.8rem, -0.2rem, 0);
+          opacity: 1;
+          font-size: 0.8rem;
         }
-      
-      }
-
-      &.password-creds {
-        bottom: 11.4rem;
-
-      }
-
-      &.password-check-creds {
-        bottom: 6.95rem;
-      }
-
-      &.focus {
-        transform: translate3d(0.8rem, -0.2rem, 0);
-        opacity: 1;
-        font-size: 0.8rem;
       }
     }
 
@@ -787,6 +758,7 @@ p.error {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  height: 700px;
 
   .back-button {
     position: absolute;
@@ -845,14 +817,35 @@ p.error {
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
+h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-bottom: 3rem;
+  align-self: flex-start;
+
+  &.creds {
+    margin-bottom: 1rem;
+  }
+}
+
+p.error {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+  color: red;
+
+  &.creds {
+    align-self: center;
+    position: absolute;
+    bottom: -3rem;
+    font-size: 0.8rem;
+  }
+}
+
+.fade-enter-active, .fade-leave-active {
   transition: opacity 0.3s ease-out;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
-
 </style>
