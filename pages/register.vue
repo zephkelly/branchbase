@@ -41,7 +41,7 @@
     </Transition>
     <Transition name="fade">
       <div v-show="onboardCredentials" class="creds-onboard">
-        <button class="back-button" v-on:click="backToInitial">
+        <button class="back-button" v-on:click="goToInitialPanel()">
           <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M561 816 320 575l241-241 43 43-198 198 198 198-43 43Z"/></svg>
         </button>
         <div class="profile-example">
@@ -123,26 +123,27 @@ const onboardCredentials = ref(false);
 const onboardOAuth = ref(false);
 
 if (data.value?.user !== null) {
-  //OAuth
+  //@ts-expect-error
+  const userProfile = await getUserProfile(data.value?.user?.email)
+
   if (route.query.authSignup === 'true') {
-    //@ts-expect-error
-    if (await queryDatabase(data?.value?.user?.email)) {
+    if (userProfile !== null) {
+      console.log("User already exists")
       router.push('/');
     }
+    else {
+      console.log("Onboard user")
+      initialPanel.value = false;
+      onboardCredentials.value = false;
 
-    initialPanel.value = false;
-    onboardOAuth.value = true;
-    //wait for user to enter their info
+      onboardOAuth.value = true;
+    }
   }
-  //Regular
-  else if (route.query.authSignup === 'false') {
-    
-    console.log(emailInput.value);
-    // router.push('/');
+  else {
+    console.log("User is making another account");
   }
 }
 
-//Input label toggling
 let isEmailFocused = false;
 let isDisplayNameFocused = false;
 let isPasswordCredsFocused = false;
@@ -388,10 +389,10 @@ async function submitRegister(e: Event) {
   if (emailSubmit.value.classList.contains('disabled')) return;
 
   checkDisplayName();
-  backToCreds();
+  goToPanel(onboardCredentials);
 
-  if (await queryDatabaseEmail(emailInput.value)) {
-    backToInitial();
+  if (await checkEmailExists(emailInput.value)) {
+    goToPanel(initialPanel);
 
     showErrorInitial.value = true;
     errorMessageInitial.value = 'That email is already in use';
@@ -453,32 +454,30 @@ const handleGoogleSignIn = async () => {
   });
 };
 
-function backToInitial() {
-  initialPanel.value = true;
-  onboardOAuth.value = false;
-  disableCredsPanel();
+function goToInitialPanel() {
+  goToPanel(initialPanel);
 }
 
-function backToOAuth() {
-  onboardOAuth.value = true;
-  initialPanel.value = false;
-  disableCredsPanel();
+function goToPanel(panel: any) {
+  disablePanels();
+
+  if (panel === onboardCredentials) {
+    registerPanel.value.classList.add('creds-onboard');
+  }
+
+  panel.value = true;
+  return;
+
+  function disablePanels() {
+    initialPanel.value = false;
+    onboardOAuth.value = false;
+    
+    onboardCredentials.value = false;
+    registerPanel.value.classList.remove('creds-onboard');
+  }
 }
 
-function backToCreds() {
-  onboardCredentials.value = true;
-  registerPanel.value.classList.add('creds-onboard');
-  
-  onboardOAuth.value = false;
-  initialPanel.value = false;
-}
-
-function disableCredsPanel() {
-  onboardCredentials.value = false;
-  registerPanel.value.classList.remove('creds-onboard');
-}
-
-async function queryDatabaseEmail(email: string): Promise<boolean> {
+async function checkEmailExists(email: string): Promise<boolean> {
   const response = await useFetch(`/api/auth/check-user?email=${email}`);
   const data: any = await response.data.value;
 
@@ -487,6 +486,17 @@ async function queryDatabaseEmail(email: string): Promise<boolean> {
   }
 
   return false;
+}
+
+async function getUserProfile(email: string): Promise<any> {
+  const response = await useFetch(`/api/auth/check-user?email=${email}`);
+  const data: any = await response.data.value;
+
+  if (data.body.userExists) {
+    return data.body
+  }
+
+  return null;
 }
 
 async function queryDatabaseDisplay(name: string): Promise<boolean> {

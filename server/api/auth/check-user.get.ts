@@ -4,16 +4,17 @@ import { UserModel } from '~~/models/user';
 export default eventHandler(async (event: any) => {
   const query = getQuery(event);
   const email: string = query.email as string;
-
-  const doesExist: boolean = await doesUserExist(email)
+  
+  let authType = "";
 
   async function doesUserExist(email: string): Promise<boolean> {
     let foundResult = false;
-
-    await UserModel.exists({ email })
-      .then((result) => {
-        if (result != null) {
+    
+    await UserModel.find({ email })
+    .then((result) => {
+      if (result.length > 0) {
           foundResult = true;
+          authType = result[0].auth_provider;
         } else {
           foundResult = false;
         }
@@ -21,15 +22,18 @@ export default eventHandler(async (event: any) => {
       .catch((err) => {
         console.log(err);
       }
-    );
-
-    return foundResult;
-  }
-
+      );
+      
+      return foundResult;
+    }
+    
+    const doesExist: boolean = await doesUserExist(email)
+  
   return {
     statusCode: 200,
     body: {
-      userExists: doesExist
+      userExists: doesExist,
+      auth: authType
     }
   };
 });

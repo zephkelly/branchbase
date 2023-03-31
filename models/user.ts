@@ -29,6 +29,11 @@ export const UserSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  display_name: {
+    type: String,
+    required: true,
+    unique: true
+  },
   password: {
     type: String,
     required: false

@@ -11,8 +11,6 @@ export default eventHandler(async (event: any) => {
   const { display_name } = body as UserProfile;
   let { avatar_url } = body as UserProfile;
 
-  console.log("In user.post.ts");
-
   if (validateQuery(email, password, auth_provider, display_name, ) == false) {
     return {
       statusCode: 400,
@@ -62,6 +60,7 @@ export default eventHandler(async (event: any) => {
 
     newUserModel = new UserModel({
       email: email,
+      display_name: display_name,
       password: hashedPassword,
       auth_provider: 'email',
       created_at: new Date().toISOString(),
@@ -79,6 +78,7 @@ export default eventHandler(async (event: any) => {
     newUserModel = new UserModel({
       email: email,
       auth_provider: auth_provider,
+      display_name: display_name,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
