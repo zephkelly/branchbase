@@ -6,7 +6,6 @@
   </Head>
   <section class="landing">
     <p v-if="status === 'authenticated'" style="margin-top: 10rem;">Welcome {{ data?.user?.name }}</p>
-    <a v-if="status === 'authenticated'" v-on:click="signOut()" style="cursor: pointer;">Sign out</a>
   </section>
 </template>
 
@@ -21,8 +20,6 @@ useHead({
 
 const { status, signOut, data } = useSession();
 const showMessage = ref(false);
-
-console.log(status.value)
 </script>
 
 <style lang="scss" scoped>

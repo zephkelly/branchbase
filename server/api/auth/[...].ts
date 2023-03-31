@@ -21,13 +21,15 @@ export default NuxtAuthHandler({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
       async profile(profile: any) {
-        const userProfile = await pool.query("SELECT * FROM user_profiles WHERE email = $1", [profile.email]);
-
-        if (userProfile.rows.length == 0) {
-          profile.name = userProfile.rows[0].display_name;
-        }
-
-        return profile;
+        return await setJWT(profile);
+      }
+    }),
+    //@ts-expect-error
+    DiscordProvider.default({
+      clientId: process.env.DISCORD_CLIENT_ID,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET,
+      async profile(profile: any) {
+        return await setJWT(profile);
       }
     }),
     //@ts-expect-error
@@ -35,13 +37,7 @@ export default NuxtAuthHandler({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       async profile(profile: any) {
-        const userProfile = await pool.query("SELECT * FROM user_profiles WHERE email = $1", [profile.email]);
-
-        if (userProfile.rows.length == 0) {
-          profile.name = userProfile.rows[0].display_name;
-        }
-        
-        return profile;
+        return await setJWT(profile);
       }
     }),
     //@ts-expect-error
@@ -82,3 +78,14 @@ export default NuxtAuthHandler({
     })
   ]
 });
+
+async function setJWT(profile: any) {
+  const userProfile = await pool.query("SELECT * FROM user_profiles WHERE email = $1", [profile.email]);
+
+  if (userProfile.rows.length > 0) {
+    profile.name = userProfile.rows[0].display_name;
+    profile.image = userProfile.rows[0].avatar_url;
+  }
+  
+  return profile;
+}

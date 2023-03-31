@@ -74,11 +74,14 @@ export default eventHandler(async (event: any) => {
     else if (auth_provider === 'github') {
       auth_provider = AuthProvider.github;
     }
+    else if (auth_provider === 'discord') {
+      auth_provider = AuthProvider.discord;
+    }
 
     newUserModel = new UserModel({
       email: email,
-      auth_provider: auth_provider,
       display_name: display_name,
+      auth_provider: auth_provider,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });

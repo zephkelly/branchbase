@@ -17,12 +17,23 @@
           <nuxt-link to="/explore">Explore</nuxt-link>
         </li>
       </ul>
-      <nuxt-link to="/login">Login</nuxt-link>
+      <nuxt-link v-if="!logout" ref="loginButton" to="/login">Login</nuxt-link>
+      <button v-else class="logout-button" v-on:click="signOut()">Logout</button>
     </nav>
   </header>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
+const { data, signOut } = useSession();
+
+const loginButton: Ref = ref(null);
+const logout: Ref = ref(false);
+
+(async function() {
+  if (data.value?.user) {
+    logout.value = true;
+  }
+})()
 </script>
 
 <style lang="scss" scoped>
@@ -81,5 +92,12 @@
         }
       }
     }
+  }
+
+  .logout-button {
+    background-color: transparent;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
   }
 </style>
