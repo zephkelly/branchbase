@@ -11,10 +11,10 @@ export default eventHandler(async (event: any) => {
   const { display_name } = body as UserProfile;
   let { avatar_url } = body as UserProfile;
 
-  if (validateQuery(email, password, auth_provider, display_name, ) == false) {
+  if (validateQuery(email, auth_provider, display_name) == false) {
     return {
       statusCode: 400,
-      body: 'Invalid query.'
+      body: 'We couldn\'t validate your info.'
     }
   }
 
@@ -32,13 +32,6 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  if (validatePassword(password) == false) {
-    return {
-      statusCode: 400,
-      body: 'Invalid password.'
-    }
-  }
-
   if (await UserModel.exists({ email })) {
     return {
       statusCode: 400,
@@ -48,7 +41,7 @@ export default eventHandler(async (event: any) => {
 
   let newUserModel: any = null
 
-  if (avatar_url == null || avatar_url == undefined || avatar_url == '') {
+  if (!avatar_url) {
     avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
   }
 

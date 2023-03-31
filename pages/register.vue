@@ -29,13 +29,11 @@
           </div>
           <p class="or">OR</p>
           <div class="wrapper regular">
-            <form>
-              <label class="animated-label email" ref="emailLabel" for="email">Email</label>
-              <input class="email" v-model="emailInput" type="email"  
-                v-on:focus="toggleLable('email', true, true)"
-                v-on:focusout="toggleLable('email', false, true)"
-                v-on:input="canSubmitEmail" v-on:submit="submitRegister" required/>
-            </form>
+            <label class="animated-label email" ref="emailLabel" for="email">Email</label>
+            <input class="email" v-model="emailInput" type="email"  
+              v-on:focus="toggleLable('email', true, true)"
+              v-on:focusout="toggleLable('email', false, true)"
+              v-on:input="canSubmitEmail" v-on:submit="submitRegister" required/>
             <!-- -->
             <button ref="emailSubmit" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
             <p class="swap">Already signed up? <nuxt-link to="/login">Log in here</nuxt-link></p>
@@ -45,6 +43,26 @@
     </Transition>
     <Transition name="fade">
       <div v-show="onboardOAuth" class="oauth-onboard">
+        <button class="back-button" v-on:click="goToInitialPanel()">
+          <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M561 816 320 575l241-241 43 43-198 198 198 198-43 43Z"/></svg>
+        </button>
+        <div class="profile-example">
+          <h1 class="creds">Pick a name</h1>
+          <img src="" alt="" class="profile-image">
+          <h3 ref="accountDisplayLabel" class="display-name">{{ displayName }}</h3>
+        </div>
+        <form ref="formOnboardAuth" v-on:submit="submitOnboardOAuth">
+          <div class="input-field">
+            <label class="animated-label display-oauth focus" ref="displayNameLabelAuth" for="displayNameAuth">Display Name</label>
+            <input id="displayNameAuth" class="display-name" v-model="displayNameInputAuth" ref="displayNameInputAuthRef"
+              v-on:focus="toggleLable('displayNameAuth', true, true), canSubmitAuth()"
+              v-on:focusout="toggleLable('displayNameAuth', false, true), queryCheckDisplayNameAuth(), canSubmitAuth()" 
+              v-on:input="canSubmitAuth(), checkDisplayNameAuth()"
+              required/>
+          </div>
+          <p v-if="showErrorAuth" class="error auth">{{ errorMessageAuth }}</p> 
+          <button ref="authSubmit" class="oauth-onboard-submit disabled" alt="Create your account" title="Create your account">Create account</button>
+        </form>
       </div>
     </Transition>
     <Transition name="fade">
@@ -55,7 +73,7 @@
         <div class="profile-example">
           <h1 class="creds">Create account</h1>
           <img src="" alt="" class="profile-image">
-          <h3 ref="accountDisplayLabel" class="display-name">{{ displayName }}</h3>
+          <h3 ref="accountDisplayLabelAuth" class="display-name">{{ displayName }}</h3>
         </div>
         <form ref="formOnboardCreds" v-on:submit="submitOnboardCreds">
           <div class="input-field">
@@ -97,15 +115,19 @@ const { signIn, data } = useSession();
 const route = useRoute();
 const router = useRouter();
 
-const registerPanel: Ref = ref(null);
 const form = ref(null);
+const registerPanel: Ref = ref(null);
 const emailSubmit: Ref = ref(null);
 const credsSubmit: Ref = ref(null);
+const authSubmit: Ref = ref(null);
 
 const showErrorInitial: Ref = ref(false);
 const showErrorCreds: Ref = ref(false);
+const showErrorAuth: Ref = ref(false);
+
 const errorMessageInitial: Ref = ref('');
 const errorMessageCreds: Ref = ref('');
+const errorMessageAuth: Ref = ref('');
 
 const emailLabel: Ref = ref(null);
 const emailInput: Ref = ref(null);
@@ -121,18 +143,22 @@ const passwordInputCheckCredsRef: Ref = ref(null);
 const displayName: Ref = ref(generateUsername());
 const displayNameInput: Ref = ref(null);
 const displayNameInputRef: Ref = ref(null);
+const displayNameInputAuth: Ref = ref(null);
+const displayNameInputAuthRef: Ref = ref(null);
 displayNameInput.value = displayName.value;
+displayNameInputAuth.value = displayName.value;
 
 const accountDisplayLabel: Ref = ref(null);
+const accountDisplayLabelAuth: Ref = ref(null);
 const displayNameLabel: Ref = ref(null);
+const displayNameLabelAuth: Ref = ref(null);
 
 const initialPanel = ref(true);
 const onboardCredentials = ref(false);
 const onboardOAuth = ref(false);
 
-let signUpAuthProvider: string | null = null
-onMounted(async () => {
-  if (data.value?.user !== null) {
+(async () => {
+  if (data.value?.user) {
     //@ts-expect-error
     const userProfile = await getUserProfile(data.value?.user?.email)
 
@@ -144,18 +170,17 @@ onMounted(async () => {
       else {
         console.log("Onboard user")
         goToPanel(onboardOAuth);
-
-        signUpAuthProvider = route.query.authProvider as string;
       }
     }
     else {
       console.log("User is making another account");
     }
   }
-})
+})();
 
 let isEmailFocused = false;
 let isDisplayNameFocused = false;
+let isDisplayNameAuthFocused = false;
 let isPasswordCredsFocused = false;
 let isPasswordCheckCredsFocused = false;
 function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = false) {
@@ -182,6 +207,16 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
       }
 
       toggle(isDisplayNameFocused);
+      break;
+    case 'displayNameAuth':
+      currentLabel = displayNameLabelAuth;
+      currentInput = displayNameInputAuth;
+
+      if (isFocused) {
+        isDisplayNameAuthFocused = !isDisplayNameAuthFocused;
+      }
+
+      toggle(isDisplayNameAuthFocused);
       break;
     case 'passwordCreds':
       currentLabel = passwordLabelCreds;
@@ -223,9 +258,8 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
   }
 }
 
+const emailRegex = /.+@.+/;
 function canSubmitEmail() {
-  const emailRegex = /@/;
-  
   if (emailRegex.test(emailInput.value) && emailInput.value !== '') {
     emailSubmit.value.classList.remove('disabled');
   }
@@ -237,13 +271,6 @@ function canSubmitEmail() {
     showErrorInitial.value = false;
     errorMessageInitial.value = '';
   }
-}
-
-const spacesRegex = /\s/g;
-const spacesOnlyRegex = /^\s+$/;
-function updateDisplayName() {
-  displayNameInput.value = displayNameInput.value.replace(spacesRegex, '');
-  displayName.value = displayNameInput.value;
 }
 
 function checkDisplayName(): boolean {
@@ -273,6 +300,47 @@ function checkDisplayName(): boolean {
   displayNameInputRef.value.classList.remove('invalid');
   displayNameInputRef.value.classList.add('valid');
   return true;
+}
+
+function checkDisplayNameAuth(): boolean {
+  updateDisplayNameAuth();
+
+  if (displayNameInputAuth.value === null || displayNameInputAuth.value === '' || spacesOnlyRegex.test(displayNameInputAuth.value)) {
+    displayName.value = "Your display name"
+    showErrorAuth.value = true;
+    errorMessageAuth.value = 'Display name cannot be empty';
+
+    displayNameInputAuthRef.value.classList.remove('valid');
+    displayNameInputAuthRef.value.classList.add('invalid');
+    return false;
+  }
+  else if (displayNameInputAuth.value.length > 25) {
+    showErrorAuth.value = true;
+    errorMessageAuth.value = "Name can't be longer than 25 characters";
+
+    displayNameInputAuthRef.value.classList.remove('valid');
+    displayNameInputAuthRef.value.classList.add('invalid');
+    return false;
+  }
+
+  showErrorAuth.value = false;
+  errorMessageAuth.value = '';
+
+  displayNameInputAuthRef.value.classList.remove('invalid');
+  displayNameInputAuthRef.value.classList.add('valid');
+  return true;
+}
+
+const spacesRegex = /\s/g;
+const spacesOnlyRegex = /^\s+$/;
+function updateDisplayName() {
+  displayNameInput.value = displayNameInput.value.replace(spacesRegex, '');
+  displayName.value = displayNameInput.value;
+}
+
+function updateDisplayNameAuth() {
+  displayNameInputAuth.value = displayNameInputAuth.value.replace(spacesRegex, '');
+  displayName.value = displayNameInputAuth.value;
 }
 
 function checkPasswordMatch() {
@@ -311,6 +379,16 @@ async function queryCheckDisplayName() {
 
     displayNameInputRef.value.classList.remove('valid');
     displayNameInputRef.value.classList.add('invalid');
+  }
+}
+
+async function queryCheckDisplayNameAuth() {
+  if (await queryDatabaseDisplay(displayNameInputAuth.value)) {
+    showErrorAuth.value = true;
+    errorMessageAuth.value = 'Display name already taken';
+
+    displayNameInputAuthRef.value.classList.remove('valid');
+    displayNameInputAuthRef.value.classList.add('invalid');
   }
 }
 
@@ -375,12 +453,18 @@ async function canSubmitCreds(showErrors: boolean = false) {
     return;
   }
 
-  if (await queryDatabaseDisplay(displayName.value)) {
+  if (!checkDisplayName()) {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'Display name is in the wrong format';
+
     credsSubmit.value.classList.add('disabled');
     return;
   }
 
-  if (!checkDisplayName()) {
+  if (await queryDatabaseDisplay(displayName.value)) {
+    showErrorCreds.value = true;
+    errorMessageCreds.value = 'Display name already exists';
+
     credsSubmit.value.classList.add('disabled');
     return;
   }
@@ -390,6 +474,28 @@ async function canSubmitCreds(showErrors: boolean = false) {
   if (showErrorCreds.value = true) {
     showErrorCreds.value = false;
     errorMessageCreds.value = '';
+  }
+}
+
+async function canSubmitAuth() {
+  if (!checkDisplayNameAuth()) {
+    authSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  if (await queryDatabaseDisplay(displayName.value)) {
+    showErrorAuth.value = true;
+    errorMessageAuth.value = 'Display name already exists';
+
+    authSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  authSubmit.value.classList.remove('disabled');
+
+  if (showErrorAuth.value = true) {
+    showErrorAuth.value = false;
+    errorMessageAuth.value = '';
   }
 }
 
@@ -452,6 +558,45 @@ async function submitOnboardCreds(e: Event) {
   }
 }
 
+async function submitOnboardOAuth(e: Event) {
+  e.preventDefault();
+
+  if (authSubmit.value.classList.contains('disabled')) return;
+
+  if (await queryDatabaseDisplay(displayNameInputAuthRef.value)) {
+    showErrorAuth.value = true;
+    errorMessageAuth.value = 'That display name is already in use';
+    return;
+  }
+
+  const email = data.value?.user?.email;
+  const avatar_url = data.value?.user?.image;
+  const displayName = displayNameInputAuth.value;
+  const auth_provider = await route.query.provider;
+
+  //send to database
+  const response = await useFetch('/api/auth/user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: email,
+      display_name: displayName,
+      auth_provider: auth_provider,
+      avatar_url: avatar_url
+    })
+  });
+
+  if (response.data.value?.statusCode == 200) {
+    window.location.href = '/';
+  }
+  else {
+    showErrorAuth.value = true;
+    errorMessageAuth.value = response.data.value?.body;
+  }
+}
+
 const handleDiscordSignIn = async () => {
   await signIn('discord', {
     callbackUrl: `/register?authSignup=true&provider=discord`,
@@ -481,6 +626,10 @@ function goToPanel(panel: any) {
     registerPanel.value.classList.add('creds-onboard');
   }
 
+  if (panel === onboardOAuth) {
+    registerPanel.value.classList.add('oauth-onboard');
+  }
+
   panel.value = true;
   return;
 
@@ -490,6 +639,7 @@ function goToPanel(panel: any) {
     
     onboardCredentials.value = false;
     registerPanel.value.classList.remove('creds-onboard');
+    registerPanel.value.classList.remove('oauth-onboard');
   }
 }
 
@@ -573,10 +723,6 @@ definePageMeta({
     justify-content: space-between;
     width: 100%;
     height: 100%;
-
-    &:last-of-type {
-      height: auto;
-    }
 
     .input-field {
       width: 100%;
@@ -702,6 +848,15 @@ definePageMeta({
           }
         }
 
+        &.display-oauth {
+          bottom: 8.6rem;
+          left: 0rem;
+
+          &.focus {
+            transform: translate3d(0.8rem, -0.4rem, 0);
+          }
+        }
+
         &.password-creds {
           bottom: 11.4rem;
         }
@@ -750,7 +905,7 @@ definePageMeta({
       }
     }
 
-    .email-signup, .creds-onboard-submit {
+    .email-signup, .creds-onboard-submit, .oauth-onboard-submit {
       font-size: 1.1rem;
       font-weight: 500;
       width: 100%;
@@ -769,10 +924,14 @@ definePageMeta({
         cursor: none;
       }
     }
+
+    .oauth-onboard-submit {
+      margin-bottom: 2rem;
+    }
   }
 }
 
-.creds-onboard {
+.creds-onboard, .oauth-onboard {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -836,6 +995,17 @@ definePageMeta({
   }
 }
 
+.oauth-onboard {
+  height: 600px;
+  form {
+    height: auto;
+
+    input.display-name {
+      margin-bottom: 1.6rem;
+    }
+  }
+}
+
 h1 {
   font-size: 1.8rem;
   font-weight: 500;
@@ -850,11 +1020,12 @@ h1 {
 p.error {
   align-self: center;
   margin-bottom: 1rem;
-  color: red;
+  color: rgba(255, 0, 0, 0.756);
 
   &.initial {
     position: absolute;
-    bottom: 1.8rem;
+    bottom: 2rem;
+    font-size: 0.8rem;
   }
 
   &.creds {
@@ -862,6 +1033,13 @@ p.error {
     bottom: -3rem;
     font-size: 0.8rem;
   }
+
+  &.auth {
+    position: absolute;
+    bottom: -1rem;
+    font-size: 0.8rem;
+  }
+  
 }
 
 .fade-enter-active, .fade-leave-active {

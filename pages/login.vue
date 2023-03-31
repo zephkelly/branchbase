@@ -35,6 +35,7 @@
             <input
               v-on:focus="toggleLable('email', true, true)"
               v-on:focusout="toggleLable('email', false, true)"
+              v-on:input="canSubmitLogin"
               class="email" v-model="emailInput" ref="emailInputRef" type="email" required/>
           </div>
           <div>
@@ -42,10 +43,11 @@
             <input
               v-on:focus="toggleLable('password', true, true)"
               v-on:focusout="toggleLable('password', false, true)"
+              v-on:input="canSubmitLogin"
               class="email" v-model="passwordInput" ref="passwordInputRef" type="password" required/>
           </div>
           <!-- -->
-          <button class="email-login" alt="Sign up with your email" title="Sign up with your email">Log in</button>
+          <button ref="loginSubmit" class="email-login disabled" alt="Sign up with your email" title="Sign up with your email">Log in</button>
           <p class="swap">Need to sign up? <nuxt-link to="/register">Register here</nuxt-link></p>
         </div>
       </form>
@@ -60,6 +62,8 @@ const route = useRoute();
 const router = useRouter();
 const setupProfile = ref(false);
 
+const loginSubmit: Ref = ref(null);
+
 const emailInput: Ref = ref(null);
 const emailInputRef: Ref = ref(null);
 const emailLabel: Ref = ref(null);
@@ -68,19 +72,19 @@ const passwordInput: Ref = ref(null);
 const passwordInputRef: Ref = ref(null);
 const passwordLabel: Ref = ref(null);
 
-(async function () {
-  if (data.value?.user !== null) {
+(async () => {
+  if (data.value?.user) {
     //@ts-expect-error
     const profile = await getUserProfile(data.value.user.email);
 
     if (profile == null) {
-      const provider: string = route.query.authProvider as string;
+      const provider: string = route.query.provider as string;
 
       if (provider === undefined || provider === null) {
         return;
       }
 
-      router.push(`/register?authSignup=true&authProvider=${provider}`);
+      router.push(`/register?authSignup=true&provider=${provider}`);
     }
     else {
       router.push('/');
@@ -137,15 +141,15 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
 }
 
 async function handleGoogleSignIn() {
-  await signIn('google', { callbackUrl: '/login?authProvider=google' });
+  await signIn('google', { callbackUrl: '/login?provider=google' });
 }
 
 async function handleGithubSignIn() {
-  await signIn('github', { callbackUrl: '/login?authProvider=github' });
+  await signIn('github', { callbackUrl: '/login?provider=github' });
 }
 
 async function handleDiscordSignIn() {
-  await signIn('discord', { callbackUrl: '/login?authProvider=discord' });
+  await signIn('discord', { callbackUrl: '/login?provider=discord' });
 }
 
 const emailRegex = /.+@.+/;
@@ -159,6 +163,31 @@ function submitCredsLogin(e: Event) {
   }
   
   handleEmailSignIn();
+}
+
+function canSubmitLogin() {
+  console.log("Hello")
+  if (!emailRegex.test(emailInput.value)) {
+    emailInputRef.value.classList.add('invalid');
+    emailInputRef.value.classList.remove('valid');
+    loginSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  if (passwordInput.value.length < 8) {
+    passwordInputRef.value.classList.add('invalid');
+    passwordInputRef.value.classList.remove('valid');
+    loginSubmit.value.classList.add('disabled');
+    return;
+  }
+
+  emailInputRef.value.classList.add('valid');
+  emailInputRef.value.classList.remove('invalid');
+
+  passwordInputRef.value.classList.add('valid');
+  passwordInputRef.value.classList.remove('invalid');
+
+  loginSubmit.value.classList.remove('disabled');
 }
 
 async function handleEmailSignIn() {
@@ -389,6 +418,13 @@ h1 {
       background-color: var(--accent-color);
       padding: 0rem;
       cursor: pointer;
+
+      &.disabled {
+        color: rgba(255, 255, 255, 0.286);
+        background-color: var(--panel-border-color);
+        pointer-events: none;
+        cursor: none;
+      }
     }
   }
 }
