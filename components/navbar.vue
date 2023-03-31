@@ -18,7 +18,7 @@
         </li>
       </ul>
       <nuxt-link v-if="!logout" ref="loginButton" to="/login">Login</nuxt-link>
-      <button v-else class="logout-button" v-on:click="signOut()">Logout</button>
+      <button v-else class="logout-button" v-on:click="logOut()">Logout</button>
     </nav>
   </header>
 </template>
@@ -34,6 +34,10 @@ const logout: Ref = ref(false);
     logout.value = true;
   }
 })()
+
+function logOut() {
+  signOut({ callbackUrl: '/login' })
+}
 </script>
 
 <style lang="scss" scoped>

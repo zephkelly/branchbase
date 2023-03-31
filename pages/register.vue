@@ -29,13 +29,13 @@
           </div>
           <p class="or">OR</p>
           <div class="wrapper regular">
-            <div>
+            <form>
               <label class="animated-label email" ref="emailLabel" for="email">Email</label>
               <input class="email" v-model="emailInput" type="email"  
                 v-on:focus="toggleLable('email', true, true)"
                 v-on:focusout="toggleLable('email', false, true)"
                 v-on:input="canSubmitEmail" v-on:submit="submitRegister" required/>
-            </div>
+            </form>
             <!-- -->
             <button ref="emailSubmit" class="email-signup disabled" alt="Sign up with your email" title="Sign up with your email">Sign up</button>
             <p class="swap">Already signed up? <nuxt-link to="/login">Log in here</nuxt-link></p>
@@ -143,10 +143,8 @@ onMounted(async () => {
       }
       else {
         console.log("Onboard user")
-        initialPanel.value = false;
-        onboardCredentials.value = false;
+        goToPanel(onboardOAuth);
 
-        onboardOAuth.value = true;
         signUpAuthProvider = route.query.authProvider as string;
       }
     }
@@ -575,6 +573,10 @@ definePageMeta({
     justify-content: space-between;
     width: 100%;
     height: 100%;
+
+    &:last-of-type {
+      height: auto;
+    }
 
     .input-field {
       width: 100%;

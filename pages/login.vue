@@ -74,7 +74,13 @@ const passwordLabel: Ref = ref(null);
     const profile = await getUserProfile(data.value.user.email);
 
     if (profile == null) {
-      router.push('/register?authSignup=true&provider=discord');
+      const provider: string = route.query.authProvider as string;
+
+      if (provider === undefined || provider === null) {
+        return;
+      }
+
+      router.push(`/register?authSignup=true&authProvider=${provider}`);
     }
     else {
       router.push('/');
@@ -131,15 +137,15 @@ function toggleLable(label: string, shouldToggle: boolean, isFocused: boolean = 
 }
 
 async function handleGoogleSignIn() {
-  await signIn('google', { callbackUrl: '/login' });
+  await signIn('google', { callbackUrl: '/login?authProvider=google' });
 }
 
 async function handleGithubSignIn() {
-  await signIn('github', { callbackUrl: '/login' });
+  await signIn('github', { callbackUrl: '/login?authProvider=github' });
 }
 
 async function handleDiscordSignIn() {
-  await signIn('discord', { callbackUrl: '/login' });
+  await signIn('discord', { callbackUrl: '/login?authProvider=discord' });
 }
 
 const emailRegex = /.+@.+/;
