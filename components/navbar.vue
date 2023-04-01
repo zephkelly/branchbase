@@ -8,14 +8,12 @@
     <nuxt-link class="logo" to="/" v-on:click="toggleSideNav()">
       <img src="~/assets/logo.png" alt="Logo" />
     </nuxt-link>
-    <nav v-if="isExplore" ref="currentFeedButton" class="current-feed" v-on:click="toggleSideNav()" title="The currently active feed.">
-      <ul>
-        <li>
-          <nuxt-link to="/explore">{{ toggleFeedMenuText }}</nuxt-link>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960"><path d="M480 711 240 471l43-43 197 198 197-197 43 43-240 239Z"/></svg>
-        </li>
-      </ul>
-    </nav>
+
+    <button v-if="isExplore" ref="currentFeedButton" class="current-feed" v-on:click="toggleSideNav()" title="Explore your feeds and communities.">
+      <p>{{ toggleFeedMenuText }}</p>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960"><path d="M480 711 240 471l43-43 197 198 197-197 43 43-240 239Z"/></svg>
+    </button>
+  
     <div v-if="!isSignupLogin" class="log-buttons">
       <nuxt-link v-if="!shouldLogout" ref="loginButton" to="/login">Login</nuxt-link>
       <button v-else class="shouldLogout-button" v-on:click="logOut()">Logout</button>
@@ -113,8 +111,10 @@ function logOut() {
     }
   }
 
-  nav.current-feed {
+  button.current-feed {
+    position: relative;
     width: 7.5rem;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -123,48 +123,34 @@ function logOut() {
     background-color: transparent;
     border: 1px solid var(--panel-border-color);
     transition: background-color 0.2s ease-in-out;
+    padding: 0rem;
     cursor: pointer;
 
     * {
       width: 100%;
       box-sizing: border-box;
+      color: var(--text-color);
     }
 
-    ul {
+    p {
       display: flex;
-      flex-direction: row;
-      height: 100%;
-      gap: 2rem;
+      align-items: center;
+      justify-content: flex-start;
+      font-size: 1rem;
+      padding: 0rem 0.8rem;
+      height: 0.9rem;
+    }
 
-      li {
-        position: relative;
-        font-family: 'Roboto', sans-serif;
-        font-weight: 500;
-        height: 100%;
+    svg {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.5rem;
+      width: 1.4rem;
+      height: 1.4rem;
+      fill: var(--text-color);
+      transition: transform 0.2s ease-in-out;
+      transform: rotate(180deg) translate(0rem, 0rem);
 
-        * {
-          color: var(--text-color);
-        }
-
-        a {
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          height: 100%;
-          padding: 0.5rem 0.8rem;
-        }
-
-        svg {
-          position: absolute;
-          top: 0.4rem;
-          right: 0.5rem;
-          width: 1.4rem;
-          height: 1.4rem;
-          fill: var(--text-color);
-          transition: transform 0.2s ease-in-out;
-          transform: rotate(180deg) translate(0rem, 0rem);
-        }
-      }
     }
 
     &.active {
