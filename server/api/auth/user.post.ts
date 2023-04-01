@@ -1,6 +1,7 @@
 import { validateQuery, validateQueryCustom } from '~~/utils/validateQuery';
 import { AuthProvider, UserProfile, User, UserModel } from '~/models/user';
 import { pool } from '~/server/postgres';
+import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
 export default eventHandler(async (event: any) => {
@@ -88,13 +89,29 @@ export default eventHandler(async (event: any) => {
       updated_at: new Date().toISOString(),
     });
   }
+
+  const transaction = await mongoose.startSession();
+
+  try {
+    await newUserModel.save();
+    await transaction.commitTransaction();
+  }
+  catch (err) {
+    await transaction.abortTransaction();
+  }
   
-  await newUserModel.save();
-  
-  await pool.query(
-    'INSERT INTO user_profiles (email, display_name, avatar_url) VALUES ($1, $2, $3)',
-    [ email, display_name, avatar_url ]
-  );
+  try {
+    await pool.query('BEGIN');
+    await pool.query(
+      'INSERT INTO user_profiles (email, display_name, avatar_url) VALUES ($1, $2, $3)',
+      [ email, display_name, avatar_url ]
+    );
+
+    await pool.query('COMMIT');
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    throw err;
+  }
 
   return {
     statusCode: 200,
