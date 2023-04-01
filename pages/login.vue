@@ -1,7 +1,7 @@
 <template>
   <section class="login-panel">
     <div class="login">
-      <form v-on:submit="submitCredsLogin">
+      <form v-on:submit="submitCredsLogin, disableMessageLogin()">
         <h1>Log in below</h1>
         <div class="wrapper oauth">
           <a v-on:click="handleGithubSignIn" alt="Connect your GitHub account" title="Connect your GitHub account">
@@ -79,6 +79,12 @@ onMounted(async () => {
   if (route.query.message === 'signedUpOAuth') {
     showMessageLogin.value = true;
     messageLogin.value = 'You have signed up! Please log in to continue.';
+    await history.pushState({}, '', '/login');
+  }
+
+  if (route.query.callbackUrl) {
+    showErrorLogin.value = true;
+    errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in with a different provider.';
     await history.pushState({}, '', '/login');
   }
 });
@@ -239,6 +245,11 @@ async function getUserProfile(email: string): Promise<any> {
   }
 
   return null;
+}
+
+function disableMessageLogin() {
+  showMessageLogin.value = false;
+  messageLogin.value = '';
 }
 
 definePageMeta({
@@ -453,10 +464,9 @@ h1 {
 
 p.error {
   align-self: center;
-  margin-bottom: 1rem;
   color: rgba(255, 0, 0, 0.756);
   position: absolute;
-  bottom: 1.2rem;
+  top: 11.5rem;
   line-height: 1rem;
   font-size: 0.8rem;
   text-align: center;
