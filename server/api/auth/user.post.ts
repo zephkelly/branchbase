@@ -11,6 +11,15 @@ export default eventHandler(async (event: any) => {
   const { display_name } = body as UserProfile;
   let { avatar_url } = body as UserProfile;
 
+  if (password != null || password != undefined) {
+    if (validatePassword(password)) {
+      return {
+        statusCode: 400,
+        body: 'Password is too short.'
+      }
+    }
+  }
+
   if (validateQuery(email, auth_provider, display_name) == false) {
     return {
       statusCode: 400,

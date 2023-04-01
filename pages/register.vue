@@ -110,7 +110,7 @@
 
 <script lang="ts" setup>
 import generateUsername from '@/utils/generateUsername';
-const { signIn, data } = useSession();
+const { signIn, signOut, data } = useSession();
 
 const route = useRoute();
 const router = useRouter();
@@ -588,13 +588,14 @@ async function submitOnboardOAuth(e: Event) {
     })
   });
 
-  if (response.data.value?.statusCode == 200) {
-    window.location.href = '/';
-  }
-  else {
+  if (response.data.value?.statusCode != 200) {
     showErrorAuth.value = true;
     errorMessageAuth.value = response.data.value?.body;
+  } else {
+    await signOut({ redirect: false });
+    router.push('/login?message=signedUpOAuth');
   }
+
 }
 
 const handleDiscordSignIn = async () => {

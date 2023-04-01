@@ -45,6 +45,8 @@
           </div>
           <!-- -->
           <button ref="loginSubmit" class="email-login disabled" alt="Sign up with your email" title="Sign up with your email">Log in</button>
+          <p v-if="showErrorLogin" class="error initial">{{ errorMessageInitial }}</p>
+          <p v-if="showMessageLogin" class="message initial">{{ messageLogin }}</p>
           <p class="swap">Need to sign up? <nuxt-link to="/register">Register here</nuxt-link></p>
         </div>
       </form>
@@ -58,6 +60,11 @@ const { status, data, signIn } = useSession();
 const route = useRoute();
 const router = useRouter();
 
+const showErrorLogin: Ref = ref(false);
+const showMessageLogin: Ref = ref(false);
+const errorMessageInitial: Ref = ref('');
+const messageLogin: Ref = ref('');
+
 const loginSubmit: Ref = ref(null);
 
 const emailInput: Ref = ref(null);
@@ -68,7 +75,22 @@ const passwordInput: Ref = ref(null);
 const passwordInputRef: Ref = ref(null);
 const passwordLabel: Ref = ref(null);
 
+onMounted(async () => {
+  if (route.query.message === 'signedUpOAuth') {
+    showMessageLogin.value = true;
+    messageLogin.value = 'You have signed up! Please log in to continue.';
+    await history.pushState({}, '', '/login');
+  }
+});
+
 (async () => {
+  if (emailInput.value) {
+      emailLabel.value.classList.add('focus');
+    }
+  if (passwordInput.value) {
+    passwordLabel.value.classList.add('focus');
+  }
+
   if (data.value?.user) {
     //@ts-expect-error
     const profile = await getUserProfile(data.value.user.email);
@@ -189,7 +211,23 @@ async function handleEmailSignIn() {
   const email: string = emailInput.value;
   const password: string = passwordInput.value;
 
-  await signIn('credentials', { email: email, password: password, callbackUrl: '/' });
+  const { error, url } = await signIn('credentials', { email, password, redirect: false })
+
+  if (error) {
+
+    if (error === 'CredentialsSignin') {
+      emailInputRef.value.classList.add('invalid');
+      emailInputRef.value.classList.remove('valid');
+
+      passwordInputRef.value.classList.add('invalid');
+      passwordInputRef.value.classList.remove('valid');
+
+      showErrorLogin.value = true;
+      errorMessageInitial.value = 'Invalid email or password. Did you sign up with a different provider?';
+    }
+  } else {
+    return navigateTo('/', { external: true })
+  }
 }
 
 async function getUserProfile(email: string): Promise<any> {
@@ -206,17 +244,6 @@ async function getUserProfile(email: string): Promise<any> {
 definePageMeta({
   auth: false,
   layout: 'center-align',
-})
-
-onMounted(() => {
-  setTimeout(() => {
-    if (emailInput.value) {
-      emailLabel.value.classList.add('focus');
-    }
-    if (passwordInput.value) {
-      passwordLabel.value.classList.add('focus');
-    }
-  }, 50);
 })
 </script>
 
@@ -422,5 +449,26 @@ h1 {
       }
     }
   }
+}
+
+p.error {
+  align-self: center;
+  margin-bottom: 1rem;
+  color: rgba(255, 0, 0, 0.756);
+  position: absolute;
+  bottom: 1.2rem;
+  line-height: 1rem;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+p.message {
+  align-self: center;
+  margin-bottom: 1rem;
+  color: rgba(0, 255, 0, 0.756);
+  position: absolute;
+  bottom: 1.8rem;
+  font-size: 0.8rem;
+  text-align: center;
 }
 </style>

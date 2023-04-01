@@ -50,19 +50,18 @@ export default NuxtAuthHandler({
 
         if (user.length == 0) {
           console.log("user not found")
-          return Error("Email or password is incorrect");
+          return null;
         }
 
         if (user[0].auth_provider != "email") {
-          console.log("user not email")
-          return Error("Sorry but you didn't sign up with an email, please use the correct provider");
+          return null;
         }
         
         const match = await bcrypt.compare(password, user[0].password);
 
         if (!match) {
           console.log("passwords don't match")
-          return Error("Email or password is incorrect");
+          return null;
         }
 
         const userProfile = await pool.query("SELECT * FROM user_profiles WHERE email = $1", [email]);

@@ -17,19 +17,30 @@
           <nuxt-link to="/explore">Explore</nuxt-link>
         </li>
       </ul>
-      <nuxt-link v-if="!logout" ref="loginButton" to="/login">Login</nuxt-link>
-      <button v-else class="logout-button" v-on:click="logOut()">Logout</button>
+      <div v-if="!isSignupLogin" class="log-buttons">
+        <nuxt-link v-if="!logout" ref="loginButton" to="/login">Login</nuxt-link>
+        <button v-else class="logout-button" v-on:click="logOut()">Logout</button>
+      </div>
     </nav>
   </header>
 </template>
 
 <script lang="ts" setup>
 const { data, signOut } = useSession();
+const route = useRoute();
 
 const loginButton: Ref = ref(null);
-const logout: Ref = ref(false);
 
-(async function() {
+const logout: Ref = ref(false);
+const isSignupLogin = computed(() => {
+  return (
+    route.path === '/login' ||
+    route.path === '/signup' ||
+    route.path === '/forgot-password'
+  );
+});
+
+(async function () {
   if (data.value?.user) {
     logout.value = true;
   }
