@@ -1,5 +1,5 @@
 import { validateQuery, validateQueryCustom } from '~~/utils/validateQuery';
-import { AuthProvider, UserProfile, User, UserModel } from '~/models/user';
+import { AuthProvider, UserMetadata, User, UserModel } from '~/models/user';
 import { pool } from '~/server/postgres';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
@@ -9,8 +9,8 @@ export default eventHandler(async (event: any) => {
 
   const { email, password } = body as User;
   let { auth_provider } = body as User;
-  const { display_name } = body as UserProfile;
-  let { avatar_url } = body as UserProfile;
+  const { display_name } = body as UserMetadata;
+  let { avatar_url } = body as UserMetadata;
 
   if (password != null || password != undefined) {
     if (validatePassword(password)) {
@@ -103,7 +103,7 @@ export default eventHandler(async (event: any) => {
   try {
     await pool.query('BEGIN');
     await pool.query(
-      'INSERT INTO user_profiles (email, display_name, avatar_url) VALUES ($1, $2, $3)',
+      'INSERT INTO user_metadata (email, display_name, avatar_url) VALUES ($1, $2, $3)',
       [ email, display_name, avatar_url ]
     );
 

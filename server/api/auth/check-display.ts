@@ -9,7 +9,7 @@ export default eventHandler(async (event: any) => {
 
   async function doesDisplayNameExist(displayName: string): Promise<boolean> {
     try {
-      const result = await pool.query('SELECT * FROM user_profiles WHERE display_name = $1', [displayName]);
+      const result = await pool.query('SELECT * FROM user_metadata WHERE display_name = $1', [displayName]);
       return result.rowCount > 0;
     } catch (err) {
       console.log(err);
