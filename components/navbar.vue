@@ -9,7 +9,7 @@
       <img src="~/assets/logo.png" alt="Logo" />
     </nuxt-link>
 
-    <button v-if="isExplore" ref="currentFeedButton" class="current-feed" v-on:click="toggleSideNav()" title="Explore your feeds and communities.">
+    <button ref="currentFeedButton" class="current-feed" v-on:click="toggleSideNav()" title="Explore your feeds and communities.">
       <p>{{ toggleFeedMenuText }}</p>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960"><path d="M480 711 240 471l43-43 197 198 197-197 43 43-240 239Z"/></svg>
     </button>
@@ -181,7 +181,7 @@ function logOut() {
       overflow: hidden;
       overflow-y: auto;
       padding-bottom: 4rem;
-      padding-top: 1rem;
+      padding-top: 2.5rem;
     }
   }
 

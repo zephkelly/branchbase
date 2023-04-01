@@ -7,15 +7,23 @@
       <ul>
         <li>
           <img>
-          <nuxt-link>News</nuxt-link>
+          <nuxt-link to="/">Home</nuxt-link>
         </li>
         <li>
           <img>
-          <nuxt-link>New</nuxt-link>
+          <nuxt-link to="/explore">Explore</nuxt-link>
         </li>
         <li>
           <img>
           <nuxt-link>Rising</nuxt-link>
+        </li>
+        <li>
+          <img>
+          <nuxt-link>Latest</nuxt-link>
+        </li>
+        <li>
+          <img>
+          <nuxt-link>News</nuxt-link>
         </li>
       </ul>
     </nav>
@@ -32,7 +40,6 @@ h6.title {
   padding: 1.5rem;
   padding-top: 0rem;
   padding-bottom: 0.4rem;
-  margin-top: 1.5rem;
   margin-bottom: 0rem;
 }
 
@@ -45,7 +52,7 @@ p.subtitle {
   padding: 1.5rem;
   padding-top: 0rem;
   padding-bottom: 0rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   opacity: 0.6;
 }
 
@@ -105,7 +112,7 @@ section.feeds {
     }
 
     a {
-      padding-left: 1rem;
+      padding-left: 1.2rem;
       padding-right: 1.5rem;
       text-overflow: ellipsis;
       overflow: hidden;

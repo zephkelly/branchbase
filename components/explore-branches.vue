@@ -73,7 +73,7 @@ p.subtitle {
   padding: 1.5rem;
   padding-top: 0rem;
   padding-bottom: 0rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   opacity: 0.6;
 }
 
