@@ -1,37 +1,50 @@
 <template>
   <Head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   </Head>
   <header>
-    <div class="logo">
+    <nuxt-link class="logo" to="/" v-on:click="toggleSideNav()">
       <img src="~/assets/logo.png" alt="Logo" />
-    </div>
-    <nav>
+    </nuxt-link>
+    <nav v-if="isExplore" ref="currentFeedButton" class="current-feed" v-on:click="toggleSideNav()" title="The currently active feed.">
       <ul>
         <li>
-          <nuxt-link to="/">Home</nuxt-link>
-        </li>
-        <li>
-          <nuxt-link to="/explore">Explore</nuxt-link>
+          <nuxt-link to="/explore">{{ toggleFeedMenuText }}</nuxt-link>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 96 960 960"><path d="M480 711 240 471l43-43 197 198 197-197 43 43-240 239Z"/></svg>
         </li>
       </ul>
-      <div v-if="!isSignupLogin" class="log-buttons">
-        <nuxt-link v-if="!logout" ref="loginButton" to="/login">Login</nuxt-link>
-        <button v-else class="logout-button" v-on:click="logOut()">Logout</button>
-      </div>
     </nav>
+    <div v-if="!isSignupLogin" class="log-buttons">
+      <nuxt-link v-if="!shouldLogout" ref="loginButton" to="/login">Login</nuxt-link>
+      <button v-else class="shouldLogout-button" v-on:click="logOut()">Logout</button>
+    </div>
   </header>
+  <aside ref="sideNav" class="side-nav minimise">
+    <div class="lists">
+      <explore-feeds />
+      <explore-branches />
+    </div>
+  </aside>
 </template>
 
 <script lang="ts" setup>
 const { data, signOut } = useSession();
 const route = useRoute();
 
-const loginButton: Ref = ref(null);
+const isExplore = computed(() => {
+  return route.path === '/explore';
+});
 
-const logout: Ref = ref(false);
+const shouldLogout: Ref = ref(false);
+(async () => {
+  if (data.value?.user) {
+    shouldLogout.value = true;
+  }
+})()
+
+const loginButton: Ref = ref(null);
 const isSignupLogin = computed(() => {
   return (
     route.path === '/login' ||
@@ -40,11 +53,29 @@ const isSignupLogin = computed(() => {
   );
 });
 
-(async function () {
-  if (data.value?.user) {
-    logout.value = true;
+const sideNav: Ref = ref(null);
+function toggleSideNav() {
+  toggleFeedButtonActive();
+
+  if (toggleFeed.value) {
+    sideNav.value?.classList.remove('minimise');
+  } else {
+    sideNav.value?.classList.add('minimise');
   }
-})()
+}
+  
+const toggleFeed: Ref = toggleFeedMenu();
+const currentFeedButton: Ref = ref(null);
+const toggleFeedMenuText: Ref = toggleFeedMenuString();
+function toggleFeedButtonActive() {
+  if (toggleFeed.value) {
+    currentFeedButton.value.classList.remove('active');
+  } else {
+    currentFeedButton.value.classList.add('active');
+  }
+  
+  toggleFeed.value = !toggleFeed.value;
+}
 
 function logOut() {
   signOut({ callbackUrl: '/login' })
@@ -67,10 +98,13 @@ function logOut() {
 
   .logo {
     width: 70px;
+    min-width: 70px;
     height: 100%;
+    margin-right: 1.6rem;
     overflow: hidden;
 
     img {
+      opacity: 0.8;
       width: 140%;
       height: 140%;
       object-fit: cover;
@@ -79,12 +113,22 @@ function logOut() {
     }
   }
 
-  nav {
+  nav.current-feed {
+    width: 7.5rem;
     display: flex;
-    width: calc(100% - 70px);
     align-items: center;
     justify-content: space-between;
-    margin-left: 6rem;
+    margin-right: 2rem;
+    border-radius: 0.4rem;
+    background-color: transparent;
+    border: 1px solid var(--panel-border-color);
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+
+    * {
+      width: 100%;
+      box-sizing: border-box;
+    }
 
     ul {
       display: flex;
@@ -93,23 +137,77 @@ function logOut() {
       gap: 2rem;
 
       li {
+        position: relative;
         font-family: 'Roboto', sans-serif;
         font-weight: 500;
-        color: white;
         height: 100%;
-        width: 4.5rem;
+
+        * {
+          color: var(--text-color);
+        }
 
         a {
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           height: 100%;
+          padding: 0.5rem 0.8rem;
         }
+
+        svg {
+          position: absolute;
+          top: 0.4rem;
+          right: 0.5rem;
+          width: 1.4rem;
+          height: 1.4rem;
+          fill: var(--text-color);
+          transition: transform 0.2s ease-in-out;
+          transform: rotate(180deg) translate(0rem, 0rem);
+        }
+      }
+    }
+
+    &.active {
+      background-color: var(--panel-hover-color-light);
+      border: 1px solid var(--panel-border-color);
+      
+      svg {
+        transform: rotate(0deg) translate(0rem, 0rem);  
       }
     }
   }
 
-  .logout-button {
+  .side-nav {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    height: calc(100vh - 3rem);
+    width: 240px;
+    background-color: var(--panel-color);
+    border-right: 1px solid rgb(54, 54, 54);
+    margin-top: 3rem;
+    transition: transform 0.3s ease-in-out;
+
+    .lists {
+      overflow: hidden;
+      overflow-y: auto;
+      padding-bottom: 4rem;
+      padding-top: 1rem;
+    }
+  }
+
+  .side-nav.minimise {
+    transform: translate3d(-100%, 0, 0);
+
+    img {
+      transform: rotate(180deg);
+    }
+  }
+
+  .shouldLogout-button {
     background-color: transparent;
     border: none;
     font-size: 1rem;

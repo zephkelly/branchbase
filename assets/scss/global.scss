@@ -6,7 +6,8 @@
   --panel-color-dark: rgb(22, 22, 23);
   --panel-color-light: rgb(245, 245, 245);
 
-  --panel-hover-color-dark: rgb(18, 18, 19);
+  --pnel-hover-color-dark-dark: rgb(18, 18, 19);
+  --panel-hover-color-dark-light: rgb(36, 36, 37);
   --panel-hover-color-light: rgb(235, 235, 235);
 
   --panel-border-dark: rgb(54, 54, 54);
@@ -34,7 +35,8 @@
   --background-color-inverted: var(--background-color-light);
 
   --panel-color: var(--panel-color-dark);
-  --panel-hover-color: var(--panel-hover-color-dark);
+  --panel-hove-color-dark: var(--panel-hover-color-dark-dark);
+  --panel-hover-color-light: var(--panel-hover-color-dark-light);
   --panel-border-color: var(--panel-border-dark);
   --panel-border-hover-color: var(--panel-border-hover-color-dark);
 

@@ -23,6 +23,44 @@
 </template>
 
 <style lang="scss" scoped>
+h6.title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 1.6rem;
+  width: calc(100% - 3rem);
+  color: var(--text-color);
+  padding: 1.5rem;
+  padding-top: 0rem;
+  padding-bottom: 0.4rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0rem;
+}
+
+p.subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  width: calc(100% - 3rem);
+  color: var(--text-color);
+  padding: 1.5rem;
+  padding-top: 0rem;
+  padding-bottom: 0rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+p.label {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 0.8rem;
+  width: calc(100% - 3rem);
+  color: var(--text-color);
+  padding: 1.5rem;
+  padding-top: 0rem;
+  padding-bottom: 0.4rem;
+  opacity: 0.3;
+}
+
 section.feeds {
   width: 100%;
   margin-bottom: 2rem;
