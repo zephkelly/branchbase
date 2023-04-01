@@ -32,16 +32,28 @@ export const PostSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
-//Mongo for creating the tables:
-// {
-//   "_id": ObjectId,
-//   "title": String,
-//   "content": String,
-//   "user_id": Number,
-//   "subreddit_id": Number,
-//   "created_at": Date,
-//   "updated_at": Date,
-//   "comments": [
-//     // Array of Comment objects, recursively nested
-//   ]
-// }
+
+//SQL Schema --------------------------------------
+export interface Post_Metadata {
+  id: string;
+  title: string;
+  content: string;
+  user_id: number;
+  branch_id: number;
+  created_at: Date;
+  updated_at: Date;
+  tags: string[];
+}
+
+// post_metadata must be linked via branch_id to branches
+
+// CREATE TABLE post_metadata (
+//   id SERIAL PRIMARY KEY,
+//   title TEXT NOT NULL,
+//   content TEXT,
+//   user_id STRING NOT NULL,
+//   branch_id STRING NOT NULL,
+//   created_at TIMESTAMP NOT NULL,
+//   updated_at TIMESTAMP NOT NULL,
+//   tags TEXT[] USING gin
+// );

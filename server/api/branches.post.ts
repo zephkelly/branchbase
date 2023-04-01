@@ -1,6 +1,8 @@
 import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
+import mongoose from 'mongoose';
 import { BranchModel } from '~~/models/branches';
+import { Post_Metadata } from '~~/models/post';
 import { validateQuery } from '~~/utils/validateQuery';
 
 export default eventHandler(async (event) => {
@@ -25,16 +27,47 @@ export default eventHandler(async (event) => {
     };
   }
 
-  await pool.query(
-    'INSERT INTO branches (branch_id, description, branch_collection, creator_name, creator_email, owner_name, owner_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-    [name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
-  );
+  const transaction = await mongoose.startSession();
+  
+  try {
+    transaction.startTransaction();
 
-  const admins: string[] = [session.user.email];
+    const newBranch = await BranchModel.create({ branch_id: name, admins: [session.user.email] });
+    await newBranch.save();
 
-  const newBranch = await BranchModel.create({ branch_id: name, admins: admins });
+    await transaction.commitTransaction();
+  } catch (error) {
+    await transaction.abortTransaction();
+    console.error(error);
+  }
 
-  await newBranch.save();
+  try {
+    await pool.query('BEGIN');
+
+    await pool.query(
+      'INSERT INTO branches (branch_id, description, branch_collection, creator_name, creator_email, owner_name, owner_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
+    );
+
+    await pool.query(
+      ` CREATE TABLE post_metadata_${pool.escapeIdentifier(name)} (
+          id SERIAL PRIMARY KEY,
+          title TEXT NOT NULL,
+          content TEXT,
+          user_id STRING NOT NULL,
+          branch_id STRING NOT NULL,
+          created_at TIMESTAMP NOT NULL,
+          updated_at TIMESTAMP NOT NULL,
+          tags TEXT[] USING gin
+        )
+      `
+    );
+
+    await pool.query('COMMIT');
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    throw err;
+  }
 
   return {
     statusCode: 200,

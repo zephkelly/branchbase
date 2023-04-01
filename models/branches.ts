@@ -27,6 +27,11 @@ export const BranchColletionSchema = new mongoose.Schema({
     required: false,
     default: [],
   },
+  tags: {
+    type: Array,
+    required: false,
+    default: [],
+  },
   posts: [PostSchema],
 }, { timestamps: true });
 
