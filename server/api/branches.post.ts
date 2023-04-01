@@ -1,8 +1,10 @@
+import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
 import { BranchModel } from '~~/models/branches';
 import { validateQuery } from '~~/utils/validateQuery';
 
 export default eventHandler(async (event) => {
+  const session: any = await getServerSession(event);
   const body = await readBody(event);
   const { name, description } = body;
 
@@ -22,13 +24,21 @@ export default eventHandler(async (event) => {
       body: JSON.stringify({ message: 'Branch already exists.' }),
     };
   }
-  
-  await createBranchMeta(name, description, name);
-  await createBranchPostsCollection(name, description);
+
+  await pool.query(
+    'INSERT INTO branches (branch_id, description, branch_collection, creator_name, creator_email, owner_name, owner_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
+  );
+
+  const admins: string[] = [session.user.email];
+
+  const newBranch = await BranchModel.create({ branch_id: name, admins: admins });
+
+  await newBranch.save();
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: 'Branch created successfully.' }),
+    body: JSON.stringify({ message: 'Branch created.' }),
   };
 });
 
@@ -37,16 +47,4 @@ async function doesBranchExist(branchName: string) {
     'SELECT EXISTS (SELECT FROM branches WHERE name = $1)',
     [branchName]
   );
-}
-
-async function createBranchMeta(name: string, description: string, posts_collection: string) {
-  return await pool.query(
-    'INSERT INTO branches (name, description, posts_collection) VALUES ($1, $2, $3) RETURNING *',
-    [name, description, posts_collection]
-  );
-}
-
-async function createBranchPostsCollection(name: string, description: string) {
-  const newBranch = await BranchModel.create({ branch_id: name });
-  return await newBranch.save();
 }

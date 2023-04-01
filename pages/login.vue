@@ -1,9 +1,6 @@
 <template>
   <section class="login-panel">
-    <div v-if="setupProfile" class="setup">
-
-    </div>
-    <div v-else class="logim">
+    <div class="login">
       <form v-on:submit="submitCredsLogin">
         <h1>Log in below</h1>
         <div class="wrapper oauth">
@@ -60,7 +57,6 @@ const { status, data, signIn } = useSession();
 
 const route = useRoute();
 const router = useRouter();
-const setupProfile = ref(false);
 
 const loginSubmit: Ref = ref(null);
 
@@ -166,7 +162,6 @@ function submitCredsLogin(e: Event) {
 }
 
 function canSubmitLogin() {
-  console.log("Hello")
   if (!emailRegex.test(emailInput.value)) {
     emailInputRef.value.classList.add('invalid');
     emailInputRef.value.classList.remove('valid');
@@ -237,7 +232,7 @@ h1 {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  margin-top: clamp(6.4rem, 18vw, 12rem);
+  margin: clamp(6.4rem, 18vw, 12rem) 0rem;
   width: 340px;
   height: auto;
   border: 1px solid var(--panel-border-color);

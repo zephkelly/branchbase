@@ -83,8 +83,8 @@ export default eventHandler(async (event: any) => {
   await newUserModel.save();
   
   await pool.query(
-    'INSERT INTO user_profiles (email, display_name, bio, avatar_url) VALUES ($1, $2, $3, $4)',
-    [ email, display_name, '', avatar_url ]
+    'INSERT INTO user_profiles (email, display_name, avatar_url) VALUES ($1, $2, $3)',
+    [ email, display_name, avatar_url ]
   );
 
   return {

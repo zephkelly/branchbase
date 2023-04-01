@@ -599,7 +599,7 @@ async function submitOnboardOAuth(e: Event) {
 
 const handleDiscordSignIn = async () => {
   await signIn('discord', {
-    callbackUrl: `/register?authSignup=true&provider=discord`,
+    callbackUrl: `/register?authSignup=true&provider=discord`
   });
 }
 
@@ -694,7 +694,7 @@ definePageMeta({
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  margin-top: clamp(6.4rem, 18vw, 12rem);
+  margin: clamp(6.4rem, 18vw, 12rem) 0rem;
   width: 340px;
   height: 600px;
   border: 1px solid var(--panel-border-color);
@@ -772,6 +772,10 @@ definePageMeta({
         &.discord {
           background-color: #5669ae;
           color: #fff;
+
+          &:hover {
+            border-color: var(--panel-border-light);
+          }
         }
 
         &.google {
