@@ -2,9 +2,12 @@ import mongoose from 'mongoose';
 import { PostSchema, Post } from './post';
 
 //--------------------Branch--------------------
+// This is the branch schema for storing all posts,
+// admins, moderators, and tags for a branch.
 //
 export interface Branch {
-  branch_id: string;
+  _id: string;
+  branch_name: string;
   admins: string[];
   moderators: string[];
   tags: string[];
@@ -14,7 +17,11 @@ export interface Branch {
 }
 
 export const BranchSchema = new mongoose.Schema({
-  branch_id: {
+  _id: {
+    type: Number,
+    required: true
+  },
+  branch_name: {
     type: String,
     required: true,
   },
@@ -37,33 +44,37 @@ export const BranchSchema = new mongoose.Schema({
 
 export const BranchModel = mongoose.model('branches', BranchSchema);
 
-//sql schema
-export interface Branch_Meta {
-  id: number;
+
+//--------------------Branch Metadata--------------------
+// This is the schema for storing all metadata for the site's branches.
+//
+export interface Branch_Metadata {
+  _id: number;
   branch_id: string;
-  creator_name: string;
-  creator_email: string;
-  owner_name: string;
-  owner_email: string;
+  creator_id: string;
+  owner_id: string;
   description: string;
-  created_at: Date;
-  branch_collection: string;
+  created_date: Date;
+  updated_date: Date;
 }
 
 export const branch_metadata: string = 'branch_metadata';
-export const posts_metadata: string = 'posts_metadata';
 
 //SQL Schema
 // CREATE TABLE branch_metadata (
-//   id SERIAL PRIMARY KEY,
+//   id BIGSERIAL PRIMARY KEY,
 //   branch_id VARCHAR(255) NOT NULL,
-//   creator_name VARCHAR(255) NOT NULL,
-//   creator_email VARCHAR(255) NOT NULL,
-//   owner_name VARCHAR(255) NOT NULL,
-//   owner_email VARCHAR(255) NOT NULL,
+//   creator_id VARCHAR(255) NOT NULL,
+//   owner_id VARCHAR(255) NOT NULL,
 //   description VARCHAR(255) NOT NULL,
 //   created_at TIMESTAMP NOT NULL,
-//   branch_collection VARCHAR(255) NOT NULL
+//   updated_at TIMESTAMP NOT NULL
 // );
+
+
+//-----------------Branch Post Metadata--------------------
+// This is the schema for storing all post metadata for a branch.
+//
+export const posts_metadata: string = 'posts_metadata';
 
 // CREATE SCHEMA IF NOT EXISTS posts_metadata;

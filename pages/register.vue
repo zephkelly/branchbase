@@ -110,7 +110,8 @@
 
 <script lang="ts" setup>
 import generateUsername from '@/utils/generateUsername';
-const { signIn, signOut, data } = useSession();
+import { SessionData } from 'h3';
+const { signIn, signOut, data, status } = useSession();
 
 const route = useRoute();
 const router = useRouter();
@@ -158,9 +159,8 @@ const onboardCredentials = ref(false);
 const onboardOAuth = ref(false);
 
 onBeforeMount(async () => {
-  if (data.value?.user) {
-    //@ts-expect-error
-    const userProfile = await getUserProfile(data.value?.user?.email)
+  if (status.value === 'authenticated') {
+    const userProfile = await getUserProfile(await Promise.resolve(data.value) as SessionData);
 
     if (route.query.authSignup === 'true') {
       if (userProfile !== null) {
@@ -655,9 +655,9 @@ async function checkEmailExists(email: string): Promise<boolean> {
   return false;
 }
 
-async function getUserProfile(email: string): Promise<any> {
-  const response = await useFetch(`/api/auth/check-user?email=${email}`);
-  const data: any = await response.data.value;
+async function getUserProfile(sessionData: SessionData): Promise<any> {
+  const response = await useFetch(`/api/auth/check-user?email=${sessionData.user.email}`);
+  const data: any = response.data.value;
 
   if (data.body.userExists) {
     return data.body

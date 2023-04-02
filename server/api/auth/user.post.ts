@@ -1,16 +1,15 @@
 import { validateQuery, validateQueryCustom } from '~~/utils/validateQuery';
-import { intFromObjectId } from '~~/utils/mongodb';
 import { pool } from '~/server/postgres';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
-import { AuthProvider, UserMetadata, Users, UserModel, user_metadata, user_stats } from '~/models/user';
+import { AuthProvider, UserMetadata, User, UserModel, user_metadata, user_stats } from '~/models/user';
 
 export default eventHandler(async (event: any) => {
   const body = await readBody(event);
 
-  const { email, password } = body as Users;
-  let { auth_provider } = body as Users;
+  const { email, password } = body as User;
+  let { auth_provider } = body as User;
   const { display_name } = body as UserMetadata;
   let { avatar_url } = body as UserMetadata;
 
@@ -57,20 +56,13 @@ export default eventHandler(async (event: any) => {
     avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
   }
 
+  let hashedPassword: string | null = null;
+
   if (checkAuthProvider(auth_provider) == false) {
     auth_provider = AuthProvider.email;
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    newUserModel = new UserModel({
-      email: email,
-      display_name: display_name,
-      password: hashedPassword,
-      auth_provider: 'email',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
+    hashedPassword = await bcrypt.hash(password, salt);
   }
   else {
     if (auth_provider === 'google') {
@@ -82,71 +74,56 @@ export default eventHandler(async (event: any) => {
     else if (auth_provider === 'discord') {
       auth_provider = AuthProvider.discord;
     }
-
-    //User collections
-    newUserModel = new UserModel({
-      email: email,
-      display_name: display_name,
-      auth_provider: auth_provider,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
   }
-
-  let _id: number | null = null;
 
   const transaction = await mongoose.startSession();
-
-  try {
-    await transaction.startTransaction();
-
-    const saved = await newUserModel.save();
-    _id = intFromObjectId(saved._id);
-
-    await transaction.commitTransaction();
-  }
-  catch (err) {
-    await transaction.abortTransaction();
-
-    console.log(err);
-    return {
-      statusCode: 500,
-      body: 'Something went wrong creating user collection.'
-    };
-  }
+  
+  let user_id: number | null = null;
   
   try {
+    await transaction.startTransaction();
     await pool.query('BEGIN');
 
     //User metadata
-    await pool.query(
+    const metadataResult = await pool.query(
       `INSERT INTO ${user_metadata} (
-        id,
         email,
         display_name,
-        avatar_url)
-        VALUES ($1, $2, $3, $4)`,
-      [ _id, email, display_name, avatar_url ]
+        avatar_url
+        ) VALUES ($1, $2, $3) RETURNING id`,
+      [ email, display_name, avatar_url ]
     );
+
+    //Grab the user id
+    const user_id: Number = metadataResult.rows[0].id;
 
     //User stats
-    await pool.query(
+    const statsResult = await pool.query(
       `INSERT INTO ${user_stats} (
         id,
-        display_name,
-        views,
-        posts,
-        comments,
-        likes,
-        dislikes)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [_id, display_name, 0, 0, 0, 0, 0]
+        view_count,
+        post_count,
+        comment_count,
+        like_count,
+        dislike_count
+        ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [user_id, 0, 0, 0, 0, 0]
     );
 
-    await pool.query('COMMIT');
+    //Create user model
+    newUserModel = await UserModel.create({
+      _id: user_id, 
+      display_name: display_name,
+      email: email,
+      password: hashedPassword,
+      auth_provider: auth_provider
+    });
+
+    await newUserModel.save();
   }
   catch (err) {
     await pool.query('ROLLBACK');
+    await transaction.abortTransaction();
 
     console.log(err);
     return {
@@ -154,6 +131,9 @@ export default eventHandler(async (event: any) => {
       body: 'Something went wrong inserting user stats and metadata.'
     };
   }
+
+  await pool.query('COMMIT');
+  await transaction.commitTransaction();
 
   return {
     statusCode: 200,
@@ -175,7 +155,7 @@ function validateEmail(email: string) {
 }
 
 function validatePassword(password: string) {
-  if (password.length < 8) {
+  if (password.length > 8) {
     return false;
   }
 

@@ -2,6 +2,7 @@ import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
 import mongoose from 'mongoose';
 import { BranchModel, branch_metadata, posts_metadata } from '~~/models/branches';
+import { User, UserModel } from '~~/models/user';
 import { validateQuery } from '~~/utils/validateQuery';
 
 export default eventHandler(async (event) => {
@@ -27,16 +28,24 @@ export default eventHandler(async (event) => {
   }
 
   const transaction = await mongoose.startSession();
-  let _id: number | null = null;
+  
+  let user: User | null = null;
+  let branch_id: number | null = null;
 
   try {
     transaction.startTransaction();
 
-    // Branch post, admin, moderator collections
-    const newBranch = await BranchModel.create({ branch_id: name, admins: [session.user.email] });
+    //Find user
+    user = await UserModel.findOne({ email: session.user.email }) as User;
+
+    // Create branch
+    const newBranch = await BranchModel.create({
+      branch_name: name,
+      admins: [session.user.email]
+    });
 
     const saved = await newBranch.save();
-    _id = intFromObjectId(saved._id);
+    branch_id = saved._id;
 
     await transaction.commitTransaction();
   }
@@ -57,20 +66,16 @@ export default eventHandler(async (event) => {
     await pool.query(
       `INSERT INTO ${branch_metadata} (
         id,
-        branch_id,
         description,
-        branch_collection,
-        creator_name,
-        creator_email,
-        owner_name,
-        owner_emai
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [_id, name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
+        branch_id,
+        creator_id,
+        ) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [branch_id, description, name, session.user.email]
     );
 
     // Metadata for the posts of this branch
     await pool.query(
-      `CREATE TABLE ${posts_metadata}.${pool.escapeIdentifier(name)} (
+      `CREATE TABLE ${posts_metadata}.${pool.escapeIdentifier(branch_id)} (
         id SERIAL PRIMARY KEY,
         user_id STRING NOT NULL,
         title TEXT NOT NULL,
@@ -81,8 +86,6 @@ export default eventHandler(async (event) => {
         tags TEXT[] USING gin
       )`
     );
-
-    await pool.query('COMMIT');
   }
   catch (err) {
     await pool.query('ROLLBACK');
@@ -94,6 +97,8 @@ export default eventHandler(async (event) => {
     };
   }
 
+  await pool.query('COMMIT');
+  
   return {
     statusCode: 200,
     body: JSON.stringify({ message: 'Branch created.' }),

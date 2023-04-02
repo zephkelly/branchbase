@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
-import type { Comment } from "./comment";
 
+//--------------------Post--------------------
+// This is the post schema for storing post content,
+// and comments for a post.
+//
 export interface Post {
   id: string;
   title: string;
@@ -9,7 +12,7 @@ export interface Post {
   branch_id: number;
   created_at: Date;
   updated_at: Date;
-  comments: Comment[];
+  comments: Object[];
 }
 
 export const PostSchema = new mongoose.Schema({
@@ -27,33 +30,23 @@ export const PostSchema = new mongoose.Schema({
     required: true,
   },
   comments: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Comment',
+    type: Object
   }]
 }, { timestamps: true });
 
 
-//SQL Schema --------------------------------------
+//--------------------Post Metadata--------------------
+// This is the schema for storing all metadata for the site's posts.
+// Will be stored under a table named after the branch_id.
+// eg. posts_metadata.branch_id
+//
 export interface Post_Metadata {
-  id: string;
+  id: string; // This the the _id of the post
   title: string;
   content: string;
-  user_id: number;
+  user_id: number; // This is the _id of the user who created the post
   branch_id: number;
   created_at: Date;
   updated_at: Date;
   tags: string[];
 }
-
-// post_metadata must be linked via branch_id to branches
-
-// CREATE TABLE post_metadata (
-//   id SERIAL PRIMARY KEY,
-//   title TEXT NOT NULL,
-//   content TEXT,
-//   user_id STRING NOT NULL,
-//   branch_id STRING NOT NULL,
-//   created_at TIMESTAMP NOT NULL,
-//   updated_at TIMESTAMP NOT NULL,
-//   tags TEXT[] USING gin
-// );

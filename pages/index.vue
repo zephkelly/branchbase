@@ -24,9 +24,6 @@ const { status, signOut, data } = useSession();
 const showMessage: Ref = ref(false);
 const message: Ref = ref('');
 
-onMounted(() => {
-});
-
 definePageMeta({
   auth: false,
   layout: 'center-align',

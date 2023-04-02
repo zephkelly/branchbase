@@ -9,7 +9,7 @@ export enum AuthProvider {
 
 //--------------------User--------------------
 //
-export interface Users {
+export interface User {
   display_name: string;
   email: string;
   verified: boolean;
@@ -24,6 +24,10 @@ export interface Users {
 }
 
 export const UserSchema = new mongoose.Schema({
+  _id: {
+    type: Number,
+    required: true,
+  },
   display_name: {
     type: String,
     required: true,
@@ -75,23 +79,26 @@ export const UserModel = mongoose.model('users', UserSchema);
 //--------------------UserMetadata--------------------
 //
 export interface UserMetadata {
-  //Id of userprofile
   email: string;
   display_name: string;
-  bio: string;
+  password: string; //Hashed
+  auth_provider: AuthProvider;
+  verified: boolean;
   avatar_url: string;
+  bio: string;
 }
 
 export const user_metadata: string = 'user_metadata';
 
 // CREATE TABLE user_metadata (
-//   id SERIAL PRIMARY KEY,
+//   id BIGSERIAL PRIMARY KEY,
 //   email VARCHAR(255) NOT NULL,
 //   display_name VARCHAR(255),
-//   bio TEXT,
+//   password VARCHAR(255),
+//   auth_provider VARCHAR(255),
+//   verified BOOLEAN,
 //   avatar_url VARCHAR(255),
-//   subscribed_branches TEXT[],
-//   friends TEXT[]
+//   bio TEXT
 // );
 
 //--------------------UserStats--------------------
@@ -109,11 +116,10 @@ export interface UserStats {
 export const user_stats: string = 'user_stats';
 
 // CREATE TABLE user_stats (
-//   id SERIAL PRIMARY KEY,
-//   display_name VARCHAR(255),
-//   views INT,
-//   posts INT,
-//   comments INT,
-//   likes INT,
-//   dislikes INT
+//   id BIGSERIAL PRIMARY KEY,
+//   view_count INT,
+//   post_count INT,
+//   comment_count INT,
+//   like_count INT,
+//   dislike_count INT
 // );

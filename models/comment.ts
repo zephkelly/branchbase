@@ -5,5 +5,5 @@ export interface Comment {
   created_at: Date;
   updated_at: Date;
   parent_comment_id?: string;
-  comments?: Comment[];
+  comments?: any[];
 }
