@@ -1,14 +1,16 @@
 import { validateQuery, validateQueryCustom } from '~~/utils/validateQuery';
-import { AuthProvider, UserMetadata, User, UserModel } from '~/models/user';
+import { intFromObjectId } from '~~/utils/mongodb';
 import { pool } from '~/server/postgres';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
+import { AuthProvider, UserMetadata, Users, UserModel, user_metadata, user_stats } from '~/models/user';
+
 export default eventHandler(async (event: any) => {
   const body = await readBody(event);
 
-  const { email, password } = body as User;
-  let { auth_provider } = body as User;
+  const { email, password } = body as Users;
+  let { auth_provider } = body as Users;
   const { display_name } = body as UserMetadata;
   let { avatar_url } = body as UserMetadata;
 
@@ -91,10 +93,16 @@ export default eventHandler(async (event: any) => {
     });
   }
 
+  let _id: number | null = null;
+
   const transaction = await mongoose.startSession();
 
   try {
-    await newUserModel.save();
+    await transaction.startTransaction();
+
+    const saved = await newUserModel.save();
+    _id = intFromObjectId(saved._id);
+
     await transaction.commitTransaction();
   }
   catch (err) {
@@ -112,25 +120,27 @@ export default eventHandler(async (event: any) => {
 
     //User metadata
     await pool.query(
-      `INSERT INTO user_metadata (
+      `INSERT INTO ${user_metadata} (
+        id,
         email,
         display_name,
         avatar_url)
-        VALUES ($1, $2, $3)`,
-      [ email, display_name, avatar_url ]
+        VALUES ($1, $2, $3, $4)`,
+      [ _id, email, display_name, avatar_url ]
     );
 
     //User stats
     await pool.query(
-      `INSERT INTO user_stats (
+      `INSERT INTO ${user_stats} (
+        id,
         display_name,
         views,
         posts,
         comments,
         likes,
         dislikes)
-        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [display_name, 0, 0, 0, 0, 0]
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [_id, display_name, 0, 0, 0, 0, 0]
     );
 
     await pool.query('COMMIT');

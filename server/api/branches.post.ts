@@ -1,8 +1,7 @@
 import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
 import mongoose from 'mongoose';
-import { BranchModel } from '~~/models/branches';
-import { Post_Metadata } from '~~/models/post';
+import { BranchModel, branch_metadata, posts_metadata } from '~~/models/branches';
 import { validateQuery } from '~~/utils/validateQuery';
 
 export default eventHandler(async (event) => {
@@ -28,13 +27,16 @@ export default eventHandler(async (event) => {
   }
 
   const transaction = await mongoose.startSession();
-  
+  let _id: number | null = null;
+
   try {
     transaction.startTransaction();
 
     // Branch post, admin, moderator collections
     const newBranch = await BranchModel.create({ branch_id: name, admins: [session.user.email] });
-    await newBranch.save();
+
+    const saved = await newBranch.save();
+    _id = intFromObjectId(saved._id);
 
     await transaction.commitTransaction();
   }
@@ -50,10 +52,11 @@ export default eventHandler(async (event) => {
 
   try {
     await pool.query('BEGIN');
-
+  
     // Branch metadata
     await pool.query(
-      `INSERT INTO branch_metadata (
+      `INSERT INTO ${branch_metadata} (
+        id,
         branch_id,
         description,
         branch_collection,
@@ -61,23 +64,22 @@ export default eventHandler(async (event) => {
         creator_email,
         owner_name,
         owner_emai
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [_id, name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
     );
 
     // Metadata for the posts of this branch
     await pool.query(
-      ` CREATE TABLE ${pool.escapeIdentifier(name)}_post_metadata (
-          id SERIAL PRIMARY KEY,
-          user_id STRING NOT NULL,
-          title TEXT NOT NULL,
-          content TEXT,
-          branch_id STRING NOT NULL,
-          created_at TIMESTAMP NOT NULL,
-          updated_at TIMESTAMP NOT NULL,
-          tags TEXT[] USING gin
-        )
-      `
+      `CREATE TABLE ${posts_metadata}.${pool.escapeIdentifier(name)} (
+        id SERIAL PRIMARY KEY,
+        user_id STRING NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT,
+        branch_id STRING NOT NULL,
+        created_at TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP NOT NULL,
+        tags TEXT[] USING gin
+      )`
     );
 
     await pool.query('COMMIT');
@@ -100,7 +102,7 @@ export default eventHandler(async (event) => {
 
 async function doesBranchExist(branchName: string) {
   return await pool.query(
-    'SELECT EXISTS (SELECT FROM branches WHERE name = $1)',
+    `SELECT EXISTS (SELECT FROM ${branch_metadata} WHERE name = $1)`,
     [branchName]
   );
 }

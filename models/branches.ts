@@ -1,7 +1,19 @@
 import mongoose from 'mongoose';
-import { PostSchema } from './post';
+import { PostSchema, Post } from './post';
 
-export const BranchColletionSchema = new mongoose.Schema({
+//--------------------Branch--------------------
+//
+export interface Branch {
+  branch_id: string;
+  admins: string[];
+  moderators: string[];
+  tags: string[];
+  posts: Post[];
+  createdDate: Date;
+  updatedDate: Date;
+}
+
+export const BranchSchema = new mongoose.Schema({
   branch_id: {
     type: String,
     required: true,
@@ -23,7 +35,7 @@ export const BranchColletionSchema = new mongoose.Schema({
   posts: [PostSchema],
 }, { timestamps: true });
 
-export const BranchModel = mongoose.model('Branch', BranchColletionSchema);
+export const BranchModel = mongoose.model('branches', BranchSchema);
 
 //sql schema
 export interface Branch_Meta {
@@ -38,6 +50,9 @@ export interface Branch_Meta {
   branch_collection: string;
 }
 
+export const branch_metadata: string = 'branch_metadata';
+export const posts_metadata: string = 'posts_metadata';
+
 //SQL Schema
 // CREATE TABLE branch_metadata (
 //   id SERIAL PRIMARY KEY,
@@ -50,3 +65,5 @@ export interface Branch_Meta {
 //   created_at TIMESTAMP NOT NULL,
 //   branch_collection VARCHAR(255) NOT NULL
 // );
+
+// CREATE SCHEMA IF NOT EXISTS posts_metadata;

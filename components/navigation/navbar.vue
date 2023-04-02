@@ -11,7 +11,7 @@
     <NavigationSideNavButton />
     <div v-if="showLogin" class="log-buttons">
       <nuxt-link v-if="!shouldLogout" ref="loginButton" to="/login">Login</nuxt-link>
-      <button v-else class="logout" v-on:click="logOut()">Logout</button>
+      <button v-else class="logout" v-on:click="logOut()">Logout {{ data?.user?.name }}</button>
     </div>
   </header>
   <NavigationBrowseNav />

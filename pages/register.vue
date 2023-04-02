@@ -157,7 +157,7 @@ const initialPanel = ref(true);
 const onboardCredentials = ref(false);
 const onboardOAuth = ref(false);
 
-(async () => {
+onBeforeMount(async () => {
   if (data.value?.user) {
     //@ts-expect-error
     const userProfile = await getUserProfile(data.value?.user?.email)
@@ -176,7 +176,7 @@ const onboardOAuth = ref(false);
       console.log("User is making another account");
     }
   }
-})();
+});
 
 let isEmailFocused = false;
 let isDisplayNameFocused = false;

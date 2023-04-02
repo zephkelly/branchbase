@@ -7,40 +7,22 @@ export enum AuthProvider {
   google = 'google',
 } 
 
-export interface UserProfile {
+//--------------------User--------------------
+//
+export interface Users {
   display_name: string;
   email: string;
   verified: boolean;
   password: string; //Hashed
   auth_provider: AuthProvider;
-  created_at: Date;
-  updated_at: Date;
+  createdDate: Date;
+  updatedDate: Date;
   comments: string[];
   posts: string[];
   subscribed_branches: number[];
   friends: string[];
 }
 
-export interface UserMetadata {
-  //Id of userprofile
-  display_name: string;
-  email: string;
-  bio: string;
-  avatar_url: string;
-}
-
-//Userstats is for the users stats
-export interface UserStats {
-  //id of userprofile
-  display_name: string;
-  views: number;
-  posts: number;
-  comments: number;
-  likes: number;
-  dislikes: number;
-}
-
-//UserProfile
 export const UserSchema = new mongoose.Schema({
   display_name: {
     type: String,
@@ -66,14 +48,6 @@ export const UserSchema = new mongoose.Schema({
     enum: Object.values(AuthProvider),
     required: true
   },
-  created_at: {
-    type: Date,
-    required: true
-  },
-  updated_at: {
-    type: Date,
-    required: true
-  },
   comments: {
     type: Array,
     required: false,
@@ -94,18 +68,45 @@ export const UserSchema = new mongoose.Schema({
     required: false,
     default: []
   }
-});
+}, { timestamps: true });
 
-export const UserModel = mongoose.model('User', UserSchema);
+export const UserModel = mongoose.model('users', UserSchema);
+
+//--------------------UserMetadata--------------------
+//
+export interface UserMetadata {
+  //Id of userprofile
+  email: string;
+  display_name: string;
+  bio: string;
+  avatar_url: string;
+}
+
+export const user_metadata: string = 'user_metadata';
 
 // CREATE TABLE user_metadata (
 //   id SERIAL PRIMARY KEY,
+//   email VARCHAR(255) NOT NULL,
 //   display_name VARCHAR(255),
 //   bio TEXT,
 //   avatar_url VARCHAR(255),
 //   subscribed_branches TEXT[],
 //   friends TEXT[]
 // );
+
+//--------------------UserStats--------------------
+//
+export interface UserStats {
+  //id of userprofile
+  display_name: string;
+  views: number;
+  posts: number;
+  comments: number;
+  likes: number;
+  dislikes: number;
+}
+
+export const user_stats: string = 'user_stats';
 
 // CREATE TABLE user_stats (
 //   id SERIAL PRIMARY KEY,
