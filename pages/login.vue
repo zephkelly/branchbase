@@ -1,7 +1,7 @@
 <template>
   <section class="login-panel">
     <div class="login">
-      <form v-on:submit="submitCredsLogin, disableMessageLogin()">
+      <form @submit.prevent="submitCredsLogin(), disableMessageLogin()">
         <h1>Log in below</h1>
         <div class="wrapper oauth">
           <a v-on:click="handleGithubSignIn" alt="Connect your GitHub account" title="Connect your GitHub account">
@@ -55,6 +55,7 @@
 </template>
 
 <script lang="ts" setup>
+import { SessionData } from 'h3';
 const { status, data, signIn } = useSession();
 
 const route = useRoute();
@@ -75,31 +76,9 @@ const passwordInput: Ref = ref(null);
 const passwordInputRef: Ref = ref(null);
 const passwordLabel: Ref = ref(null);
 
-onMounted(async () => {
-  if (route.query.message === 'signedUpOAuth') {
-    showMessageLogin.value = true;
-    messageLogin.value = 'You have signed up! Please log in to continue.';
-    await history.pushState({}, '', '/login');
-  }
-
-  if (route.query.callbackUrl) {
-    showErrorLogin.value = true;
-    errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in with a different provider.';
-    await history.pushState({}, '', '/login');
-  }
-});
-
-(async () => {
-  if (emailInput.value) {
-      emailLabel.value.classList.add('focus');
-    }
-  if (passwordInput.value) {
-    passwordLabel.value.classList.add('focus');
-  }
-
-  if (data.value?.user) {
-    //@ts-expect-error
-    const profile = await getUserProfile(data.value.user.email);
+onBeforeMount(async () => {
+  if (status.value === 'authenticated') {
+    const profile = await getUserProfile(await Promise.resolve(data.value) as SessionData);
 
     if (profile == null) {
       const provider: string = route.query.provider as string;
@@ -114,7 +93,31 @@ onMounted(async () => {
       router.push('/');
     }
   }
-})();
+
+  if (route.query.message === 'signedUpOAuth') {
+    showMessageLogin.value = true;
+    messageLogin.value = 'You have signed up! Please log in to continue.';
+    await history.pushState({}, '', '/login');
+  }
+  else if (route.query.message === 'signedUpCreds') {
+    showMessageLogin.value = true;
+    messageLogin.value = 'You have signed up successfully! Please log in to continue.';
+    await history.pushState({}, '', '/login');
+  }
+
+  if (route.query.callbackUrl) {
+    showErrorLogin.value = true;
+    errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in with a different provider.';
+    await history.pushState({}, '', '/login');
+  }
+
+  if (emailInput.value) {
+      emailLabel.value.classList.add('focus');
+    }
+  if (passwordInput.value) {
+    passwordLabel.value.classList.add('focus');
+  }
+});
 
 //Input label toggling
 let isEmailFocused = false;
@@ -177,16 +180,30 @@ async function handleDiscordSignIn() {
 }
 
 const emailRegex = /.+@.+/;
-function submitCredsLogin(e: Event) {
-  e.preventDefault();
+async function submitCredsLogin() {
+  const email: string = emailInput.value;
+  const password: string = passwordInput.value;
 
-  if (!emailRegex.test(emailInput.value)) {
-    emailInputRef.value.classList.add('invalid');
-    emailInputRef.value.classList.remove('valid');
-    return;
+  const { error, url } = await signIn('credentials', { email, password, redirect: false })
+
+  if (error) {
+    if (error === 'CredentialsSignin') {
+      emailInputRef.value.classList.add('invalid');
+      emailInputRef.value.classList.remove('valid');
+
+      passwordInputRef.value.classList.add('invalid');
+      passwordInputRef.value.classList.remove('valid');
+
+      showErrorLogin.value = true;
+      errorMessageInitial.value = 'Invalid email or password. Did you sign up with a different provider?';
+    }
+    else {
+      showErrorLogin.value = true;
+      errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in with a different provider.';
+    }
+  } else {
+    return navigateTo('/', { external: true })
   }
-  
-  handleEmailSignIn();
 }
 
 function canSubmitLogin() {
@@ -197,7 +214,7 @@ function canSubmitLogin() {
     return;
   }
 
-  if (passwordInput.value.length < 8) {
+  if (passwordInput.value !== null && passwordInput.value.length < 8) {
     passwordInputRef.value.classList.add('invalid');
     passwordInputRef.value.classList.remove('valid');
     loginSubmit.value.classList.add('disabled');
@@ -213,31 +230,8 @@ function canSubmitLogin() {
   loginSubmit.value.classList.remove('disabled');
 }
 
-async function handleEmailSignIn() {
-  const email: string = emailInput.value;
-  const password: string = passwordInput.value;
-
-  const { error, url } = await signIn('credentials', { email, password, redirect: false })
-
-  if (error) {
-
-    if (error === 'CredentialsSignin') {
-      emailInputRef.value.classList.add('invalid');
-      emailInputRef.value.classList.remove('valid');
-
-      passwordInputRef.value.classList.add('invalid');
-      passwordInputRef.value.classList.remove('valid');
-
-      showErrorLogin.value = true;
-      errorMessageInitial.value = 'Invalid email or password. Did you sign up with a different provider?';
-    }
-  } else {
-    return navigateTo('/', { external: true })
-  }
-}
-
-async function getUserProfile(email: string): Promise<any> {
-  const response = await useFetch(`/api/auth/check-user?email=${email}`);
+async function getUserProfile(sessionData: SessionData): Promise<any> {
+  const response = await useFetch(`/api/auth/check-user?email=${sessionData.user.email}`);
   const data: any = await response.data.value;
 
   if (data.body.userExists) {
@@ -477,7 +471,7 @@ p.message {
   margin-bottom: 1rem;
   color: rgba(0, 255, 0, 0.756);
   position: absolute;
-  bottom: 1.8rem;
+  top: 11.5rem;
   font-size: 0.8rem;
   text-align: center;
 }

@@ -549,12 +549,12 @@ async function submitOnboardCreds(e: Event) {
     })
   });
 
-  if (response.data.value?.statusCode == 200) {
-    window.location.href = '/';
-  }
-  else {
-    showErrorCreds.value = true;
-    errorMessageCreds.value = response.data.value?.body;
+  if (response.data.value?.statusCode != 200) {
+    showErrorAuth.value = true;
+    errorMessageAuth.value = response.data.value?.body;
+  } else {
+    await signOut({ redirect: false });
+    router.push('/login?message=signedUpCreds');
   }
 }
 
