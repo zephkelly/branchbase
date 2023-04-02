@@ -8,12 +8,10 @@
     <nuxt-link class="logo" to="/" v-on:click="toggleFeedMenu().value = false">
       <img src="~/assets/logo.png" alt="Logo" />
     </nuxt-link>
-
     <NavigationSideNavButton />
-  
-    <div v-if="!isSignupLogin" class="log-buttons">
+    <div v-if="showLogin" class="log-buttons">
       <nuxt-link v-if="!shouldLogout" ref="loginButton" to="/login">Login</nuxt-link>
-      <button v-else class="shouldLogout-button" v-on:click="logOut()">Logout</button>
+      <button v-else class="logout" v-on:click="logOut()">Logout</button>
     </div>
   </header>
   <NavigationBrowseNav />
@@ -34,12 +32,13 @@ const isExplore = computed(() => {
   return route.path === '/explore';
 });
 
-const isSignupLogin = computed(() => {
-  return (
-    route.path === '/login' ||
-    route.path === '/signup' ||
-    route.path === '/forgot-password'
-  );
+const showLogin = computed(() => {
+  if (route.path === '/login' ||
+    route.path == '/register' ||
+    route.path == '/forgot-password'
+  ) { return false; }
+
+  return true;
 });
 
 function logOut() {
@@ -76,5 +75,12 @@ function logOut() {
       margin-top: -0.5rem;
       margin-left: -0.9rem;
     }
+  }
+
+  button.logout {
+    background-color: transparent;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
   }
 </style>

@@ -3,28 +3,25 @@
     <h6 class="title">Feeds</h6>
     <p class="subtitle">Content curated by topic</p>
     <nav>
-      <!-- <p class="label">TOPICS</p> -->
       <ul>
-        <li>
-          <img>
-          <nuxt-link to="/">Home</nuxt-link>
-        </li>
-        <li>
-          <img>
-          <nuxt-link to="/explore">Explore</nuxt-link>
-        </li>
-        <li>
-          <img>
-          <nuxt-link>Rising</nuxt-link>
-        </li>
-        <li>
-          <img>
-          <nuxt-link>Latest</nuxt-link>
-        </li>
-        <li>
-          <img>
-          <nuxt-link>News</nuxt-link>
-        </li>
+        <nuxt-link to="/">
+          <li>
+            <img>
+            <p to="/">Home</p>
+          </li>
+        </nuxt-link>
+        <nuxt-link to="/explore">
+          <li>
+            <img>
+            <p>Explore</p>
+          </li>
+        </nuxt-link>
+        <nuxt-link to="/rising">
+          <li>
+            <img>
+            <p>Rising</p>
+          </li>
+        </nuxt-link>
       </ul>
     </nav>
   </section>
@@ -87,6 +84,11 @@ section.feeds {
       gap: 0rem;
       color: var(--text-color);
 
+      a {
+        width: 100%;
+        height: 100%;
+      }
+
       li {
         width: 100%;
         height: 2.4rem;
@@ -106,17 +108,10 @@ section.feeds {
           min-height: 1.2rem;
           border-radius: 100%;
           margin-left: 1.5rem;
+          margin-right: 1.5rem;
           background-color: rgb(255, 255, 255);
         }
       }
-    }
-
-    a {
-      padding-left: 1.2rem;
-      padding-right: 1.5rem;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
     }
   }
 }

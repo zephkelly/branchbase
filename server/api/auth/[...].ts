@@ -64,7 +64,7 @@ export default NuxtAuthHandler({
           return null;
         }
 
-        const userProfile = await pool.query("SELECT * FROM user_profiles WHERE email = $1", [email]);
+        const userProfile = await pool.query("SELECT * FROM user_metadata WHERE email = $1", [email]);
 
         const userObject = {
           name: userProfile.rows[0].display_name,
@@ -79,7 +79,7 @@ export default NuxtAuthHandler({
 });
 
 async function setJWT(profile: any) {
-  const userProfile = await pool.query("SELECT * FROM user_profiles WHERE email = $1", [profile.email]);
+  const userProfile = await pool.query("SELECT * FROM user_metadata WHERE email = $1", [profile.email]);
 
   if (userProfile.rows.length > 0) {
     profile.name = userProfile.rows[0].display_name;

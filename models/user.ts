@@ -7,7 +7,7 @@ export enum AuthProvider {
   google = 'google',
 } 
 
-export interface User {
+export interface UserProfile {
   display_name: string;
   email: string;
   verified: boolean;
@@ -17,18 +17,21 @@ export interface User {
   updated_at: Date;
   comments: string[];
   posts: string[];
+  subscribed_branches: number[];
+  friends: string[];
 }
 
 export interface UserMetadata {
+  //Id of userprofile
   display_name: string;
+  email: string;
   bio: string;
   avatar_url: string;
-  subscribed_branches: string[];
-  friends: string[];
 }
 
 //Userstats is for the users stats
 export interface UserStats {
+  //id of userprofile
   display_name: string;
   views: number;
   posts: number;
@@ -37,6 +40,7 @@ export interface UserStats {
   dislikes: number;
 }
 
+//UserProfile
 export const UserSchema = new mongoose.Schema({
   display_name: {
     type: String,
@@ -76,6 +80,16 @@ export const UserSchema = new mongoose.Schema({
     default: []
   },
   posts: {
+    type: Array,
+    required: false,
+    default: []
+  },
+  subscribed_branches: {
+    type: Array,
+    required: false,
+    default: []
+  },
+  friends: {
     type: Array,
     required: false,
     default: []

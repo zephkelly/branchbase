@@ -27,7 +27,7 @@ export const BranchModel = mongoose.model('Branch', BranchColletionSchema);
 
 //sql schema
 export interface Branch_Meta {
-  id: string;
+  id: number;
   branch_id: string;
   creator_name: string;
   creator_email: string;
