@@ -32,29 +32,46 @@ export default eventHandler(async (event) => {
   try {
     transaction.startTransaction();
 
+    // Branch post, admin, moderator collections
     const newBranch = await BranchModel.create({ branch_id: name, admins: [session.user.email] });
     await newBranch.save();
 
     await transaction.commitTransaction();
-  } catch (error) {
+  }
+  catch (error) {
     await transaction.abortTransaction();
+
     console.error(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Something went wrong creating branch collection.' }),
+    };
   }
 
   try {
     await pool.query('BEGIN');
 
+    // Branch metadata
     await pool.query(
-      'INSERT INTO branches (branch_id, description, branch_collection, creator_name, creator_email, owner_name, owner_email) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      `INSERT INTO branch_metadata (
+        branch_id,
+        description,
+        branch_collection,
+        creator_name,
+        creator_email,
+        owner_name,
+        owner_emai
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [name, description, name, session.user.name, session.user.email, session.user.name, session.user.email]
     );
 
+    // Metadata for the posts of this branch
     await pool.query(
-      ` CREATE TABLE post_metadata_${pool.escapeIdentifier(name)} (
+      ` CREATE TABLE ${pool.escapeIdentifier(name)}_post_metadata (
           id SERIAL PRIMARY KEY,
+          user_id STRING NOT NULL,
           title TEXT NOT NULL,
           content TEXT,
-          user_id STRING NOT NULL,
           branch_id STRING NOT NULL,
           created_at TIMESTAMP NOT NULL,
           updated_at TIMESTAMP NOT NULL,
@@ -64,9 +81,15 @@ export default eventHandler(async (event) => {
     );
 
     await pool.query('COMMIT');
-  } catch (err) {
+  }
+  catch (err) {
     await pool.query('ROLLBACK');
-    throw err;
+
+    console.error(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Something went wrong creating branch / branch_post metadata.' }),
+    };
   }
 
   return {

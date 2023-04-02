@@ -81,6 +81,7 @@ export default eventHandler(async (event: any) => {
       auth_provider = AuthProvider.discord;
     }
 
+    //User collections
     newUserModel = new UserModel({
       email: email,
       display_name: display_name,
@@ -98,19 +99,50 @@ export default eventHandler(async (event: any) => {
   }
   catch (err) {
     await transaction.abortTransaction();
+
+    console.log(err);
+    return {
+      statusCode: 500,
+      body: 'Something went wrong creating user collection.'
+    };
   }
   
   try {
     await pool.query('BEGIN');
+
+    //User metadata
     await pool.query(
-      'INSERT INTO user_metadata (email, display_name, avatar_url) VALUES ($1, $2, $3)',
+      `INSERT INTO user_metadata (
+        email,
+        display_name,
+        avatar_url)
+        VALUES ($1, $2, $3)`,
       [ email, display_name, avatar_url ]
     );
 
+    //User stats
+    await pool.query(
+      `INSERT INTO user_stats (
+        display_name,
+        views,
+        posts,
+        comments,
+        likes,
+        dislikes)
+        VALUES ($1, $2, $3, $4, $5, $6)`,
+      [display_name, 0, 0, 0, 0, 0]
+    );
+
     await pool.query('COMMIT');
-  } catch (err) {
+  }
+  catch (err) {
     await pool.query('ROLLBACK');
-    throw err;
+
+    console.log(err);
+    return {
+      statusCode: 500,
+      body: 'Something went wrong inserting user stats and metadata.'
+    };
   }
 
   return {

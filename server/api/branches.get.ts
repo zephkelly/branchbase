@@ -25,8 +25,8 @@ export default eventHandler(async (event: any) => {
 
   const startTime: number = performance.now();
 
-  const branches = await pool.query('SELECT * FROM branches ORDER BY id LIMIT $1 OFFSET $2', [limit, offset]);
-  const totalBranches = await pool.query('SELECT COUNT(*) FROM branches');
+  const branches = await pool.query('SELECT * FROM branch_metadata ORDER BY id LIMIT $1 OFFSET $2', [limit, offset]);
+  const totalBranches = await pool.query('SELECT COUNT(*) FROM branch_metadata');
 
   const endTime: number = performance.now();
 

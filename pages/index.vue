@@ -4,12 +4,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   </Head>
-  <section v-if="status === 'authenticated'" class="landing">
-    <authenticated />
-  </section>
-  <section v-else class="landing">
-    <unauthenticated />
-  </section>
+  <authenticated v-if="status === 'authenticated'" />
+  <unauthenticated v-else />
 </template>
 
 <script lang="ts" setup>
@@ -30,10 +26,12 @@ const message: Ref = ref('');
 
 onMounted(() => {
 });
+
+definePageMeta({
+  auth: false,
+  layout: 'center-align',
+}) 
 </script>
 
 <style lang="scss" scoped>
-  .landing {
-    height: calc(100% - 3rem);
-  }
 </style>

@@ -1,18 +1,6 @@
 import mongoose from 'mongoose';
 import { PostSchema } from './post';
 
-export interface Branch_Meta {
-  id: string;
-  branch_id: string;
-  creator_name: string;
-  creator_email: string;
-  owner_name: string;
-  owner_email: string;
-  description: string;
-  created_at: Date;
-  branch_collection: string;
-}
-
 export const BranchColletionSchema = new mongoose.Schema({
   branch_id: {
     type: String,
@@ -37,8 +25,21 @@ export const BranchColletionSchema = new mongoose.Schema({
 
 export const BranchModel = mongoose.model('Branch', BranchColletionSchema);
 
+//sql schema
+export interface Branch_Meta {
+  id: string;
+  branch_id: string;
+  creator_name: string;
+  creator_email: string;
+  owner_name: string;
+  owner_email: string;
+  description: string;
+  created_at: Date;
+  branch_collection: string;
+}
+
 //SQL Schema
-// CREATE TABLE branches (
+// CREATE TABLE branch_metadata (
 //   id SERIAL PRIMARY KEY,
 //   branch_id VARCHAR(255) NOT NULL,
 //   creator_name VARCHAR(255) NOT NULL,

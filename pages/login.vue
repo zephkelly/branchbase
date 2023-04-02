@@ -255,7 +255,7 @@ function disableMessageLogin() {
 definePageMeta({
   auth: false,
   layout: 'center-align',
-})
+}) 
 </script>
 
 <style lang="scss" scoped>
