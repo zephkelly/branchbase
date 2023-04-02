@@ -1,5 +1,5 @@
 <template>
-  <navbar />
+  <NavigationNavbar />
   <main>
     <slot />
   </main>
@@ -18,5 +18,6 @@
 </style>
 
 <script>
+
 import '~/assets/scss/main.scss';
 </script>

@@ -115,6 +115,7 @@ section.posts-feed {
     flex-direction: column;
     align-items: flex-start;
     padding: 1rem 1rem;
+    z-index: 10;
 
     div.post-info {
       display: grid;
@@ -223,6 +224,7 @@ section.posts-feed {
     width: 100%;
     min-height: 200px;
     padding: 1rem 1rem;
+    z-index: 1;
 
     p {
       font-family: 'Inter', sans-serif;
@@ -239,6 +241,7 @@ section.posts-feed {
     height: 3rem;
     padding: 0.5rem 1rem;
     border-top: 1px solid var(--panel-border-color);
+    z-index: 10;
   }
 }
 
