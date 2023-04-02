@@ -16,7 +16,9 @@
   --panel-border-hover-color-dark: rgb(84, 84, 84);
   --panel-border-hover-color-light: rgb(167, 167, 167);
   
-  --text-color-dark: #d6d6d6;
+  --text-color-dark: #dedede;
+  --text-color-dark-darker: #bfbfbf;
+
   --text-color-light: #000000;
 
   --input-focus-dark: rgb(70, 128, 198);
@@ -30,6 +32,7 @@
   color-scheme: dark;
 
   --text-color: var(--text-color-dark);
+  --text-color-darker: var(--text-color-dark-darker);
 
   --background-color: var(--background-color-dark);
   --background-color-inverted: var(--background-color-light);

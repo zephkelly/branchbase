@@ -113,7 +113,7 @@ function logOut() {
 
   button.current-feed {
     position: relative;
-    min-width: 7.5rem;
+    min-width: 6.5rem;
     height: 100%;
     display: flex;
     align-items: center;
