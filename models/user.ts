@@ -10,17 +10,10 @@ export enum AuthProvider {
 //--------------------User--------------------
 //
 export interface User {
-  display_name: string;
+  id: number;
   email: string;
-  verified: boolean;
   password: string; //Hashed
   auth_provider: AuthProvider;
-  createdDate: Date;
-  updatedDate: Date;
-  comments: string[];
-  posts: string[];
-  subscribed_branches: number[];
-  friends: string[];
 }
 
 export const UserSchema = new mongoose.Schema({
@@ -28,20 +21,10 @@ export const UserSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  display_name: {
-    type: String,
-    required: true,
-    unique: true
-  },
   email: {
     type: String,
     required: true,
     unique: true
-  },
-  verified: {
-    type: Boolean,
-    required: true,
-    default: false
   },
   password: {
     type: String,
@@ -51,28 +34,8 @@ export const UserSchema = new mongoose.Schema({
     type: String,
     enum: Object.values(AuthProvider),
     required: true
-  },
-  comments: {
-    type: Array,
-    required: false,
-    default: []
-  },
-  posts: {
-    type: Array,
-    required: false,
-    default: []
-  },
-  subscribed_branches: {
-    type: Array,
-    required: false,
-    default: []
-  },
-  friends: {
-    type: Array,
-    required: false,
-    default: []
   }
-}, { timestamps: true });
+});
 
 export const UserModel = mongoose.model('users', UserSchema);
 
@@ -81,11 +44,12 @@ export const UserModel = mongoose.model('users', UserSchema);
 export interface UserMetadata {
   email: string;
   display_name: string;
-  password: string; //Hashed
   auth_provider: AuthProvider;
   verified: boolean;
   avatar_url: string;
   bio: string;
+  createdDate: Date;
+  updatedDate: Date;
 }
 
 export const user_metadata: string = 'user_metadata';
@@ -94,23 +58,23 @@ export const user_metadata: string = 'user_metadata';
 //   id BIGSERIAL PRIMARY KEY,
 //   email VARCHAR(255) NOT NULL,
 //   display_name VARCHAR(255),
-//   password VARCHAR(255),
 //   auth_provider VARCHAR(255),
 //   verified BOOLEAN,
 //   avatar_url VARCHAR(255),
 //   bio TEXT
+//   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+//   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 // );
 
 //--------------------UserStats--------------------
 //
 export interface UserStats {
   //id of userprofile
-  display_name: string;
-  views: number;
-  posts: number;
-  comments: number;
-  likes: number;
-  dislikes: number;
+  view_count: number;
+  post_count: number;
+  comment_count: number;
+  like_count: number;
+  dislike_count: number;
 }
 
 export const user_stats: string = 'user_stats';

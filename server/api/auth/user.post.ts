@@ -50,8 +50,7 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  let newUserModel: any = null
-
+  
   if (!avatar_url) {
     avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
   }
@@ -75,11 +74,9 @@ export default eventHandler(async (event: any) => {
       auth_provider = AuthProvider.discord;
     }
   }
-
+  
   const transaction = await mongoose.startSession();
-  
-  let user_id: number | null = null;
-  
+
   try {
     await transaction.startTransaction();
     await pool.query('BEGIN');
@@ -111,9 +108,8 @@ export default eventHandler(async (event: any) => {
     );
 
     //Create user model
-    newUserModel = await UserModel.create({
-      _id: user_id, 
-      display_name: display_name,
+    const newUserModel = await UserModel.create({
+      _id: user_id,
       email: email,
       password: hashedPassword,
       auth_provider: auth_provider

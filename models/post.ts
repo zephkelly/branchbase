@@ -6,22 +6,14 @@ import mongoose from "mongoose";
 //
 export interface Post {
   id: string;
-  title: string;
-  content: string;
-  user_id: number;
-  branch_id: number;
-  created_at: Date;
-  updated_at: Date;
-  comments: Object[];
+  content: Object;
+  post_id: string;
+  branch_id: string;
+  user_id: string;
 }
 
 export const PostSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  content: String,
-  user_id: {
+  post_id: {
     type: String,
     required: true,
   },
@@ -29,10 +21,12 @@ export const PostSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  comments: [{
-    type: Object
-  }]
-}, { timestamps: true });
+  user_id: {
+    type: String,
+    required: true,
+  },
+  content: Object,
+});
 
 
 //--------------------Post Metadata--------------------
@@ -43,10 +37,9 @@ export const PostSchema = new mongoose.Schema({
 export interface Post_Metadata {
   id: string; // This the the _id of the post
   title: string;
-  content: string;
+  content_type: string;
   user_id: number; // This is the _id of the user who created the post
   branch_id: number;
   created_at: Date;
   updated_at: Date;
-  tags: string[];
 }

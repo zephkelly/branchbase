@@ -2,19 +2,6 @@
 :root {
   --background-color-dark: rgb(8, 8, 9);
   --background-color-light: rgb(255, 255, 255);
-
-  --panel-color-dark: rgb(22, 22, 23);
-  --panel-color-light: rgb(245, 245, 245);
-
-  --pnel-hover-color-dark-dark: rgb(18, 18, 19);
-  --panel-hover-color-dark-light: rgb(36, 36, 37);
-  --panel-hover-color-light: rgb(235, 235, 235);
-
-  --panel-border-dark: rgb(54, 54, 54);
-  --panel-border-light: rgb(137, 137, 137);
-
-  --panel-border-hover-color-dark: rgb(84, 84, 84);
-  --panel-border-hover-color-light: rgb(167, 167, 167);
   
   --text-color-dark: #dedede;
   --text-color-dark-darker: #bfbfbf;
@@ -28,6 +15,28 @@
   --accent-color: rgb(31, 115, 172);
 }
 
+//Panel
+:root {
+  --panel-color-dark: rgb(22, 22, 23);
+  --panel-color-light: rgb(245, 245, 245);
+
+  --panel-hover-color-dark-dark: rgb(18, 18, 19);
+  --panel-hover-color-dark-light: rgb(36, 36, 37);
+  --panel-hover-color-light: rgb(235, 235, 235);
+
+  --panel-border-dark: rgb(54, 54, 54);
+  --panel-border-light: rgb(137, 137, 137);
+
+  --panel-border-hover-color-dark: rgb(84, 84, 84);
+  --panel-border-hover-color-light: rgb(167, 167, 167);
+
+  //Rising panel
+  --panel-color-dark-rising: rgb(22, 20, 20);
+  --panel-border-dark-rising: rgb(93, 56, 38);
+}
+
+
+// Dark mode
 :root {
   color-scheme: dark;
 
@@ -38,8 +47,6 @@
   --background-color-inverted: var(--background-color-light);
 
   --panel-color: var(--panel-color-dark);
-  --panel-hove-color-dark: var(--panel-hover-color-dark-dark);
-  --panel-hover-color-light: var(--panel-hover-color-dark-light);
   --panel-border-color: var(--panel-border-dark);
   --panel-border-hover-color: var(--panel-border-hover-color-dark);
 
@@ -49,6 +56,7 @@
 
 }
 
+// Light mode
 @media screen and (prefers-color-scheme: light) {
   :root {
     color-scheme: light;
