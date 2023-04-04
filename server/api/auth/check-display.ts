@@ -1,5 +1,4 @@
 import { pool } from '~~/server/postgres';
-import { UserModel } from '~~/models/user';
 
 export default eventHandler(async (event: any) => {
   const query = getQuery(event);
@@ -9,7 +8,7 @@ export default eventHandler(async (event: any) => {
 
   async function doesDisplayNameExist(displayName: string): Promise<boolean> {
     try {
-      const result = await pool.query('SELECT * FROM user_metadata WHERE display_name = $1', [displayName]);
+      const result = await pool.query('SELECT display_name FROM user_metadata WHERE display_name = $1', [displayName]);
       return result.rowCount > 0;
     } catch (err) {
       console.log(err);

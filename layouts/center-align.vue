@@ -15,6 +15,14 @@
     align-items: center;
     justify-content: flex-start;
   }
+
+  .post {
+    .post-info {
+      .branch-name {
+        color: red;
+      }
+    }
+  }
 </style>
 
 <script>

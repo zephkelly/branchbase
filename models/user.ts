@@ -9,43 +9,26 @@ export enum AuthProvider {
 
 //--------------------User--------------------
 //
-export interface User {
-  id: number;
+export interface Users {
   email: string;
   password: string; //Hashed
   auth_provider: AuthProvider;
+  verified: boolean;
 }
 
-export const UserSchema = new mongoose.Schema({
-  _id: {
-    type: Number,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: false
-  },
-  auth_provider: {
-    type: String,
-    enum: Object.values(AuthProvider),
-    required: true
-  }
-});
-
-export const UserModel = mongoose.model('users', UserSchema);
+// CREATE TABLE users (
+//   id BIGSERIAL PRIMARY KEY,
+//   email VARCHAR(255) NOT NULL,
+//   password VARCHAR(255),
+//   auth_provider VARCHAR(255),
+//   verified BOOLEAN DEFAULT FALSE
+// );
 
 //--------------------UserMetadata--------------------
 //
 export interface UserMetadata {
-  email: string;
+  user_id: number,
   display_name: string;
-  auth_provider: AuthProvider;
-  verified: boolean;
   avatar_url: string;
   bio: string;
   createdDate: Date;
@@ -56,12 +39,10 @@ export const user_metadata: string = 'user_metadata';
 
 // CREATE TABLE user_metadata (
 //   id BIGSERIAL PRIMARY KEY,
-//   email VARCHAR(255) NOT NULL,
+//   user_id BIGINT REFERENCES users(id),
 //   display_name VARCHAR(255),
-//   auth_provider VARCHAR(255),
-//   verified BOOLEAN,
 //   avatar_url VARCHAR(255),
-//   bio TEXT
+//   bio TEXT,
 //   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 //   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 // );
@@ -69,7 +50,7 @@ export const user_metadata: string = 'user_metadata';
 //--------------------UserStats--------------------
 //
 export interface UserStats {
-  //id of userprofile
+  user_id: number;
   view_count: number;
   post_count: number;
   comment_count: number;
@@ -81,9 +62,10 @@ export const user_stats: string = 'user_stats';
 
 // CREATE TABLE user_stats (
 //   id BIGSERIAL PRIMARY KEY,
-//   view_count INT,
-//   post_count INT,
-//   comment_count INT,
-//   like_count INT,
-//   dislike_count INT
+//   user_id BIGINT REFERENCES users(id),
+//   view_count INT DEFAULT 0,
+//   post_count INT DEFAULT 0,
+//   comment_count INT DEFAULT 0,
+//   like_count INT DEFAULT 0,
+//   dislike_count INT DEFAULT 0
 // );

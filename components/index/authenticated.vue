@@ -7,9 +7,7 @@
       <div v-for="post in posts">
         <PostsPost />
       </div>
-      <nav class="control-bar">
-
-      </nav>
+      <PostsControlBar />
       <PostsPost />
     </div>
   </section>
@@ -39,14 +37,5 @@ section.posts-feed {
   &::-webkit-scrollbar {
     display: none;
   }
-}
-
-.control-bar {
-  width: 100%;
-  height: 4.5rem;
-  margin: 2rem 0rem;
-  margin-bottom: 1rem;
-  background-color: var(--panel-color);
-  border: 1px solid var(--panel-border-color);
 }
 </style>

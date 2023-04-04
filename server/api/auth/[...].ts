@@ -1,5 +1,5 @@
 import { NuxtAuthHandler } from "#auth";
-import { UserModel } from "~~/models/user";
+import { Users } from "~~/models/user";
 import { pool } from "~~/server/postgres";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
@@ -46,30 +46,37 @@ export default NuxtAuthHandler({
       name: 'Credentials',
       async authorize(credentials: any) {
         const { email, password } = credentials;
-        const user: any = await UserModel.find({ email: email });
 
-        if (user.length == 0) {
-          console.log("user not found")
+        const findUserQuery = `
+          SELECT u.id, u.email, u.password, u.auth_provider, um.display_name, um.avatar_url
+          FROM users u
+          JOIN user_metadata um ON u.id = um.user_id
+          WHERE u.email = $1;
+        `;
+
+        const result = await pool.query(findUserQuery, [email]);
+
+        if (result.rowCount == 0) {
+          console.error("User not found");
           return null;
         }
 
-        if (user[0].auth_provider != "email") {
-          return null;
-        }
-        
-        const match = await bcrypt.compare(password, user[0].password);
-
-        if (!match) {
-          console.log("passwords don't match")
+        if (result.rows[0].auth_provider != "email") {
+          console.error("User is not signed up via email");
           return null;
         }
 
-        const displayName = await pool.query("SELECT display_name FROM user_metadata WHERE email = $1", [email]);
+        const passwordMatch = await bcrypt.compare(password, result.rows[0].password);
+
+        if (!passwordMatch) {
+          console.error("Passwords don't match");
+          return null;
+        }
 
         const userObject = {
-          name: displayName.rows[0].display_name,
-          email: user[0].email,
-          image: ""
+          name: result.rows[0].display_name,
+          email: result.rows[0].email,
+          image: result.rows[0].avatar_url
         };
           
         return userObject;
@@ -79,11 +86,18 @@ export default NuxtAuthHandler({
 });
 
 async function setJWT(profile: any) {
-  const userProfile = await pool.query("SELECT display_name, avatar_url FROM user_metadata WHERE email = $1", [profile.email]);
+  const findUserQuery = `
+    SELECT u.id, um.display_name, um.avatar_url
+    FROM users u
+    JOIN user_metadata um ON u.id = um.user_id
+    WHERE u.email = $1;
+  `;
 
-  if (userProfile.rows.length > 0) {
-    profile.name = userProfile.rows[0].display_name;
-    profile.image = userProfile.rows[0].avatar_url;
+  const result = await pool.query(findUserQuery, [profile.email]);
+
+  if (result.rowCount > 0) {
+    profile.name = result.rows[0].display_name;
+    profile.image = result.rows[0].avatar_url;
   }
   
   return profile;

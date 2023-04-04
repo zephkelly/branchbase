@@ -1,15 +1,15 @@
 import { validateQuery, validateQueryCustom } from '~~/utils/validateQuery';
 import { pool } from '~/server/postgres';
-import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
-import { AuthProvider, UserMetadata, User, UserModel, user_metadata, user_stats } from '~/models/user';
+import { AuthProvider, UserMetadata, Users, user_metadata, user_stats } from '~/models/user';
 
 export default eventHandler(async (event: any) => {
   const body = await readBody(event);
 
-  const { email, password } = body as User;
-  let { auth_provider } = body as User;
+  const { email, password } = body as Users;
+  let { auth_provider } = body as Users;
+
   const { display_name } = body as UserMetadata;
   let { avatar_url } = body as UserMetadata;
 
@@ -21,36 +21,34 @@ export default eventHandler(async (event: any) => {
       }
     }
   }
-
-  if (validateQuery(email, auth_provider, display_name) == false) {
+  else if (validateQuery(email, auth_provider, display_name) == false) {
     return {
       statusCode: 400,
       body: 'We couldn\'t validate your info.'
     }
   }
-
-  if (validateQueryCustom(display_name, 1, 25) == false) {
+  else if (validateQueryCustom(display_name, 1, 25) == false) {
     return {
       statusCode: 400,
       body: 'Invalid display name. Greater than 25 characters.'
     }
   }
-
-  if (validateEmail(email) == false) {
+  else if (validateEmail(email) == false) {
     return {
       statusCode: 400,
       body: 'Invalid email.'
     }
   }
+ 
+  const userData = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-  if (await UserModel.exists({ email })) {
+  if (userData.rowCount > 0) {
     return {
       statusCode: 400,
       body: 'User already exists.'
     }
   }
 
-  
   if (!avatar_url) {
     avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
   }
@@ -74,52 +72,44 @@ export default eventHandler(async (event: any) => {
       auth_provider = AuthProvider.discord;
     }
   }
-  
-  const transaction = await mongoose.startSession();
 
   try {
-    await transaction.startTransaction();
     await pool.query('BEGIN');
 
-    //User metadata
-    const metadataResult = await pool.query(
-      `INSERT INTO ${user_metadata} (
+    //User
+    const userResult = await pool.query(
+      `INSERT INTO users (
         email,
-        display_name,
-        avatar_url
-        ) VALUES ($1, $2, $3) RETURNING id`,
-      [ email, display_name, avatar_url ]
+        password,
+        auth_provider
+      ) VALUES ($1, $2, $3) RETURNING id`,
+      [email, hashedPassword, auth_provider]
     );
 
     //Grab the user id
-    const user_id: Number = metadataResult.rows[0].id;
+    const user_id: Number = userResult.rows[0].id;
 
-    //User stats
-    const statsResult = await pool.query(
-      `INSERT INTO ${user_stats} (
-        id,
-        view_count,
-        post_count,
-        comment_count,
-        like_count,
-        dislike_count
-        ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [user_id, 0, 0, 0, 0, 0]
+    //User metadata
+    const metadataResult = await pool.query(
+      `INSERT INTO user_metadata (
+        user_id,
+        display_name,
+        avatar_url
+      ) VALUES ($1, $2, $3)`,
+      [ user_id, display_name, avatar_url ]
     );
 
-    //Create user model
-    const newUserModel = await UserModel.create({
-      _id: user_id,
-      email: email,
-      password: hashedPassword,
-      auth_provider: auth_provider
-    });
+    //User stats
+    await pool.query(
+      `INSERT INTO user_stats (
+        user_id
+      ) VALUES ($1)`,
+      [user_id]
+    );
 
-    await newUserModel.save();
   }
   catch (err) {
     await pool.query('ROLLBACK');
-    await transaction.abortTransaction();
 
     console.log(err);
     return {
@@ -129,7 +119,6 @@ export default eventHandler(async (event: any) => {
   }
 
   await pool.query('COMMIT');
-  await transaction.commitTransaction();
 
   return {
     statusCode: 200,
