@@ -2,12 +2,10 @@
 @import '/assets/scss/reset.scss';
 
 #__nuxt {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
   min-height: 100vh;
   height: auto;
-  width: 100%;
   background-color: var(--background-color);
   z-index: -1;
+  width: auto;
+  overflow: hidden;
 }

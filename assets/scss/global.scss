@@ -48,13 +48,14 @@
 
   --panel-color: var(--panel-color-dark);
   --panel-hover-color: var(--panel-hover-color-dark-light);
+  --panel-hover-color-inverted: var(--panel-hover-color-dark-dark);
+  
   --panel-border-color: var(--panel-border-dark);
   --panel-border-hover-color: var(--panel-border-hover-color-dark);
 
   --input-focus-color: var(--input-focus-dark);
   --input-valid-color: var(--input-valid-dark);
   --input-invalid-color: var(--input-invalid-dark);
-
 }
 
 // Light mode

@@ -77,10 +77,22 @@ function logOut() {
     }
   }
 
-  button.logout {
-    background-color: transparent;
-    border: none;
-    font-size: 1rem;
-    cursor: pointer;
+  .log-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    button.logout {
+      background-color: transparent;
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 0;
+
+      &:hover {
+        border-bottom: 1px solid var(--text-color);
+      }
+    }
   }
 </style>

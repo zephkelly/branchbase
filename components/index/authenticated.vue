@@ -1,7 +1,7 @@
 <template>
   <section class="posts-feed">
     <div v-if="pending" class="posts-pending">
-      <p style="margin-top: 3rem;">Loading</p>>
+      <p style="margin-top: 3rem;">Loading</p>
     </div>
     <div v-else ref="postsContainer" class="posts-loaded">
       <IndexControlBar />
@@ -30,6 +30,10 @@ watch(isCreating, (newIsCreating) => {
   } else {
     postsContainer.value.classList.remove('creating');
   }
+})
+
+onUnmounted(() => {
+  isCreating().value = false;
 })
 </script>
 

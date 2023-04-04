@@ -16,6 +16,10 @@ watch(toggleFeedMenu(), (value) => {
     currentFeedButton.value?.classList.remove('active');
   }
 });
+
+onUnmounted(() => {
+  toggleFeedMenu().value = false;
+})
 </script>
 
 <style lang="scss" scoped>
@@ -30,7 +34,7 @@ button {
     border-radius: 0.4rem;
     background-color: transparent;
     border: 1px solid var(--panel-border-color);
-    transition: background-color 0.2s ease-in-out;
+    transition: background-color 0.2s cubic-bezier(0.075, 0.82, 0.165, 1), borderColor 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
     padding: 0rem;
     cursor: pointer;
 
@@ -61,12 +65,20 @@ button {
     }
 
     &.active {
-      background-color: var(--panel-border-hover-color-dark);
+      background-color: var(--panel-hover-color);
       border: 1px solid var(--panel-border-color);
       
       svg {
         transform: rotate(270deg) translate(0rem, 0rem);  
       }
+
+      &:hover {
+        background-color: var(--panel-hover-color);
+      }
+    }
+
+    &:hover {
+      border: 1px solid var(--panel-border-hover-color);
     }
   }
 </style>
