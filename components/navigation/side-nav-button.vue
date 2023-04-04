@@ -61,7 +61,7 @@ button {
     }
 
     &.active {
-      background-color: var(--panel-hover-color-light);
+      background-color: var(--panel-border-hover-color-dark);
       border: 1px solid var(--panel-border-color);
       
       svg {

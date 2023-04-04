@@ -1,5 +1,5 @@
 <template>
-  <article ref="postElement" class="post text">
+  <article ref="postElement" class="post media">
     <header>
       <div class="post-info">
         <div class="branch-attributes">
@@ -30,6 +30,17 @@
             Here is the actual body of the text, see i am stupid because
            dy of the text, see i am stupid because
           </p>
+          <p>
+            Here is the actual body of the text, see i am stupid because
+            Here is the actual body of the text, see i am stupid because
+            Here is the actual body of the text, see i am stupid because
+            Here is the actual body of the text, see i am stupid because
+            Here is the actual body of the text, see i am stupid because
+          </p>
+          <p>
+            Here is the actual body of the text, see i am stupid because
+            dy of the text, see i am stupid because
+          </p>
         </div>
         <div ref="textFadeOut" class="fade"></div>
       </div>
@@ -47,13 +58,17 @@
           </Transition>
           <p>2</p>
         </div>
-        <div class="comment">
-          <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M80 976V236q0-23 18-41.5t42-18.5h680q23 0 41.5 18.5T880 236v520q0 23-18.5 41.5T820 816H240L80 976Zm60-145 75-75h605V236H140v595Zm0-595v595-595Z"/></svg>
+        <div class="dislike">
+          <Transition name="fade">
+            <svg v-if="isDisliked" @click="isDisliked = false" class="disliked" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M239 216h467v512l-278 288-33-26q-11-8-14.5-18t-3.5-23v-10l45-211H100q-23 0-41.5-18.5T40 668v-82q0-11 2.5-25.5T50 535l116-268q9-21 29.5-36t43.5-15Zm527 512V216h114v512H766Z"/></svg>
+          </Transition>
+          <Transition name="fade">
+            <svg v-if="!isDisliked" @click="isDisliked = true; isLiked = false;" class="undisliked" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M242 216h444v512l-278 288-39-31q-6-5-9-14t-3-22v-10l45-211H103q-24 0-42-18t-18-42v-81.839Q43 579 41.5 571.5T43 557l126-290q8.878-21.25 29.595-36.125Q219.311 216 242 216Zm384 60H229L103 575v93h373l-53 249 203-214V276Zm0 427V276v427Zm60 25v-60h133V276H686v-60h193v512H686Z"/></svg>
+          </Transition>
           <p>20</p>
         </div>
         <div class="comment">
-          <svg v-if="isDisliked" @click="isDisliked = false" class="disliked" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M239 216h467v512l-278 288-33-26q-11-8-14.5-18t-3.5-23v-10l45-211H100q-23 0-41.5-18.5T40 668v-82q0-11 2.5-25.5T50 535l116-268q9-21 29.5-36t43.5-15Zm527 512V216h114v512H766Z"/></svg>
-          <svg v-if="!isDisliked" @click="isDisliked = true; isLiked = false;" class="undisliked" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M242 216h444v512l-278 288-39-31q-6-5-9-14t-3-22v-10l45-211H103q-24 0-42-18t-18-42v-81.839Q43 579 41.5 571.5T43 557l126-290q8.878-21.25 29.595-36.125Q219.311 216 242 216Zm384 60H229L103 575v93h373l-53 249 203-214V276Zm0 427V276v427Zm60 25v-60h133V276H686v-60h193v512H686Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M80 976V236q0-23 18-41.5t42-18.5h680q23 0 41.5 18.5T880 236v520q0 23-18.5 41.5T820 816H240L80 976Zm60-145 75-75h605V236H140v595Zm0-595v595-595Z"/></svg>
           <p>20</p>
         </div>
       </section>
@@ -264,8 +279,8 @@ function checkTextFadeOut() {
       flex-direction: row;
       align-items: center;
       height: 1.3rem;
-      opacity: 0.6;
       user-select: none;
+      opacity: 0.8;
 
       svg {
         width: 1.3rem;
@@ -274,6 +289,11 @@ function checkTextFadeOut() {
         top: 0rem;
         left: 0rem;
         fill: var(--text-color);
+        cursor: pointer;
+
+        &.liked {
+          fill: rgb(255, 60, 60);
+        }
       }
 
       div {
@@ -287,8 +307,8 @@ function checkTextFadeOut() {
 
         p {
           font-size: 0.8rem;
-          font-weight: 500;
-          font-family: 'Inter', sans-serif;
+          font-weight: 700;
+          font-family: 'Roboto', sans-serif;
           color: var(--text-color);
           letter-spacing: 0.05em;
           height: 100%;
@@ -310,6 +330,14 @@ function checkTextFadeOut() {
 
   &:hover {
     border: 1px solid var(--panel-border-hover-color);
+  }
+
+  &.text {
+    section.body {
+      .fade {
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color-dark-rising) 100%);
+      }
+    }
   }
 }
 
@@ -347,7 +375,7 @@ function checkTextFadeOut() {
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 10rem;
+        height: 15rem;
         background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color) 100%);
       }
     }
@@ -355,6 +383,7 @@ function checkTextFadeOut() {
     footer {
       padding-top: 1.5rem;
       border-top: none;
+      // border-top: 1px solid var(--panel-border-color);
     }
   }
 
@@ -395,7 +424,7 @@ function checkTextFadeOut() {
 }
 
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+  transition: opacity 0.15s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 .fade-enter-from, .fade-leave-to {
