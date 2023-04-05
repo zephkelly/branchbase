@@ -8,13 +8,13 @@
     <nuxt-link class="logo" to="/" v-on:click="toggleFeedMenu().value = false">
       <img src="~/assets/logo.png" alt="Logo" />
     </nuxt-link>
-    <NavigationSideNavButton />
+    <NavigationButtonBrowse />
     <div v-if="showLogin" class="log-buttons">
       <nuxt-link v-if="!shouldLogout" ref="loginButton" to="/login">Login</nuxt-link>
       <button v-else class="logout" v-on:click="logOut()">Logout {{ userName }}</button>
     </div>
   </header>
-  <NavigationBrowseNav />
+  <NavigationBrowse />
 </template>
 
 <script lang="ts" setup>

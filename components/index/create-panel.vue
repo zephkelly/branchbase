@@ -379,7 +379,7 @@ form.create-branch {
   align-items: flex-start;
 
   div:first-child {
-    width: 16rem;
+    width: 17rem;
   }
 
   div:last-child {

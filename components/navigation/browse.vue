@@ -1,8 +1,8 @@
 <template>
   <aside ref="sideNav" class="side-nav minimise">
     <div class="lists">
-      <NavigationBrowseNavFeeds />
-      <NavigationBrowserNavBranches/>
+      <NavigationBrowseFeeds />
+      <NavigationBrowseBranches/>
     </div>
   </aside>
 </template>

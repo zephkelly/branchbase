@@ -11,7 +11,7 @@
         <li v-for="//@ts-ignore
         branch in branches?.body?.branches" :title="branch.description">
           <img>
-          <a>b/{{ branch.name }}</a>
+          <a>b/{{ branch.branch_name }}</a>
         </li>
         <div v-if="!loadMoreBranches" v-on:click="loadMore" class="more-button">
           <a>+ More</a>
@@ -19,7 +19,7 @@
         <li v-else v-for="//@ts-ignore
         branch in moreBranches?.data?.value?.body?.branches" :title="branch.description">
           <img>
-          <a>b/{{ branch.name }}</a>
+          <a>b/{{ branch.branch_name }}</a>
         </li>
         <div v-if="showViewAll" class="more-button">
             <a href="">+ View all</a>

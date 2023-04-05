@@ -85,8 +85,6 @@ export default eventHandler(async (event: any) => {
       ]
     );
 
-    console.log(branch_metadata_result)
-
     //Create branch post store from BranchPostStore model mogoose
     const branchStore = new BranchPostStore({
       branch_id: branch_metadata_result.rows[0].id,
