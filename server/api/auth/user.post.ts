@@ -105,7 +105,7 @@ export default eventHandler(async (event: any) => {
     const user_id: Number = userResult.rows[0].id;
 
     //User metadata
-    const metadataResult = await pool.query(
+    const metadataResult = await pool.query( 
       `INSERT INTO user_metadata (
         user_id,
         display_name,

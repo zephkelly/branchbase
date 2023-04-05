@@ -154,10 +154,6 @@ async function submitBranch() {
     const branchDescription = branchDescriptionModel.value;
     const branchType = branchTypeModel.value;
 
-    console.log("Branch name: " + branchName);
-    console.log("Branch description: " + branchDescription);
-    console.log("Branch type: " + branchType);
-
     const response = await useFetch('/api/branches/create', {
       method: 'POST',
       body: JSON.stringify({
