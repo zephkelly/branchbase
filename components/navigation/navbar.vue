@@ -11,18 +11,21 @@
     <NavigationSideNavButton />
     <div v-if="showLogin" class="log-buttons">
       <nuxt-link v-if="!shouldLogout" ref="loginButton" to="/login">Login</nuxt-link>
-      <button v-else class="logout" v-on:click="logOut()">Logout {{ data?.user?.name }}</button>
+      <button v-else class="logout" v-on:click="logOut()">Logout {{ userName }}</button>
     </div>
   </header>
   <NavigationBrowseNav />
 </template>
 
 <script lang="ts" setup>
-//Session data
 const { data, signOut } = useSession();
 
 const shouldLogout = computed(() => {
   return data.value?.user;
+})
+
+const userName = computed(() => {
+  return regexDisplayName(data);
 })
 
 //Route checkers

@@ -42,6 +42,7 @@ section.posts-feed {
   position: relative;
   width: 600px;
   margin-top: 3rem;
+  margin-bottom: 6rem;
   box-sizing: border-box;
 }
 
@@ -64,17 +65,17 @@ section.posts-feed {
       left: -1.8rem;
       position: absolute;
       width: 110%;
-      height: 40rem;
+      height: 80rem;
       background: linear-gradient(0deg, rgba(255,255,255,0) 0%, var(--background-color) 100%);
       opacity: 0;
-      transition: opacity 1s cubic-bezier(0.075, 0.82, 0.165, 1) 0.3s;
+      transition: opacity 1s cubic-bezier(0.075, 0.82, 0.165, 1) 0.25s;
     }
   }
 }
 
 .posts-loaded.creating {
   .posts {
-    transform: translateY(26rem);
+    transform: translateY(36rem);
     transition: transform 0.15s cubic-bezier(0.075, 0.82, 0.165, 1);
     
     

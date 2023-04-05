@@ -7,40 +7,52 @@ import { AuthProvider, UserMetadata, Users, user_metadata, user_stats } from '~/
 export default eventHandler(async (event: any) => {
   const body = await readBody(event);
 
-  const { email, password } = body as Users;
-  let { auth_provider } = body as Users;
+  const user: Users = {
+    email: body.email,
+    password: body.password,
+    auth_provider: body.auth_provider,
+    verified: false,
+  }
 
-  const { display_name } = body as UserMetadata;
-  let { avatar_url } = body as UserMetadata;
+  const userMetadata: UserMetadata = {
+    display_name: body.display_name,
+    avatar_url: body.avatar_url,
+    bio: '',
+    user_id: 0,
+  }
 
-  if (password != null || password != undefined) {
-    if (validatePassword(password)) {
+  //--------------------Validation--------------------
+  //
+  //Input checks
+  if (!user.password) {
+    if (validatePassword(user.password)) {
       return {
         statusCode: 400,
         body: 'Password is too short.'
       }
     }
   }
-  else if (validateQuery(email, auth_provider, display_name) == false) {
+  else if (validateQuery(user.email, user.auth_provider, userMetadata.display_name) == false) {
     return {
       statusCode: 400,
       body: 'We couldn\'t validate your info.'
     }
   }
-  else if (validateQueryCustom(display_name, 1, 25) == false) {
+  else if (validateQueryCustom(userMetadata.display_name, 1, 25) == false) {
     return {
       statusCode: 400,
       body: 'Invalid display name. Greater than 25 characters.'
     }
   }
-  else if (validateEmail(email) == false) {
+  else if (validateEmail(user.email) == false) {
     return {
       statusCode: 400,
       body: 'Invalid email.'
     }
   }
  
-  const userData = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+  //Does user exist already in db?
+  const userData = await pool.query('SELECT * FROM users WHERE email = $1', [user.email]);
 
   if (userData.rowCount > 0) {
     return {
@@ -49,33 +61,37 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  if (!avatar_url) {
-    avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
+  //Set default avatar if null
+  if (!userMetadata.avatar_url) {
+    userMetadata.avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
   }
 
+  //Set auth provider and hash password if it's email
   let hashedPassword: string | null = null;
 
-  if (checkAuthProvider(auth_provider) == false) {
-    auth_provider = AuthProvider.email;
+  switch (user.auth_provider) {
+    case 'google':
+      user.auth_provider = AuthProvider.google;
+      break;
+    case 'github':
+      user.auth_provider = AuthProvider.github;
+      break;
+    case 'discord':
+      user.auth_provider = AuthProvider.discord;
+      break;
+    default:
+      user.auth_provider = AuthProvider.email;
 
-    const salt = await bcrypt.genSalt(10);
-    hashedPassword = await bcrypt.hash(password, salt);
+      const salt = await bcrypt.genSalt(10);
+      hashedPassword = await bcrypt.hash(user.password, salt);
+      break;
   }
-  else {
-    if (auth_provider === 'google') {
-      auth_provider = AuthProvider.google;
-    }
-    else if (auth_provider === 'github') {
-      auth_provider = AuthProvider.github;
-    }
-    else if (auth_provider === 'discord') {
-      auth_provider = AuthProvider.discord;
-    }
-  }
+
+  //--------------------Create User--------------------
+  //
+  await pool.query('BEGIN');
 
   try {
-    await pool.query('BEGIN');
-
     //User
     const userResult = await pool.query(
       `INSERT INTO users (
@@ -83,10 +99,9 @@ export default eventHandler(async (event: any) => {
         password,
         auth_provider
       ) VALUES ($1, $2, $3) RETURNING id`,
-      [email, hashedPassword, auth_provider]
+      [user.email, hashedPassword, user.auth_provider]
     );
 
-    //Grab the user id
     const user_id: Number = userResult.rows[0].id;
 
     //User metadata
@@ -96,7 +111,7 @@ export default eventHandler(async (event: any) => {
         display_name,
         avatar_url
       ) VALUES ($1, $2, $3)`,
-      [ user_id, display_name, avatar_url ]
+      [ user_id, userMetadata.display_name, userMetadata.avatar_url ]
     );
 
     //User stats
@@ -126,14 +141,6 @@ export default eventHandler(async (event: any) => {
   }
 });
 
-function checkAuthProvider(authProvider: string) {
-  if (authProvider === 'email' || authProvider === AuthProvider.email || authProvider === '' || authProvider === null || authProvider === undefined) {
-    return false;
-  }
-  
-  return true;
-}
-
 function validateEmail(email: string) {
   const re = /@/;
   return re.test(email);
@@ -143,6 +150,5 @@ function validatePassword(password: string) {
   if (password.length > 8) {
     return false;
   }
-
   return true;
 }

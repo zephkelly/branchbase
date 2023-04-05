@@ -74,7 +74,7 @@ export default NuxtAuthHandler({
         }
 
         const userObject = {
-          name: result.rows[0].display_name,
+          name: `${result.rows[0].display_name}*${result.rows[0].id}`,
           email: result.rows[0].email,
           image: result.rows[0].avatar_url
         };
@@ -96,9 +96,9 @@ async function setJWT(profile: any) {
   const result = await pool.query(findUserQuery, [profile.email]);
 
   if (result.rowCount > 0) {
-    profile.name = result.rows[0].display_name;
+    profile.name = `${result.rows[0].display_name}*${result.rows[0].id}`;
     profile.image = result.rows[0].avatar_url;
   }
-  
+
   return profile;
 }

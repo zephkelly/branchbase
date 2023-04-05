@@ -1,4 +1,12 @@
 // ------------Comment Model----------------
+enum CommentContentType {
+  TEXT = "text",
+  IMAGE = "image",
+  VIDEO = "video",
+  AUDIO = "audio",
+  LINK = "link",
+}
+
 export interface Comment {
   id: string;
   user_id: number;
@@ -12,14 +20,16 @@ export interface Comment {
 //   id SERIAL PRIMARY KEY,
 //   user_id INTEGER REFERENCES users(id),
 //   post_id INTEGER REFERENCES posts(id),
-//   parent_id INTEGER REFERENCES comments(id),
+//   parent_comment_id INTEGER REFERENCES comments(id),
 //   content TEXT,
+//   content_type VARCHAR(255),
 // );
 
 //--------------------Comment Metadata--------------------
 export interface CommentMetadata {
   id: string;
   comment_id: string;
+  branch_id: string;
   tag: string;
   keyword: string;
   created_at: Date;

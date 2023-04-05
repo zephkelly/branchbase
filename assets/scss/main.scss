@@ -7,5 +7,44 @@
   background-color: var(--background-color);
   z-index: -1;
   width: auto;
-  overflow: hidden;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+input {
+  height: 0.6rem;
+  padding: 0.8rem;
+}
+textarea {
+  resize: none;
+  padding: 0.8rem;
+}
+input, textarea, select {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  border: 1px solid var(--panel-border-color);
+  color: var(--text-color);
+  border-radius: 1rem;
+  font-size: 1rem;
+
+   &:focus {
+    outline: none;
+    border: 1px solid var(--input-focus-color);
+  }
+}
+
+button {
+  font-weight: 500;
+  border: none;
+  background-color: var(--accent-color);
+  cursor: pointer;
+  padding: 0rem;
+
+  &.disabled {
+    color: rgba(255, 255, 255, 0.286);
+    background-color: var(--panel-border-color);
+    pointer-events: none;
+    cursor: none;
+  }
 }

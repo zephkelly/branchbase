@@ -25,14 +25,12 @@ export interface Users {
 // );
 
 //--------------------UserMetadata--------------------
-//
+// Created dates stored here
 export interface UserMetadata {
   user_id: number,
   display_name: string;
   avatar_url: string;
   bio: string;
-  createdDate: Date;
-  updatedDate: Date;
 }
 
 export const user_metadata: string = 'user_metadata';

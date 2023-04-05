@@ -879,16 +879,11 @@ definePageMeta({
     }
 
     input {
-      background-color: var(--background-color);
-      border: 1px solid var(--panel-border-color);
-      border-radius: 1rem;
-      padding: 0.8rem;
       margin-bottom: 1.6rem;
-      height: 2.5rem;
       width: 100%;
       transition: border 0.1s ease-out;
-      font-size: 1rem;
       z-index: 0;
+      height: 2.5rem;
 
       &:focus {
         outline: none;

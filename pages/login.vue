@@ -425,7 +425,6 @@ h1 {
       height: 2.5rem;
       width: 100%;
       transition: border 0.1s ease-out;
-      // letter-spacing: 0.1rem;
       font-size: 1rem;
       z-index: 0;
 
@@ -437,21 +436,9 @@ h1 {
 
     .email-login {
       font-size: 1.1rem;
-      font-weight: 500;
       width: 100%;
       height: 2.5rem;
-      border: none;
       border-radius: 1rem;
-      background-color: var(--accent-color);
-      padding: 0rem;
-      cursor: pointer;
-
-      &.disabled {
-        color: rgba(255, 255, 255, 0.286);
-        background-color: var(--panel-border-color);
-        pointer-events: none;
-        cursor: none;
-      }
     }
   }
 }
