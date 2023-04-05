@@ -46,7 +46,7 @@
             <div class="field name container">
               <div>
                 <label for="branch-name">Name your branch</label>
-                <input id="branch-name" class="branch-name-input" v-model="branchInputModel" type="text" required>
+                <input id="branch-name" class="branch-name-input" v-model="branchInputModel" type="text" @input="canEnableSumbit()" required>
                 <p class="placeholder">b/</p>
                 <div class="tooltip">
                   <p class="tip" v-show="!branchNameTaken">Characters remaining: <span>{{ branchCharactersRemaining }}</span></p>
@@ -55,7 +55,7 @@
               </div>
               <div>
                 <label for="branch-type">Set your branch visibility</label>
-                <select id="branch-type" class="branch-type-input" v-model="branchTypeModel" required>
+                <select id="branch-type" class="branch-type-input" v-model="branchTypeModel" @click="canEnableSumbit()" required>
                   <option value="public" title="Anybody can view the community" selected>Public</option>
                   <option value="secret" title="Anybody with a link or an invite can view the community">Secret</option>
                 </select>
@@ -63,14 +63,14 @@
             </div>
             <div class="field description">
               <label for="branch-description">Describe your branch</label>
-              <textarea id="branch-description" class="branch-description-input" v-model="branchDescriptionModel" placeholder="Let people know what your community is all about" required></textarea>
+              <textarea id="branch-description" class="branch-description-input" v-model="branchDescriptionModel" placeholder="Let people know what your community is all about" @input="canEnableSumbit()" required></textarea>
               <div class="tooltip">
                 <p class="tip">Characters remaining: <span>{{ descriptionCharsRemaining }}</span></p>
                 <p class="error" ref="descriptionError" v-show="false">Sorry, that description is too long!</p>
               </div>
             </div>
             <div class="field submit">
-              <button class="submit " alt="Submit" ref="submitBranchButton" @click="submitBranch()" title="Submit">
+              <button class="submit disabled" alt="Submit" ref="submitBranchButton" @click="submitBranch()" title="Submit">
                 <h3>Submit</h3>
               </button>
             </div>
@@ -144,10 +144,19 @@ watch(branchDescriptionModel, (value) => {
   }
 });
 
-//Watch submit button
+//Watch can we submit
 const branchForm: Ref = ref(null);
 const branchTypeModel: Ref = ref(null);
 const submitBranchButton: Ref = ref(null);
+function canEnableSumbit() {
+  if (branchForm.value?.checkValidity()) {
+    submitBranchButton.value?.classList.remove('disabled');
+  } else {
+    submitBranchButton.value?.classList.add('disabled');
+  }
+}
+
+//Watch submit button
 async function submitBranch() {
   if (branchForm?.value?.checkValidity()) {
     const branchName = branchInputModel.value;
@@ -374,7 +383,7 @@ form.create-branch {
 }
 
 .field.container {
-  height: 7rem;
+  height: 6rem;
   justify-content: space-between;
   align-items: flex-start;
 
