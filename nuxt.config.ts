@@ -8,6 +8,9 @@ export default defineNuxtConfig({
       '~/server/postgres.ts'
     ]
   },
+  plugins: [
+    '~/plugins/markdown-it.ts',
+  ],
   routeRules: {
     '/': { ssr: true },
   },
