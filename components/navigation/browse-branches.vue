@@ -10,8 +10,10 @@
         <!-- <p class="label">BRANCHES</p> -->
         <li v-for="//@ts-ignore
         branch in branches?.body?.branches" :title="branch.description">
-          <img>
-          <a>b/{{ branch.branch_name }}</a>
+          <nuxt-link :to="'/branches/' + branch.branch_name" @click="toggleFeedMenu().value = false">
+            <img>
+            <p>b/{{ branch.branch_name }}</p>
+          </nuxt-link>
         </li>
         <div v-if="!loadMoreBranches" v-on:click="loadMore" class="more-button">
           <a>+ More</a>
@@ -19,7 +21,7 @@
         <li v-else v-for="//@ts-ignore
         branch in moreBranches?.data?.value?.body?.branches" :title="branch.description">
           <img>
-          <a>b/{{ branch.branch_name }}</a>
+          <p>b/{{ branch.branch_name }}</p>
         </li>
         <div v-if="showViewAll" class="more-button">
             <a href="">+ View all</a>
@@ -114,6 +116,12 @@ p.label {
         overflow: hidden;
         cursor: pointer;
 
+        a {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+        }
+
         &:hover {
           background-color: rgb(54, 54, 54);
         }
@@ -134,7 +142,7 @@ p.label {
       }
     }
 
-    a {
+    p {
       font-family: 'Roboto', sans-serif;
       font-weight: 400;
       font-size: 0.95rem;

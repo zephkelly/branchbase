@@ -66,6 +66,7 @@ export default eventHandler(async (event: any) => {
       creator_user_id: user_id,
       owner_user_id: user_id,
       branch_type: branch_type,
+      branch_title: branch_name,
       description: branch_description,
       created_date: new Date(),
       updated_date: new Date(),
@@ -73,14 +74,15 @@ export default eventHandler(async (event: any) => {
 
     //Create branch metadata returning the id
     const branch_metadata_result = await pool.query(`
-      INSERT INTO branches_metadata (branch_name, creator_user_id, owner_user_id, branch_type, description)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO branches_metadata (branch_name, creator_user_id, owner_user_id, branch_type, branch_title, description)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id
     `,
       [branch_metadata.branch_name,
       branch_metadata.creator_user_id,
       branch_metadata.owner_user_id,
       branch_metadata.branch_type,
+      branch_metadata.branch_title,
       branch_metadata.description
       ]
     );

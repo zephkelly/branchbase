@@ -2,6 +2,10 @@ import MarkdownIt from 'markdown-it'
 
 const md = new MarkdownIt()
 
-export default function (app: any) {
-  app.provide('md', md)
-}
+export default defineNuxtPlugin(() => {
+  return {
+    provide: {
+      md: () => md
+    }
+  }
+});

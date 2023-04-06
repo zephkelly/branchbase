@@ -377,6 +377,7 @@ function checkTextFadeOut() {
         width: 100%;
         height: 15rem;
         background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color) 100%);
+        pointer-events: none;
       }
     }
 

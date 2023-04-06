@@ -14,6 +14,7 @@ export interface Branches_Metadata {
   creator_user_id: string;
   owner_user_id: string;
   branch_type: BranchType;
+  branch_title: string;
   description: string;
   created_date: Date;
   updated_date: Date;
@@ -26,6 +27,7 @@ export interface Branches_Metadata {
 //   creator_user_id VARCHAR(255) NOT NULL,
 //   owner_user_id VARCHAR(255) NOT NULL,
 //   branch_type VARCHAR(255) NOT NULL,
+//   branch_title VARCHAR(255) NOT NULL,
 //   description VARCHAR(255) NOT NULL,
 //   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 //   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

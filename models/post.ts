@@ -12,8 +12,14 @@ enum PostContentType {
   LINK = "link",
 }
 
+enum PostStatus {
+  ACTIVE = "active",
+  DELETED = "deleted",
+  LOCKED = "locked",
+  HIDDEN = "hidden"
+}
+
 export interface Post {
-  id: string;
   content: Object;
   post_id: string;
   branch_id: string;
@@ -57,11 +63,11 @@ export const PostSchema = new mongoose.Schema({
   content: Object,
   likes: [
     {
-      user_id: {
+      like_id: {
         type: String,
         required: true,
       },
-      like_id: {
+      user_id: {
         type: String,
         required: true,
       },
@@ -69,11 +75,11 @@ export const PostSchema = new mongoose.Schema({
   ],
   dislikes: [
     {
-      user_id: {
+      dislike_id: {
         type: String,
         required: true,
       },
-      dislike_id: {
+      user_id: {
         type: String,
         required: true,
       },
@@ -113,8 +119,11 @@ export const PostSchema = new mongoose.Schema({
 // This is the schema for storing all metadata for the site's posts.
 // 
 export interface Post_Metadata {
+  id: number;
   title: string;
+  content: string;
   content_type: PostContentType;
+  post_status: PostStatus;
   user_id: number; // This is the _id of the user who created the post
   branch_id: number;
   created_at: Date;
@@ -125,9 +134,11 @@ export interface Post_Metadata {
 // CREATE TABLE post_metadata (
 //   id BIGSERIAL PRIMARY KEY,
 //   title VARCHAR(255) NOT NULL,
+//   content VARCHAR(255) NOT NULL,
 //   content_type VARCHAR(255) NOT NULL,
+//   post_status VARCHAR(255) NOT NULL,
 //   user_id INTEGER REFERENCES users(id),
-//   branch_id INTEGER REFERENCES branches(id),
-//   created_at TIMESTAMP NOT NULL,
-//   updated_at TIMESTAMP NOT NULL
+//   branch_id INTEGER REFERENCES branches_metadata(id),
+//   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+//   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 // );
