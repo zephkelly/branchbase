@@ -18,8 +18,6 @@
 
 <script lang="ts" setup>
 const props = defineProps(['branchData'])
-
-console.log(props.branchData)
 </script>
 
 <style lang="scss" scoped>
