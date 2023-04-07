@@ -14,17 +14,19 @@
   </header>
   <header class="branch-header" v-else>
     <div class="background-image">
-      <img :src="props.branchData.branchMeta.background_image" >
+      <img :src="props.branchData.branchMeta.background_image">
       <!-- <div class="fade"></div> -->
       <div class="fade"></div>
     </div>
-    <div class="title">
-      <div class="icon">
-        <img :src="props.branchData.branch.icon_image">
-      </div>
-      <div class="text">
-        <h1>{{ props.branchData.branchMeta.branch_title }}</h1>
-        <p>b/{{ props.branchData.branch.branch_name }}</p>
+    <div class="branch-info">
+      <div class="title">
+        <div class="icon" ref="branchIcon">
+          <img :src="props.branchData.branch.icon_image">
+        </div>
+        <div class="text">
+          <h1 ref="branchTitle">{{ props.branchData.branchMeta.branch_title }}</h1>
+          <p ref="branchId">b/{{ props.branchData.branch.branch_name }}</p>
+        </div>
       </div>
     </div>
   </header>
@@ -32,12 +34,81 @@
 
 <script lang="ts" setup>
 const props = defineProps(['branchData', 'isPending']);
-const branchHeader = ref(null);
+
+//----------------------------------------------------
+
+// Scroll responsive icon
+const branchIcon: Ref = ref(null);
+function updateIconElement(progress: number) {
+  const scale = 1 - progress * 0.55;
+  const top = `${-3 * (1 - progress) + 0.535}rem`;
+  const left = `${(progress * 1.1)}rem`;
+
+  branchIcon.value.style.transform = `scale(${scale})`;
+  branchIcon.value.style.top = top;
+  branchIcon.value.style.left = left;
+};
+
+// Scroll responsive title
+const branchTitle: Ref = ref(null);
+const branchId: Ref = ref(null);
+function updateTitleELements(progress: number) {
+  const titleOpacity = `${(1 - progress)}`;
+  let idOpacity = progress;
+  let fontWeight = 400;
+  let fontSize = '1rem';
+
+  if (progress < 0.6) {
+    idOpacity = 0.6;
+  }
+
+  if (progress == 1) {
+    fontSize = '1.4rem';
+    fontWeight = 600;
+  }
+
+  branchTitle.value.style.opacity = titleOpacity;
+
+  branchId.value.style.opacity = idOpacity;
+  branchId.value.style.fontSize = fontSize;
+  branchId.value.style.fontWeight = fontWeight;
+};
+
+function calculateScroll() {
+  let scrollY = window.scrollY;
+  const minScroll = 50;
+  const maxScroll = 130;
+
+  if (scrollY > maxScroll) {
+    scrollY = maxScroll;
+  }
+
+  if (scrollY < minScroll) {
+    scrollY = minScroll;
+  }
+
+  const progress: number = (scrollY - minScroll) / (maxScroll - minScroll);
+
+  updateIconElement(progress);
+  updateTitleELements(progress);
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', calculateScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', calculateScroll);
+});
+</script>
+
+<script lang="ts">
 </script>
 
 <style lang="scss" scoped>
 header.branch-header {
-  position: relative;
+  position: sticky;
+  top: -5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,10 +119,17 @@ header.branch-header {
   margin-top: 3rem;
   background-color: var(--panel-color);
   border-bottom: 1px solid var(--panel-border-color);
+  z-index: 10;
 
   * {
     box-sizing: border-box;  
   }
+}
+
+.branch-info {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .title {
@@ -73,6 +151,10 @@ header.branch-header {
     overflow: hidden;
     background-color: var(--panel-color);
     border: 1px solid var(--panel-border-color);
+    transition: 
+      transform 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
+      top 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
+      left 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
 
     img {
       width: 100%;
@@ -89,15 +171,20 @@ header.branch-header {
     font-family: 'Roboto', 'Inter', sans-serif;
 
     h1 {
+      position: relative;
       font-size: 2rem;
       font-weight: 700;
     }
 
     p {
-      margin-top: 0.5em;
+      position: relative;
+      font-weight: 400;
+      margin-top: 0.3rem;
       font-size: 1rem;
-      color: var(--text-color-darker);
       opacity: 0.6;
+      transition: 
+        font-weight 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
+        font-size 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
     }
   }
 }

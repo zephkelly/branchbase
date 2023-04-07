@@ -1,20 +1,22 @@
 <template>
-  <section class="posts-feed">
-    <ControlBar :currentPage="'index'" />
-    <IndexCreatePanel />
-    <div v-if="pending" class="posts-pending">
-      <p style="margin-top: 3rem;">Loading</p>
-    </div>
-    <div v-else ref="postsContainer" class="posts-loaded">
-      <section class="posts">
-        <div class="fade"></div>
-        <PostsPost class="text" />
-        <PostsPost class="text rising"/>
-        <PostsPost class="media" />
-        <PostsPost class="media rising" />
-      </section>
-    </div>
-  </section>
+  <div class="overflow" ref="overflowY">
+    <section class="posts-feed">
+      <ControlBar :currentPage="'index'" />
+      <IndexCreatePanel />
+      <div v-if="pending" class="posts-pending">
+        <p style="margin-top: 3rem;">Loading</p>
+      </div>
+      <div v-else ref="postsContainer" class="posts-loaded">
+        <section class="posts">
+          <div class="fade"></div>
+          <PostsPost class="text" />
+          <PostsPost class="text rising"/>
+          <PostsPost class="media" />
+          <PostsPost class="media rising" />
+        </section>
+      </div>
+    </section>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -24,12 +26,15 @@ watch(posts, (newPosts) => {
   // to its contents immediately, but you can watch it.
 })
 
+const overflowY: Ref = ref(null)
 const postsContainer: Ref = ref(null)
 watch(isCreatingIndex, (newIsCreating) => {
   if (newIsCreating.value === true) {
     postsContainer.value.classList.add('creating');
+    overflowY.value.style.height = '100vh';
   } else {
     postsContainer.value.classList.remove('creating');
+    overflowY.value.style.height = '100%';
   }
 })
 
@@ -39,6 +44,16 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.overflow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  overflow-y: hidden;
+}
+
 section.posts-feed {
   position: relative;
   width: 600px;

@@ -1,7 +1,11 @@
 <template>
-    <BranchesBranchHead :branchData="branchData" :isPending="pending"/>
+  <BranchesBranchHead :branchData="branchData" :isPending="pending"/>
   <section class="post-feed">
     <ControlBar :currentPage="'branch'"/>
+    <PostsPost />
+    <PostsPost />
+    <PostsPost />
+    <PostsPost />
   </section>
 </template>
 
