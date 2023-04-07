@@ -1,6 +1,6 @@
 <template>
   <Transition name="fade">
-    <div v-show="isCreating().value" class="create-panel">
+    <div v-show="isCreatingIndex().value" class="create-panel">
       <nav class="options">
         <ul>
           <li>
@@ -17,7 +17,7 @@
 
           </li>
           <li>
-            <button class="close" @click="isCreating().value = false, toggleFeedMenu().value = false" alt="Close" title="Close create panel">
+            <button class="close" @click="isCreatingIndex().value = false, toggleFeedMenu().value = false" alt="Close" title="Close create panel">
               <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="m249 849-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/></svg>
             </button>
           </li>

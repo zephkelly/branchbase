@@ -4,7 +4,7 @@
       <p style="margin-top: 3rem;">Loading</p>
     </div>
     <div v-else ref="postsContainer" class="posts-loaded">
-      <IndexControlBar />
+      <ControlBar :currentPage="'index'" />
       <IndexCreatePanel />
       <section class="posts">
         <div class="fade"></div>
@@ -24,7 +24,7 @@ watch(posts, (newPosts) => {
 })
 
 const postsContainer: Ref = ref(null)
-watch(isCreating, (newIsCreating) => {
+watch(isCreatingIndex, (newIsCreating) => {
   if (newIsCreating.value === true) {
     postsContainer.value.classList.add('creating');
   } else {
@@ -33,7 +33,7 @@ watch(isCreating, (newIsCreating) => {
 })
 
 onUnmounted(() => {
-  isCreating().value = false;
+  isCreatingIndex().value = false;
 })
 </script>
 

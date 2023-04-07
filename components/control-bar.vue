@@ -6,7 +6,7 @@
       </Transition> -->
     </div>
     <div>
-      <button class="create" @click="isCreating().value = !isCreating().value, toggleFeedMenu().value = false" ref="createButton" alt="Open create panel" title="Open create panel">
+      <button class="create" @click="toggleCreatePanel()" ref="createButton" alt="Open create panel" title="Open create panel">
         <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M450 856V606H200v-60h250V296h60v250h250v60H510v250h-60Z"/></svg>
       </button>
     </div>
@@ -14,14 +14,18 @@
 </template>
 
 <script lang="ts" setup>
+const props = defineProps(['currentPage']);
 const createButton: Ref = ref(null);
-watch(isCreating, (newIsCreating) => {
-  if (newIsCreating.value) {
-    createButton.value.classList.add('active');
-  } else {
-    createButton.value.classList.remove('active');
+
+function toggleCreatePanel() {
+  createButton.value.classList.toggle('active');
+
+  if (props.currentPage === 'index') {
+    isCreatingIndex().value = !isCreatingIndex().value;
+  } else if (props.currentPage === 'branch') {
+    isCreatingBranch().value = !isCreatingBranch().value;
   }
-});
+}
 </script>
 
 <style lang="scss" scoped>
