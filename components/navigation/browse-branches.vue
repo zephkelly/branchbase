@@ -11,7 +11,7 @@
         <li v-for="//@ts-ignore
         branch in branches?.body?.branches" :title="branch.description">
           <nuxt-link :to="'/branches/' + branch.branch_name" @click="toggleFeedMenu().value = false">
-            <img>
+            <img :src="branch.icon_image">
             <p>b/{{ branch.branch_name }}</p>
           </nuxt-link>
         </li>
@@ -20,7 +20,7 @@
         </div>
         <li v-else v-for="//@ts-ignore
         branch in moreBranches?.data?.value?.body?.branches" :title="branch.description">
-          <img>
+          <img :scr="branch.icon_image">
           <p>b/{{ branch.branch_name }}</p>
         </li>
         <div v-if="showViewAll" class="more-button">
@@ -133,13 +133,13 @@ p.label {
         }
         
         img {
-          width: 1.2rem;
-          height: 1.2rem;
+          width: 1.4rem;
+          height: 1.4rem;
           min-width: 1.2rem;
           min-height: 1.2rem;
-          border-radius: 100%;
+          border-radius: 50%;
+          border: 1px solid var(--panel-border-color);
           margin-left: 1.5rem;
-          background-color: rgb(255, 255, 255);
         } 
       }
     }

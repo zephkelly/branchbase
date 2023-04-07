@@ -1,24 +1,59 @@
 <template> 
-  <div class="background-image">
-    <img :src="props.branchData.branchMeta.background_image" >
-    <div class="fade"></div>
-  </div>
-  <div class="title">
-    <div class="icon">
-      <img :src="props.branchData.branch.icon_image">
+  <header class="branch-header pending" v-if="isPending">
+    <div class="background-image">
+      <div class="fade"></div>
     </div>
-    <div class="text">
-      <h1>{{ props.branchData.branchMeta.branch_title }}</h1>
-      <p>b/{{ props.branchData.branch.branch_name }}</p>
+    <div class="title">
+      <div class="icon">
+      </div>
+      <div class="text">
+        <h1 class="branch-title pending-large"><title></title></h1>
+        <p class="pending"></p>
+      </div>
     </div>
-  </div>
+  </header>
+  <header class="branch-header" v-else>
+    <div class="background-image">
+      <img :src="props.branchData.branchMeta.background_image" >
+      <!-- <div class="fade"></div> -->
+      <div class="fade"></div>
+    </div>
+    <div class="title">
+      <div class="icon">
+        <img :src="props.branchData.branch.icon_image">
+      </div>
+      <div class="text">
+        <h1>{{ props.branchData.branchMeta.branch_title }}</h1>
+        <p>b/{{ props.branchData.branch.branch_name }}</p>
+      </div>
+    </div>
+  </header>
 </template>
 
 <script lang="ts" setup>
-const props = defineProps(['branchData'])
+const props = defineProps(['branchData', 'isPending']);
+const branchHeader = ref(null);
 </script>
 
 <style lang="scss" scoped>
+header.branch-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  height: 12rem;
+  width: 100%;
+  margin-top: 3rem;
+  background-color: var(--panel-color);
+  border-bottom: 1px solid var(--panel-border-color);
+
+  * {
+    box-sizing: border-box;  
+  }
+}
+
 .title {
   display: flex;
   flex-direction: row;
@@ -59,9 +94,10 @@ const props = defineProps(['branchData'])
     }
 
     p {
+      margin-top: 0.5em;
+      font-size: 1rem;
       color: var(--text-color-darker);
       opacity: 0.6;
-      margin-top: 0.5em;
     }
   }
 }
@@ -77,13 +113,13 @@ const props = defineProps(['branchData'])
   .fade {
     display: flex;
     position: absolute;
-    bottom: 0;
     left: 0;
+    bottom: 0;
     width: 100%;
-    height: 3rem;
-    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color) 100%);
+    height: 2rem;
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.4;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color) 100%);
   }
 
   img {
@@ -91,6 +127,7 @@ const props = defineProps(['branchData'])
     height: 100%;
     object-fit: cover;
     object-position: center;
+    background-color: rgb(61, 61, 61);
   }
 }
 
@@ -109,4 +146,32 @@ const props = defineProps(['branchData'])
 .fade2-enter-from, .fade-leave-to {
   opacity: 0;
 }
+</style>
+
+<style lang="scss" scoped>
+  .background-image {
+    background-color: rgb(38, 38, 38);
+  }
+
+  .title {
+    .icon {
+      background-color: var(--panel-color);
+      border: 1px solid var(--panel-border-color);
+    }
+
+    .text {
+      h1 {
+        height: 2rem;
+        width: 16rem;
+        animation: pulse 2.2s ease-in-out infinite alternate;
+        animation-delay: 0.5s;
+      }
+
+      p {
+        height: 1rem;
+        width: 8rem;
+        animation: pulse 1.5s ease-in-out infinite alternate;
+      }
+    }
+  }
 </style>

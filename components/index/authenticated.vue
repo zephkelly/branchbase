@@ -1,16 +1,17 @@
 <template>
   <section class="posts-feed">
+    <ControlBar :currentPage="'index'" />
+    <IndexCreatePanel />
     <div v-if="pending" class="posts-pending">
       <p style="margin-top: 3rem;">Loading</p>
     </div>
     <div v-else ref="postsContainer" class="posts-loaded">
-      <ControlBar :currentPage="'index'" />
-      <IndexCreatePanel />
       <section class="posts">
         <div class="fade"></div>
-        <PostsPost />
-        <PostsPost />
-        <PostsPost />
+        <PostsPost class="text" />
+        <PostsPost class="text rising"/>
+        <PostsPost class="media" />
+        <PostsPost class="media rising" />
       </section>
     </div>
   </section>

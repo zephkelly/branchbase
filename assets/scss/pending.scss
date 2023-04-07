@@ -1,0 +1,29 @@
+@keyframes pulse {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+p.pending {
+  background: linear-gradient(90deg, 
+    rgb(8, 8, 8) 0%, 
+    rgb(18, 18, 18) 20%, 
+    rgb(8, 8, 8) 55%,
+    rgb(20, 20, 20) 85%,
+    rgb(8, 8, 8) 100%
+  );
+  background-size: 400% 400%;
+}
+
+h1.pending-large {
+  background: linear-gradient(90deg, 
+    rgb(15, 15, 15) 0%, 
+    rgb(18, 18, 18) 40%, 
+    rgb(14, 14, 14) 60%,
+    rgb(20, 20, 20) 100%
+  );
+  background-size: 400% 400%;
+}

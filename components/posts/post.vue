@@ -1,5 +1,5 @@
 <template>
-  <article ref="postElement" class="post text">
+  <article ref="postElement" class="post">
     <header>
       <div class="post-info">
         <div class="branch-attributes">

@@ -18,23 +18,15 @@
 </template>
 
 <script lang="ts" setup>
+const route = useRoute();
 const { data, signOut } = useSession();
 
-const shouldLogout = computed(() => {
-  return data.value?.user;
-})
 
 const userName = computed(() => {
   return regexDisplayName(data);
 })
 
-//Route checkers
-const route = useRoute();
-
-const isExplore = computed(() => {
-  return route.path === '/explore';
-});
-
+//Login
 const showLogin = computed(() => {
   if (route.path === '/login' ||
     route.path == '/register' ||
@@ -43,6 +35,11 @@ const showLogin = computed(() => {
 
   return true;
 });
+
+//Logout
+const shouldLogout = computed(() => {
+  return data.value?.user;
+})
 
 function logOut() {
   signOut({ callbackUrl: '/login' })

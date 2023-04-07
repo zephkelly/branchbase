@@ -1,9 +1,7 @@
 <template>
-  <header class="branch-header">
-    <BranchesBranchHead :branchData="branchData" v-if="!pending"/>
-  </header>
+    <BranchesBranchHead :branchData="branchData" :isPending="pending"/>
   <section class="post-feed">
-    <ControlBar :currentPage="'branch'" v-if="!pending"/>
+    <ControlBar :currentPage="'branch'"/>
   </section>
 </template>
 
@@ -36,24 +34,6 @@ definePageMeta({
 </script>
 
 <style lang="scss" scoped>
-header.branch-header {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  height: 12rem;
-  width: 100%;
-  margin-top: 3rem;
-  background-color: var(--panel-color);
-  border-bottom: 1px solid var(--panel-border-color);
-
-  * {
-    box-sizing: border-box;  
-  }
-}
-
 section.post-feed {
   width: 600px;
 }

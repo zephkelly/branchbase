@@ -4,19 +4,19 @@
     <p class="subtitle">Content curated by topic</p>
     <nav>
       <ul>
-        <nuxt-link to="/">
+        <nuxt-link to="/" @click="toggleFeedMenu().value = false">
           <li>
             <img>
             <p to="/">Home</p>
           </li>
         </nuxt-link>
-        <nuxt-link to="/explore">
+        <nuxt-link to="/explore" @click="toggleFeedMenu().value = false">
           <li>
             <img>
             <p>Explore</p>
           </li>
         </nuxt-link>
-        <nuxt-link to="/rising">
+        <nuxt-link to="/rising" @click="toggleFeedMenu().value = false">
           <li>
             <img>
             <p>Rising</p>

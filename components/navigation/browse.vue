@@ -8,8 +8,9 @@
 </template>
 
 <script lang="ts" setup>
-//Toggle side nav minimised
 const sideNav: Ref = ref(null);
+
+// Toggle side nav minimised
 watch(toggleFeedMenu(), (value) => {
   if (value) {
     sideNav.value?.classList.remove('minimise');
