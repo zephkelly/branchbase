@@ -21,7 +21,7 @@ export default eventHandler(async (event: any) => {
     let result = null;
     
     try {
-      result = await pool.query('SELECT branch_name FROM branches_metadata WHERE branch_name = $1', [query.branchName]);
+      result = await pool.query('SELECT branch_name FROM branches WHERE branch_name = $1', [query.branchName]);
     } catch(err) {
       console.log(err);
       return false;

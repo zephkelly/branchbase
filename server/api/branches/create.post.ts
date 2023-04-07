@@ -2,7 +2,7 @@ import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
 
 import mongoose from 'mongoose';
-import { Branches_Metadata, BranchPostStore } from '~~/models/branches';
+import { Branches, Branch_Metadata, BranchPostStore } from '~~/models/branches';
 
 import { validateQuery } from '~~/utils/validateQuery';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
@@ -42,7 +42,7 @@ export default eventHandler(async (event: any) => {
 
   //Check if branch exists
   const doesBranchExist = pool.query(`
-    SELECT branch_name FROM branches_metadata WHERE branch_name = $1
+    SELECT branch_name FROM branches WHERE branch_name = $1
   `, [branch_name]);
 
   if (doesBranchExist.rowCount > 0) {
@@ -61,35 +61,52 @@ export default eventHandler(async (event: any) => {
   const user_id = regexDisplayIdRaw(user_display_name as string);
 
   try {
-    const branch_metadata: Branches_Metadata = {
+    const branch: Branches = {
       branch_name: branch_name,
-      creator_user_id: user_id,
-      owner_user_id: user_id,
+      icon_image: "",
       branch_type: branch_type,
-      branch_title: branch_name,
       description: branch_description,
       created_date: new Date(),
-      updated_date: new Date(),
+      updated_date: new Date()
     }
 
-    //Create branch metadata returning the id
-    const branch_metadata_result = await pool.query(`
-      INSERT INTO branches_metadata (branch_name, creator_user_id, owner_user_id, branch_type, branch_title, description)
+    const branch_result = await pool.query(`
+      INSERT INTO branches (branch_name, icon_image, branch_type, description, created_at, updated_at)
       VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id
-    `,
-      [branch_metadata.branch_name,
-      branch_metadata.creator_user_id,
-      branch_metadata.owner_user_id,
-      branch_metadata.branch_type,
-      branch_metadata.branch_title,
-      branch_metadata.description
+      RETURNING id`,
+      [
+        branch.branch_name,
+        branch.icon_image,
+        branch.branch_type,
+        branch.description,
+        branch.created_date,
+        branch.updated_date
       ]
     );
 
+    const branch_metadata: Branch_Metadata = {
+      branch_id: branch_result.rows[0].id,
+      branch_title: branch_name,
+      creator_user_id: user_id,
+      owner_user_id: user_id,
+      background_image: ""
+    }
+
+    //Create branch metadata
+    const branch_metadata_result = await pool.query(`
+      INSERT INTO branch_metadata (branch_id, branch_title, creator_user_id, owner_user_id, background_image)
+      VALUES ($1, $2, $3, $4, $5)`,
+    [
+      branch_metadata.branch_id,
+      branch_metadata.branch_title,
+      branch_metadata.creator_user_id,
+      branch_metadata.owner_user_id,
+      branch_metadata.background_image
+    ]);
+
     //Create branch post store from BranchPostStore model mogoose
     const branchStore = new BranchPostStore({
-      branch_id: branch_metadata_result.rows[0].id,
+      branch_id: branch_result.rows[0].id,
       posts: [],
     });
 

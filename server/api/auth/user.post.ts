@@ -63,7 +63,7 @@ export default eventHandler(async (event: any) => {
 
   //Set default avatar if null
   if (!userMetadata.avatar_url) {
-    userMetadata.avatar_url = 'https://breezebase.net/assets/images/default-avatar.png';
+    userMetadata.avatar_url = '';
   }
 
   //Set auth provider and hash password if it's email

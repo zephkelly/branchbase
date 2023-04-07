@@ -1,6 +1,6 @@
 import { pool } from '~~/server/postgres';
 import { validateQuery } from '~~/utils/validateQuery';
-import { Branches_Metadata, BranchPostStore } from '~~/models/branches';
+import { Branches, Branch_Metadata, BranchPostStore } from '~~/models/branches';
 import { Post } from '~~/models/post';
 
 export default eventHandler(async (event: any) => {
@@ -25,20 +25,46 @@ export default eventHandler(async (event: any) => {
   }
 
   //-----------------Query-----------------
-  const branchMeta = await pool.query('SELECT * FROM branches_metadata WHERE branch_name = $1', [branchName]);
-  const branch: Branches_Metadata = branchMeta.rows[0];
+  const result = await pool.query(`
+    SELECT 
+      b.*, 
+      bm.*
+    FROM 
+      branches b 
+      JOIN branch_metadata bm ON b.id = bm.branch_id
+    WHERE 
+      b.branch_name = $1;`,
+    [branchName]);
 
-  // //This grabs all the posts under this branch, full info
-  // const postStore = await BranchPostStore.find({ branch_id: branch.id }).exec();
-  // const posts = postStore[0].posts;
+  const rows = result.rows;
+  const branchData = result.rows[0];
 
-  //This grabs all the post metadata under this branch
-  const postStore = await pool.query('SELECT * FROM post_metadata WHERE branch_id = $1', [branch.id]);
-  const posts: Post[] = postStore.rows;
+  const branch: Branches = {
+    branch_name: branchData.branch_name,
+    icon_image: branchData.icon_image,
+    branch_type: branchData.branch_type,
+    description: branchData.description,
+    created_date: branchData.created_at,
+    updated_date: branchData.updated_at
+  };
+  
+  const branchMeta: Branch_Metadata = {
+    branch_id: branchData.id,
+    branch_title: branchData.branch_title,
+    creator_user_id: branchData.creator_user_id,
+    owner_user_id: branchData.owner_user_id,
+    background_image: branchData.background_image
+  };
 
+  const postResult = await pool.query(`
+    SELECT * FROM post_metadata WHERE branch_id = $1;`, [branchMeta.branch_id]);
+
+  const posts = postResult.rows;
+  
   return {
     statusCode: 200,
     branch: branch,
+    branchMeta: branchMeta,
     posts: posts,
   }
 
@@ -47,7 +73,7 @@ export default eventHandler(async (event: any) => {
     let result = null;
     
     try {
-      result = await pool.query('SELECT branch_name FROM branches_metadata WHERE branch_name = $1', [query.branchName]);
+      result = await pool.query('SELECT branch_name FROM branches WHERE branch_name = $1', [query.branchName]);
     } catch(err) {
       console.log(err);
       return false;

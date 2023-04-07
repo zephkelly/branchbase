@@ -40,7 +40,7 @@ export const user_metadata: string = 'user_metadata';
 //   user_id BIGINT REFERENCES users(id),
 //   display_name VARCHAR(255),
 //   avatar_url VARCHAR(255),
-//   bio TEXT,
+//   bio VARCHAR(255),
 //   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 //   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 // );

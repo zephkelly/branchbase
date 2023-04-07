@@ -138,7 +138,7 @@ export interface Post_Metadata {
 //   content_type VARCHAR(255) NOT NULL,
 //   post_status VARCHAR(255) NOT NULL,
 //   user_id INTEGER REFERENCES users(id),
-//   branch_id INTEGER REFERENCES branches_metadata(id),
+//   branch_id INTEGER REFERENCES branches(id),
 //   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 //   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 // );
