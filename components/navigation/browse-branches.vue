@@ -15,16 +15,8 @@
             <p>b/{{ branch.branch_name }}</p>
           </nuxt-link>
         </li>
-        <div v-if="!loadMoreBranches" v-on:click="loadMore" class="more-button">
+        <div v-if="loadMoreBranches" v-on:click="loadMore" class="more-button">
           <a>+ More</a>
-        </div>
-        <li v-else v-for="//@ts-ignore
-        branch in moreBranches?.data?.value?.body?.branches" :title="branch.description">
-          <img :scr="branch.icon_image">
-          <p>b/{{ branch.branch_name }}</p>
-        </li>
-        <div v-if="showViewAll" class="more-button">
-            <a href="">+ View all</a>
         </div>
       </ul>
     </nav>
@@ -32,7 +24,12 @@
 </template>
 
 <script lang="ts" setup>
-const loadMoreBranches = ref(false);
+const loadMoreBranches = computed(() => {
+  //@ts-expect-error
+  return moreBranches.data.value.body.branches.length > 0;
+});
+
+
 const showViewAll = ref(false);
 const limit: number = 6;
 
@@ -40,8 +37,6 @@ const { data: branches, pending } = await useFetch(`/api/branches?page=1&limit=$
 const moreBranches = await useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
 
 function loadMore() {
-  loadMoreBranches.value = true;
-
   //@ts-expect-error
   moreBranches.data.value.body.metadata.totalBranches > moreBranches.data.value.body.branches.length
     ? showViewAll.value = false
@@ -125,7 +120,7 @@ p.label {
         }
 
         &:hover {
-          background-color: rgb(54, 54, 54);
+          background-color: var(--panel-hover-color);
         }
 
         &:last-of-type {

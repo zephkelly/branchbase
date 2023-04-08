@@ -15,7 +15,6 @@
   <header class="branch-header" ref="branchHeader" v-else>
     <div class="background-image">
       <img :src="props.branchData.branchMeta.background_image">
-      <!-- <div class="fade"></div> -->
       <div class="fade"></div>
     </div>
     <div class="branch-info">
@@ -41,29 +40,24 @@ const branchHeader: Ref = ref(null);
 let lastScrollY = 0;
 let canShrink = false;
 function updateHideHeader(progress: number) {
-  if (progress < 160) {
+  if (progress < 700) {
     canShrink = false;
+  } else {
+    canShrink = true;
   }
 
-  // Always show header to 500 px but allow user to hide 
-  // after 2 seconds on scroll up
   if (!canShrink) {
+    if (!branchHeader.value.classList.contains('hide')) return;
     branchHeader.value.classList.remove('hide');
-    let timeout: any = null;
-
-    if (timeout) {
-      clearTimeout(timeout); 
-    }
-
-    timeout = setTimeout(() => {
-      canShrink = true;
-    }, 2000);
+    lastScrollY = progress;
     return;
   }
 
   if (progress < lastScrollY) {
+    if (!branchHeader.value.classList.contains('hide')) return;
     branchHeader.value.classList.remove('hide');
   } else {
+    if (branchHeader.value.classList.contains('hide')) return;
     branchHeader.value.classList.add('hide');
   }
 
@@ -249,7 +243,11 @@ header.branch-header {
     height: 2rem;
     pointer-events: none;
     opacity: 0.4;
-    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color) 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, black 100%);
+
+    @media (prefers-color-scheme: light) {
+      opacity: 0.2;
+    }
   }
 
   img {
@@ -261,6 +259,36 @@ header.branch-header {
   }
 }
 
+.background-image {
+  background-color: rgb(38, 38, 38);
+}
+
+.title {
+  .icon {
+    background-color: var(--panel-color);
+    border: 1px solid var(--panel-border-color);
+    box-shadow: 0rem 0rem 2rem 0.2rem rgba(0, 0, 0, 0.2);
+  }
+
+  .text {
+    h1 {
+      height: 2rem;
+      width: 16rem;
+      animation: pulse 2.2s ease-in-out infinite alternate;
+      animation-delay: 0.5s;
+    }
+
+    p {
+      height: 1rem;
+      width: 8rem;
+      animation: pulse 1.5s ease-in-out infinite alternate;
+    }
+  }
+}
+</style>
+
+
+<style lang="scss" scoped>
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.6s ease-out;
 }
@@ -276,32 +304,4 @@ header.branch-header {
 .fade2-enter-from, .fade-leave-to {
   opacity: 0;
 }
-</style>
-
-<style lang="scss" scoped>
-  .background-image {
-    background-color: rgb(38, 38, 38);
-  }
-
-  .title {
-    .icon {
-      background-color: var(--panel-color);
-      border: 1px solid var(--panel-border-color);
-    }
-
-    .text {
-      h1 {
-        height: 2rem;
-        width: 16rem;
-        animation: pulse 2.2s ease-in-out infinite alternate;
-        animation-delay: 0.5s;
-      }
-
-      p {
-        height: 1rem;
-        width: 8rem;
-        animation: pulse 1.5s ease-in-out infinite alternate;
-      }
-    }
-  }
 </style>

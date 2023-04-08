@@ -1,12 +1,14 @@
 //Global variables
 :root {
   --background-color-dark: rgb(8, 8, 9);
-  --background-color-light: rgb(255, 255, 255);
+  --background-color-light: rgb(220, 220, 220);
   
   --text-color-dark: #dedede;
-  --text-color-dark-darker: #9c9c9c;
+  --text-color-dark-darker: #c3c3c3;
 
   --text-color-light: #000000;
+  --text-color-light-lighter: #2f2f2f;
+
 
   --input-focus-dark: rgb(70, 128, 198);
   --input-valid-dark: rgba(0, 255, 0, 0.35);
@@ -22,19 +24,21 @@
 
   --panel-hover-color-dark-dark: rgb(18, 18, 19);
   --panel-hover-color-dark-light: rgb(36, 36, 37);
-  --panel-hover-color-light: rgb(235, 235, 235);
+  --panel-hover-color-light: rgb(243, 240, 236);
 
   --panel-border-dark: rgb(54, 54, 54);
   --panel-border-light: rgb(137, 137, 137);
 
   --panel-border-hover-color-dark: rgb(84, 84, 84);
-  --panel-border-hover-color-light: rgb(167, 167, 167);
+  --panel-border-hover-color-light: rgb(145, 145, 145);
 
   //Rising panel
   --panel-color-dark-rising: rgb(22, 20, 20);
-  --panel-border-dark-rising: rgb(93, 56, 38);
-}
+  --panel-color-light-rising: rgb(244, 241, 238);;
 
+  --panel-border-dark-rising: rgb(93, 56, 38);
+  --panel-border-light-rising: rgb(255, 158, 109);
+}
 
 // Dark mode
 :root {
@@ -49,6 +53,9 @@
   --panel-color: var(--panel-color-dark);
   --panel-hover-color: var(--panel-hover-color-dark-light);
   --panel-hover-color-inverted: var(--panel-hover-color-dark-dark);
+
+  --panel-color-rising: var(--panel-color-dark-rising);
+  --panel-border-rising: var(--panel-border-dark-rising);
   
   --panel-border-color: var(--panel-border-dark);
   --panel-border-hover-color: var(--panel-border-hover-color-dark);
@@ -63,8 +70,18 @@
   :root {
     color-scheme: light;
 
+    --text-color: var(--text-color-light);
+    --text-color-darker: var(--text-color-light-lighter);
+
     --background-color: var(--background-color-light);
     --panel-color: var(--panel-color-light);
-    --text-color: var(--text-color-light);
+
+    --panel-hover-color: var(--panel-hover-color-light);
+    --panel-hover-color-inverted: var(--panel-hover-color-dark);
+
+    --panel-color-rising: var(--panel-color-light-rising);
+    --panel-border-rising: var(--panel-border-light-rising);
+    
+    --panel-border-hover-color: var(--panel-border-hover-color-light);
   }
 }

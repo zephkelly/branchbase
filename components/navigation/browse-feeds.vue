@@ -98,7 +98,7 @@ section.feeds {
         cursor: pointer;
 
         &:hover {
-          background-color: rgb(40, 40, 40);
+          background-color: var(--panel-hover-color);
         }
 
         img {

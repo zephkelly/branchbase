@@ -325,8 +325,8 @@ function checkTextFadeOut() {
 }
 
 .post.rising {
-  background-color: var(--panel-color-dark-rising);
-  border: 1px solid var(--panel-border-dark-rising);
+  background-color: var(--panel-color-rising);
+  border: 1px solid var(--panel-border-rising);
 
   &:hover {
     border: 1px solid var(--panel-border-hover-color);
@@ -335,7 +335,7 @@ function checkTextFadeOut() {
   &.text {
     section.body {
       .fade {
-        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color-dark-rising) 100%);
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, var(--panel-color-rising) 100%);
       }
     }
   }
