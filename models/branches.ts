@@ -167,6 +167,7 @@ export interface Branch_Collections_Interface {
   branch_id: string;
   created_date: Date;
   updated_date: Date;
+  branch_pages: [typeof Branch_Pages];
   posts: [typeof PostSchema];
 }
 

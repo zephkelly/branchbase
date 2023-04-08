@@ -18,7 +18,7 @@
 const { slug } = useRoute().params;
 
 //Get branch data
-const { data: branchData, pending } = await useLazyFetch(`/api/branches/get-branch?name=${slug}`);
+const { data: branchData, pending } = await useLazyFetch(`/api/branches/get/branch?name=${slug}`);
 
 definePageMeta({
   layout: 'center-align',

@@ -8,19 +8,19 @@ export default eventHandler(async (event: any) => {
   const branchName: string = query.name as string;
 
   //-----------------Validation-----------------
-  if (await !doesBranchExist()) {
-    console.log("Branch doesn't exist.")
-    return {
-      statusCode: 200,
-      exists: false,
-    };
-  }
-
   if (!validateQuery(branchName)) {
     console.log("Invalid query.")
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Invalid query.' }),
+    };
+  }
+  
+  if (await !doesBranchExist()) {
+    console.log("Branch doesn't exist.")
+    return {
+      statusCode: 200,
+      exists: false,
     };
   }
 
@@ -59,7 +59,6 @@ export default eventHandler(async (event: any) => {
     owner_user_id: branchData.owner_user_id,
     background_image: branchData.background_image
   };
-
 
   let branchPages: Branch_Page_Metadata[] = [];
 

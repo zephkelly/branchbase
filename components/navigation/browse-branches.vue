@@ -29,7 +29,6 @@ const loadMoreBranches = computed(() => {
   return moreBranches.data.value.body.branches.length > 0;
 });
 
-
 const showViewAll = ref(false);
 const limit: number = 6;
 
