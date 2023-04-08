@@ -1,5 +1,6 @@
 <template>
-  <BranchesBranchHead :branchData="branchData" :isPending="pending"/>
+  <BranchesBranchHead :branchData="branchData" :isPending="pending" v-if="pending"/>
+  <BranchesBranchHead :branchData="branchData" :isPending="pending" v-else/>
   <section class="post-feed">
     <ControlBar :currentPage="'branch'"/>
     <PostsPost />
@@ -10,9 +11,6 @@
 </template>
 
 <script lang="ts" setup>
-import { regexDisplayIdRaw } from '@/utils/filterName';
-const { status, data } = useSession();
-
 const { slug } = useRoute().params;
 
 //Get branch data

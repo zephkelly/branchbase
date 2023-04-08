@@ -27,9 +27,11 @@
           <p ref="branchId">b/{{ props.branchData.branch.branch_name }}</p>
         </div>
         <div class="branch-interaction">
-          <nuxt-link class="edit-button" :to="`/edit/branches/${props.branchData.branch.branch_name}`">
-            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M180 876h44l443-443-44-44-443 443v44Zm614-486L666 262l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>
-          </nuxt-link>
+          <div class="edit" ref="editBranchButton">
+            <nuxt-link class="edit-button" :to="`/edit/branches/${props.branchData.branch.branch_name}`">
+              <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M180 876h44l443-443-44-44-443 443v44Zm614-486L666 262l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>
+            </nuxt-link>
+          </div>
         </div>
       </div>
     </div>
@@ -39,9 +41,10 @@
 <script lang="ts" setup>
 const { status, data } = useSession();
 const props = defineProps(['branchData', 'isPending']);
+const isPending = ref(props.isPending);
 
 // ----------------------Owner check----------------------
-watch(props.isPending, (value) => {
+watch(isPending, (value) => {
   if (value) {
     return;
   } else {
@@ -91,7 +94,7 @@ function updateHideHeader(progress: number) {
 const branchIcon: Ref = ref(null);
 function updateIconElement(progress: number) {
   const scale = 1 - progress * 0.55;
-  const top = `${-3 * (1 - progress) + 0.535}rem`;
+  const top = `${-3 * (1 - progress) + 0.545}rem`;
   const left = `${(progress * 1.1)}rem`;
 
   branchIcon.value.style.transform = `scale(${scale})`;
@@ -104,6 +107,8 @@ const branchTitle: Ref = ref(null);
 const branchId: Ref = ref(null);
 function updateTitleELements(progress: number) {
   const titleOpacity = `${(1 - progress)}`;
+  const left = `-${(progress * 0.8)}rem`;
+
   let idOpacity = progress;
   let fontWeight = 400;
   let fontSize = '1rem';
@@ -113,7 +118,7 @@ function updateTitleELements(progress: number) {
   }
 
   if (progress == 1) {
-    fontSize = '1.4rem';
+    fontSize = '1.5rem';
     fontWeight = 600;
   }
 
@@ -122,6 +127,23 @@ function updateTitleELements(progress: number) {
   branchId.value.style.opacity = idOpacity;
   branchId.value.style.fontSize = fontSize;
   branchId.value.style.fontWeight = fontWeight;
+  branchId.value.style.left = left;
+};
+
+// Scroll responsive edit
+const editBranchButton: Ref = ref(null);
+function updateEditElement(progress: number) {
+  const opacity = `${(1 - progress)}`;
+  
+  editBranchButton.value.style.opacity = opacity
+
+  if (progress == 1) {
+    if (editBranchButton.value.style.display === 'none') return;
+    editBranchButton.value.style.display = 'none';
+  } else {
+    if (editBranchButton.value.style.display === 'block') return;
+    editBranchButton.value.style.display = 'block';
+  }
 };
 
 function calculateScroll() {
@@ -143,6 +165,7 @@ function calculateScroll() {
 
   updateIconElement(progress);
   updateTitleELements(progress);
+  updateEditElement(progress);
 
   updateHideHeader(scrollYAbsolute);
 }
@@ -246,7 +269,8 @@ header.branch-header {
       opacity: 0.6;
       transition: 
         font-weight 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
-        font-size 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+        font-size 0.3s cubic-bezier(0.075, 0.82, 0.165, 1),
+        left 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
     }
   }
 }
@@ -285,12 +309,13 @@ header.branch-header {
 }
 
 .branch-interaction {
-  padding-top: 1rem;
-  width: 2rem;
+  padding-top: 1.25rem;
+  width: 1.8rem;
 
   svg {
-    width: 2rem;
-    height: 2rem;
+    position: relative;
+    width: 1.8rem;
+    height: 1.8rem;
     fill: var(--text-color);
   }
 }
