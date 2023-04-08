@@ -26,16 +26,39 @@
           <h1 ref="branchTitle">{{ props.branchData.branchMeta.branch_title }}</h1>
           <p ref="branchId">b/{{ props.branchData.branch.branch_name }}</p>
         </div>
+        <div class="branch-interaction">
+          <nuxt-link class="edit-button" :to="`/edit/branches/${props.branchData.branch.branch_name}`">
+            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M180 876h44l443-443-44-44-443 443v44Zm614-486L666 262l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>
+          </nuxt-link>
+        </div>
       </div>
     </div>
   </header>
 </template>
 
 <script lang="ts" setup>
+const { status, data } = useSession();
 const props = defineProps(['branchData', 'isPending']);
 
-//----------------------------------------------------
+// ----------------------Owner check----------------------
+watch(props.isPending, (value) => {
+  if (value) {
+    return;
+  } else {
+    if (status.value === 'authenticated') {
+      const userId = regexDisplayIdRaw(data.value?.user?.name);
+      const branchOwnerId = props.branchData.branchMeta.owner_user_id;
 
+      if (userId !== branchOwnerId) {
+        console.log('You are not the owner of this branch');
+      } else {
+        console.log('You are the owner of this branch');
+      }
+    }
+  }
+});
+
+// ------------------ SCROLL ANIMATIONS ------------------
 const branchHeader: Ref = ref(null);
 let lastScrollY = 0;
 let canShrink = false;
@@ -133,9 +156,7 @@ onUnmounted(() => {
 });
 </script>
 
-<script lang="ts">
-</script>
-
+<!-- Heading loaded -->
 <style lang="scss" scoped>
 header.branch-header {
   position: sticky;
@@ -170,6 +191,7 @@ header.branch-header {
 }
 
 .title {
+  position: relative;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -188,6 +210,7 @@ header.branch-header {
     overflow: hidden;
     background-color: var(--panel-color);
     border: 1px solid var(--panel-border-color);
+    box-shadow: 0rem 0rem 2rem 0.2rem rgba(0, 0, 0, 0.2);
     transition: 
       transform 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
       top 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
@@ -208,12 +231,14 @@ header.branch-header {
     font-family: 'Roboto', 'Inter', sans-serif;
 
     h1 {
+      width: auto;
       position: relative;
       font-size: 2rem;
       font-weight: 700;
     }
 
     p {
+      width: auto;
       position: relative;
       font-weight: 400;
       margin-top: 0.3rem;
@@ -255,39 +280,45 @@ header.branch-header {
     height: 100%;
     object-fit: cover;
     object-position: center;
-    background-color: rgb(61, 61, 61);
+    background-color: rgb(38, 38, 38);
   }
 }
 
-.background-image {
-  background-color: rgb(38, 38, 38);
-}
+.branch-interaction {
+  padding-top: 1rem;
+  width: 2rem;
 
-.title {
-  .icon {
-    background-color: var(--panel-color);
-    border: 1px solid var(--panel-border-color);
-    box-shadow: 0rem 0rem 2rem 0.2rem rgba(0, 0, 0, 0.2);
+  svg {
+    width: 2rem;
+    height: 2rem;
+    fill: var(--text-color);
   }
+}
+</style>
 
-  .text {
-    h1 {
-      height: 2rem;
-      width: 16rem;
-      animation: pulse 2.2s ease-in-out infinite alternate;
-      animation-delay: 0.5s;
-    }
-
-    p {
-      height: 1rem;
-      width: 8rem;
-      animation: pulse 1.5s ease-in-out infinite alternate;
+<!-- Heading Pending -->
+<style lang="scss" scoped>
+header.pending {
+  .title {
+    .text {
+      h1 {
+        height: 2rem;
+        width: 16rem;
+        animation: pulse 2.2s ease-in-out infinite alternate;
+        animation-delay: 0.5s;
+      }
+  
+      p {
+        height: 1rem;
+        width: 8rem;
+        animation: pulse 1.5s ease-in-out infinite alternate;
+      }
     }
   }
 }
 </style>
 
-
+<!-- Animation -->
 <style lang="scss" scoped>
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.6s ease-out;

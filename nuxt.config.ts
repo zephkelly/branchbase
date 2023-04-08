@@ -14,6 +14,13 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { ssr: true },
   },
+
+  generate: {
+    routes: [
+      '/branches/[slug]/edit',
+      // add additional dynamic routes here as needed
+    ]
+  }
   // auth: {
   //   origin: process.env.AUTH_ORIGIN,
   // },
