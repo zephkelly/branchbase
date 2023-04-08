@@ -12,7 +12,7 @@
       </div>
     </div>
   </header>
-  <header class="branch-header" v-else>
+  <header class="branch-header" ref="branchHeader" v-else>
     <div class="background-image">
       <img :src="props.branchData.branchMeta.background_image">
       <!-- <div class="fade"></div> -->
@@ -36,6 +36,39 @@
 const props = defineProps(['branchData', 'isPending']);
 
 //----------------------------------------------------
+
+const branchHeader: Ref = ref(null);
+let lastScrollY = 0;
+let canShrink = false;
+function updateHideHeader(progress: number) {
+  if (progress < 160) {
+    canShrink = false;
+  }
+
+  // Always show header to 500 px but allow user to hide 
+  // after 2 seconds on scroll up
+  if (!canShrink) {
+    branchHeader.value.classList.remove('hide');
+    let timeout: any = null;
+
+    if (timeout) {
+      clearTimeout(timeout); 
+    }
+
+    timeout = setTimeout(() => {
+      canShrink = true;
+    }, 2000);
+    return;
+  }
+
+  if (progress < lastScrollY) {
+    branchHeader.value.classList.remove('hide');
+  } else {
+    branchHeader.value.classList.add('hide');
+  }
+
+  lastScrollY = progress;
+}
 
 // Scroll responsive icon
 const branchIcon: Ref = ref(null);
@@ -75,7 +108,9 @@ function updateTitleELements(progress: number) {
 };
 
 function calculateScroll() {
-  let scrollY = window.scrollY;
+  let scrollYAbsolute = window.scrollY;
+  let scrollY = scrollYAbsolute;
+
   const minScroll = 50;
   const maxScroll = 130;
 
@@ -91,6 +126,8 @@ function calculateScroll() {
 
   updateIconElement(progress);
   updateTitleELements(progress);
+
+  updateHideHeader(scrollYAbsolute);
 }
 
 onMounted(() => {
@@ -119,10 +156,16 @@ header.branch-header {
   margin-top: 3rem;
   background-color: var(--panel-color);
   border-bottom: 1px solid var(--panel-border-color);
+  transition: transform 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
   z-index: 10;
-
+  
   * {
     box-sizing: border-box;  
+  }
+  
+  &.hide {
+    transform: translateY(-6rem);
+    transition: transform 2s cubic-bezier(0.075, 0.82, 0.165, 1);
   }
 }
 
