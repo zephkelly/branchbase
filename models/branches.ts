@@ -51,10 +51,119 @@ export interface Branch_Metadata {
 //   background_image VARCHAR(255) NOT NULL
 // );
 
-// ---------------Branch Post Store----------------
+// ---------------Branch Pages-----------------------------
+// This is the schema for storing all pages for a branches pages
+enum PageType {
+  ABOUT = "about",
+  CONTACT = "contact",
+  FAQ = "faq",
+  RULES = "rules",
+  LINK = "link",
+  OTHER = "other",
+}
+
+enum PageContentType {
+  TEXT = "text",
+  IMAGE = "image",
+  VIDEO = "video",
+  LINK = "link",
+  QUOTE = "quote",
+  POLL = "poll",
+}
+
+export interface Branch_Page_Content {
+  //id: string;
+  url: string;
+  type: PageContentType;
+  content: string;
+}
+
+export interface Branch_Pages {
+  //id: string;
+  branch_id: string;
+  page_title: string;
+  page_heading: string;
+  page_subheading: string;
+  page_type: PageType;
+  created_date: Date;
+  updated_date: Date;
+  page_content: [Branch_Page_Content];
+}
+
+const Branch_Page_Content = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+});
+
+const Branch_Pages = new mongoose.Schema({
+  branch_id: {
+    type: String,
+    required: true,
+  },
+  page_title: {
+    type: String,
+    required: true,
+  },
+  page_heading: {
+    type: String,
+    required: true,
+  },
+  page_subheading: {
+    type: String,
+    required: false,
+  },
+  page_type: {
+    type: String,
+    required: true,
+  },
+  page_content: {
+    type: [Branch_Page_Content],
+    required: true,
+  },
+  created_date: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+  updated_date: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
+});
+
+
+// ---------------Branch Page Metadata---------------------
+// This is the schema for storing all metadata for a branches pages
+export interface Branch_Page_Metadata {
+  //id: string;
+  branch_id: string;
+  page_id: string; //From mongodb objectid
+  page_url: string;
+  page_title: string;
+  page_type: PageType;
+}
+
+//SQL table
+// CREATE TABLE branch_page_metadata (
+//   id BIGSERIAL PRIMARY KEY,
+//   branch_id BIGINT REFERENCES branches(id),
+//   page_id TEXT NOT NULL,
+//   page_url VARCHAR(255) NOT NULL,
+//   page_title VARCHAR(255) NOT NULL,
+//   page_type VARCHAR(255) NOT NULL
+// );
+
+// ---------------Branch Collections-----------------------
 // This is the schema for storing all posts for the site's branches.
-//
-export interface Branch_Post_Store {
+// branch-pages are stored in this schema.
+export interface Branch_Collections_Interface {
   branch_id: string;
   created_date: Date;
   updated_date: Date;
@@ -62,7 +171,7 @@ export interface Branch_Post_Store {
 }
 
 //MongoDB Schema
-const BranchPostStoreSchema = new mongoose.Schema({
+const Branch_Collections = new mongoose.Schema({
   branch_id: {
     type: String,
     required: true,
@@ -77,13 +186,8 @@ const BranchPostStoreSchema = new mongoose.Schema({
     required: true,
     default: Date.now,
   },
-  moderators: {
-    type: [String],
-    required: true,
-    default: [],
-  },
-  admins: {
-    type: [String],
+  branch_pages: {
+    type: [Branch_Pages],
     required: true,
     default: [],
   },
@@ -95,7 +199,7 @@ const BranchPostStoreSchema = new mongoose.Schema({
 });
 
 //MogoDB Model
-export const BranchPostStore = mongoose.model(
-  "BranchPostStore",
-  BranchPostStoreSchema
+export const BranchCollections = mongoose.model(
+  "branch_collections",
+  Branch_Collections
 );

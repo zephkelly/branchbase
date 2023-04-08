@@ -7,6 +7,10 @@
     <PostsPost />
     <PostsPost />
     <PostsPost />
+    <PostsPost />
+    <PostsPost />
+    <PostsPost />
+    <PostsPost />
   </section>
 </template>
 

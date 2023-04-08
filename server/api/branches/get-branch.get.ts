@@ -1,6 +1,6 @@
 import { pool } from '~~/server/postgres';
 import { validateQuery } from '~~/utils/validateQuery';
-import { Branches, Branch_Metadata, BranchPostStore } from '~~/models/branches';
+import { Branches, Branch_Metadata, Branch_Page_Metadata } from '~~/models/branches';
 import { Post } from '~~/models/post';
 
 export default eventHandler(async (event: any) => {
@@ -28,12 +28,16 @@ export default eventHandler(async (event: any) => {
   const result = await pool.query(`
     SELECT 
       b.*, 
-      bm.*
+      bm.*, 
+      json_agg(bpm.*) AS pages
     FROM 
       branches b 
       JOIN branch_metadata bm ON b.id = bm.branch_id
+      LEFT JOIN branch_page_metadata bpm ON b.id = bpm.branch_id
     WHERE 
-      b.branch_name = $1;`,
+      b.branch_name = $1
+    GROUP BY 
+      b.id, bm.id;`,
     [branchName]);
 
   const rows = result.rows;
@@ -56,6 +60,13 @@ export default eventHandler(async (event: any) => {
     background_image: branchData.background_image
   };
 
+
+  let branchPages: Branch_Page_Metadata[] = [];
+
+  if (branchData.pages[0] !== null) {
+    branchPages = JSON.parse(branchData.pages);
+  }
+
   const postResult = await pool.query(`
     SELECT * FROM post_metadata WHERE branch_id = $1;`, [branchMeta.branch_id]);
 
@@ -65,6 +76,7 @@ export default eventHandler(async (event: any) => {
     statusCode: 200,
     branch: branch,
     branchMeta: branchMeta,
+    branchPages: branchPages,
     posts: posts,
   }
 

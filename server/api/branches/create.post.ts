@@ -2,7 +2,7 @@ import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
 
 import mongoose from 'mongoose';
-import { Branches, Branch_Metadata, BranchPostStore } from '~~/models/branches';
+import { Branches, Branch_Metadata, BranchCollections } from '~~/models/branches';
 
 import { validateQuery } from '~~/utils/validateQuery';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
@@ -104,9 +104,10 @@ export default eventHandler(async (event: any) => {
       branch_metadata.background_image
     ]);
 
-    //Create branch post store from BranchPostStore model mogoose
-    const branchStore = new BranchPostStore({
+    //Create branch post store from BranchCollection model mogoose
+    const branchStore = new BranchCollections({
       branch_id: branch_result.rows[0].id,
+      branch_pages: [],
       posts: [],
     });
 

@@ -73,17 +73,29 @@ function updateHideHeader(progress: number) {
   }
 
   if (!canShrink) {
-    if (!branchHeader.value.classList.contains('hide')) return;
+    if (!branchHeader.value.classList.contains('hide')) {
+      lastScrollY = progress;
+      return;
+    }
+    
     branchHeader.value.classList.remove('hide');
     lastScrollY = progress;
     return;
   }
 
   if (progress < lastScrollY) {
-    if (!branchHeader.value.classList.contains('hide')) return;
+    if (!branchHeader.value.classList.contains('hide')) {
+      lastScrollY = progress;
+      return;
+    }
+
     branchHeader.value.classList.remove('hide');
   } else {
-    if (branchHeader.value.classList.contains('hide')) return;
+    if (branchHeader.value.classList.contains('hide')) {
+      lastScrollY = progress;
+      return;
+    }
+
     branchHeader.value.classList.add('hide');
   }
 
@@ -94,7 +106,7 @@ function updateHideHeader(progress: number) {
 const branchIcon: Ref = ref(null);
 function updateIconElement(progress: number) {
   const scale = 1 - progress * 0.55;
-  const top = `${-3 * (1 - progress) + 0.545}rem`;
+  const top = `${-3 * (1 - progress) + 0.535}rem`;
   const left = `${(progress * 1.1)}rem`;
 
   branchIcon.value.style.transform = `scale(${scale})`;
@@ -107,6 +119,7 @@ const branchTitle: Ref = ref(null);
 const branchId: Ref = ref(null);
 function updateTitleELements(progress: number) {
   const titleOpacity = `${(1 - progress)}`;
+  const top = `-${(progress * 0.08)}rem`;
   const left = `-${(progress * 0.8)}rem`;
 
   let idOpacity = progress;
@@ -127,6 +140,7 @@ function updateTitleELements(progress: number) {
   branchId.value.style.opacity = idOpacity;
   branchId.value.style.fontSize = fontSize;
   branchId.value.style.fontWeight = fontWeight;
+  branchId.value.style.top = top;
   branchId.value.style.left = left;
 };
 
