@@ -1,8 +1,15 @@
 <template>
   <header class="head">
     <div class="introduction">
-      <h1 class="title">EDITING BRANCH</h1>
-      <h2 class="title">b/{{ branchData.branch.branch_name }}</h2>
+      <div class="text">
+        <h1 class="title">EDITING BRANCH</h1>
+        <h2 class="title">b/{{ branchData.branch.branch_name }}</h2>
+      </div>
+      <div class="icon">
+        <div class="container">
+          <img :src="branchData.branch.icon_image" alt="Branch icon">
+        </div>
+      </div>
     </div>
     <div class="edit-branch-navbar">
       <nav>
@@ -86,16 +93,56 @@ header.head {
   }
 
   .introduction {
-    h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text-color);
+    display: grid;
+    grid-template-columns: 1fr 7rem;
+
+    .text {
+      max-height: 6rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-end;
+
+      h1 {
+        position: relative;
+        left: -2px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-color);  
+      }
+      
+      h2 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-color);
+        opacity: 0.8;
+      }
     }
 
-    h2 {
-      font-size: 1.2rem;
-      font-weight: 500;
-      color: var(--text-color);
+    .icon {
+      position: relative;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      max-width: 100%;
+      height: 6rem;
+      max-height: 6rem;
+      
+      .container {
+        position: relative;
+        border-radius: 50%;
+        overflow: hidden;
+        width: 7rem;
+        height: 7rem;
+        margin-top: 2.5rem;
+        border: 1px solid var(--panel-border-color);
+
+        img {
+          height: auto;
+          width: 100%;
+        }
+      }
     }
   }
 }
@@ -143,12 +190,6 @@ header.head {
           }
         }
 
-        p {
-          width: 4rem;
-          height: 1.2rem;
-          animation-delay: 0.3s;
-        }
-
         h3 {
           opacity: 0.4;
         }
@@ -175,11 +216,6 @@ header.head {
         button {
           border-top-left-radius: 0.5rem;
           border-left: 1px solid var(--panel-border-color);
-
-          p {
-            animation-delay: 0.5s;
-            min-width: 5rem;
-          }
         }
 
         button.active {
@@ -191,11 +227,6 @@ header.head {
         button {
           border-top-right-radius: 0.5rem;
           border-right: 1px solid var(--panel-border-color);
-
-          p {
-            animation-delay: 1s;
-            min-width: 4rem;
-          }
         }
 
         button.active {

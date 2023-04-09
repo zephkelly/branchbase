@@ -140,7 +140,7 @@ section.loading {
  
     p {
      width: 10rem;
-     height: 1.2rem;
+     height: 1.3rem;
      margin-top: 0.3em;
     }
   }
@@ -148,9 +148,31 @@ section.loading {
   &.edit-branch-navbar {
     position: relative;
     top: 1px;
+    
+    li {
+      button {
+        border-bottom: 1px solid var(--panel-border-color);
+  
+        p {
+          min-height: 1.2rem;
+          min-width: 5rem;
+          animation-duration: 4s;
+        }
+      }
 
-    button {
-      border-bottom: 1px solid var(--panel-border-color);
+      &:first-of-type {
+        p {
+          animation-delay: 1.5s;
+          min-width: 3.8rem;
+        }
+      }
+
+      &:last-of-type {
+        p {
+          animation-delay: 2s;
+          min-width: 3.6rem;
+        }
+      }
     }
 
     button.active {
