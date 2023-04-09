@@ -1,5 +1,5 @@
 <template>
-  <BranchesBranchHead :branchData="branchData" :isPending="pending" v-if="pending"/>
+  <BranchesBranchHead :branchData="null" :isPending="pending" v-if="pending"/>
   <BranchesBranchHead :branchData="branchData" :isPending="pending" v-else/>
   <section class="post-feed">
     <ControlBar :currentPage="'branch'"/>

@@ -1,0 +1,2 @@
+export const backgroundImageModalEnabled = () => useState<boolean>('backgroundImageModalEnabled', () => false);
+// export const backgroundImageModalEnabled = () => useState<boolean>('backgroundImageModalEnabled', () => false);

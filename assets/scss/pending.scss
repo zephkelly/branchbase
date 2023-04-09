@@ -7,15 +7,18 @@
   }
 }
 
-p.pending {
-  background: linear-gradient(90deg, 
-    rgb(8, 8, 8) 0%, 
-    rgb(18, 18, 18) 20%, 
-    rgb(8, 8, 8) 55%,
-    rgb(20, 20, 20) 85%,
-    rgb(8, 8, 8) 100%
-  );
-  background-size: 400% 400%;
+p {
+  &.pending {
+    background: linear-gradient(90deg, 
+      rgb(8, 8, 8) 0%, 
+      rgb(18, 18, 18) 20%, 
+      rgb(8, 8, 8) 55%,
+      rgb(20, 20, 20) 85%,
+      rgb(8, 8, 8) 100%
+    );
+    background-size: 400% 400%;
+    animation: pulse 1.5s ease-in-out infinite alternate;
+  }
 }
 
 h1.pending-large {
@@ -26,4 +29,5 @@ h1.pending-large {
     rgb(20, 20, 20) 100%
   );
   background-size: 400% 400%;
+  animation: pulse 2.2s ease-in-out infinite alternate;
 }

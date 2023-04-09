@@ -27,7 +27,7 @@
           <p ref="branchId">b/{{ props.branchData.branch.branch_name }}</p>
         </div>
         <div class="branch-interaction">
-          <div class="edit" ref="editBranchButton">
+          <div class="edit" ref="editBranchButton" v-if="isOwnerAdmin">
             <nuxt-link class="edit-button" :to="`/edit/branches/${props.branchData.branch.branch_name}`">
               <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M180 876h44l443-443-44-44-443 443v44Zm614-486L666 262l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>
             </nuxt-link>
@@ -42,24 +42,21 @@
 const { status, data } = useSession();
 const props = defineProps(['branchData', 'isPending']);
 const isPending = ref(props.isPending);
+const isOwnerAdmin: Ref = ref(false);
 
 // ----------------------Owner check----------------------
-watch(isPending, (value) => {
-  if (value) {
-    return;
-  } else {
-    if (status.value === 'authenticated') {
-      const userId = regexDisplayIdRaw(data.value?.user?.name);
-      const branchOwnerId = props.branchData.branchMeta.owner_user_id;
-
-      if (userId !== branchOwnerId) {
-        console.log('You are not the owner of this branch');
-      } else {
-        console.log('You are the owner of this branch');
-      }
+if (isPending.value) {
+  console.log('Pending');
+} else {
+  if (status.value === 'authenticated') {
+    const userId = regexDisplayIdRaw(data.value?.user?.name);
+    const branchOwnerId = props.branchData.branchMeta.owner_user_id;
+    if (userId === branchOwnerId) {
+      isOwnerAdmin.value = true;
     }
   }
-});
+}
+
 
 // ------------------ SCROLL ANIMATIONS ------------------
 const branchHeader: Ref = ref(null);
@@ -71,7 +68,7 @@ function updateHideHeader(progress: number) {
   } else {
     canShrink = true;
   }
-
+  
   if (!canShrink) {
     if (!branchHeader.value.classList.contains('hide')) {
       lastScrollY = progress;
@@ -179,7 +176,10 @@ function calculateScroll() {
 
   updateIconElement(progress);
   updateTitleELements(progress);
-  updateEditElement(progress);
+
+  if (editBranchButton.value) {
+    updateEditElement(progress);
+  }
 
   updateHideHeader(scrollYAbsolute);
 }
@@ -221,6 +221,40 @@ header.branch-header {
   }
 }
 
+.background-image {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 6rem;
+  min-height: 6rem;
+  max-height: 6rem;
+  border-bottom: 1px solid var(--panel-border-color);
+
+  .fade {
+    display: flex;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2rem;
+    pointer-events: none;
+    opacity: 0.25;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, black 100%);
+
+    @media (prefers-color-scheme: light) {
+      opacity: 0.2;
+    }
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    background-color: rgb(38, 38, 38);
+  }
+}
+
 .branch-info {
   width: 100%;
   display: flex;
@@ -247,7 +281,7 @@ header.branch-header {
     overflow: hidden;
     background-color: var(--panel-color);
     border: 1px solid var(--panel-border-color);
-    box-shadow: 0rem 0rem 2rem 0.2rem rgba(0, 0, 0, 0.2);
+    box-shadow: 0rem 0rem 2rem 0.2rem rgba(0, 0, 0, 0.04);
     transition: 
       transform 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
       top 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
@@ -289,38 +323,6 @@ header.branch-header {
   }
 }
 
-.background-image {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  min-height: 6rem;
-  max-height: 6rem;
-  border-bottom: 1px solid var(--panel-border-color);
-
-  .fade {
-    display: flex;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 2rem;
-    pointer-events: none;
-    opacity: 0.4;
-    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, black 100%);
-
-    @media (prefers-color-scheme: light) {
-      opacity: 0.2;
-    }
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    background-color: rgb(38, 38, 38);
-  }
-}
 
 .branch-interaction {
   padding-top: 1.25rem;
@@ -343,14 +345,12 @@ header.pending {
       h1 {
         height: 2rem;
         width: 16rem;
-        animation: pulse 2.2s ease-in-out infinite alternate;
         animation-delay: 0.5s;
       }
   
       p {
         height: 1rem;
         width: 8rem;
-        animation: pulse 1.5s ease-in-out infinite alternate;
       }
     }
   }
