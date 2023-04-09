@@ -27,6 +27,9 @@
       </nav>
     </div>
   </section>
+  <div v-if="canViewPage" class="modals">
+    <EditBranchesModalBackgroundImage v-if="backgroundImageModalEnabled().value" :branchData="branchData"/>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -86,6 +89,11 @@ function toggleFixedBody(val: boolean) {
     document.body.style.top = '';
     window.scrollTo(0, parseInt(scrollY || '0') * -1);
   }
+}
+
+// ---------------------- Modal ------------------------
+function toggleEditBackgroundModal() {
+  backgroundImageModalEnabled().value = !backgroundImageModalEnabled().value;
 }
 
 // Disabled all modals

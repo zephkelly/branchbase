@@ -8,17 +8,17 @@
       <nav>
         <ul>
           <li>
-            <button class="active">
+            <button ref="generalPageButton" class="active" @click="editBranchActivePage().value = 'general'">
               <h3>General</h3>
             </button>
           </li>
           <li>
-            <button class="">
+            <button ref="metadataPageButton" class="" @click="editBranchActivePage().value = 'metadata'">
               <h3>Metadata</h3>
             </button>
           </li>
           <li>
-            <button class="">
+            <button ref="pagesPageButton" class="" @click="editBranchActivePage().value = 'page'">
               <h3>Pages</h3>
             </button>
           </li>
@@ -26,16 +26,32 @@
       </nav>
     </div>
   </header>
-  <EditBranchesModalBackgroundImage v-if="backgroundImageModalEnabled().value" :branchData="branchData"/>
 </template>
 
 <script lang="ts" setup>
 const props = defineProps(['branchData'])
 
-// ---------------------- Modal ----------------------
-function toggleEditBackgroundModal() {
-  backgroundImageModalEnabled().value = !backgroundImageModalEnabled().value;
-}
+// -------------- Sub page navigation ------------------
+const generalPageButton: Ref = ref(null);
+const metadataPageButton: Ref = ref(null);
+const pagesPageButton: Ref = ref(null);
+watch(editBranchActivePage, (val) => {
+  if (val.value === 'general') {
+    generalPageButton.value.classList.add('active');
+    metadataPageButton.value.classList.remove('active');
+    pagesPageButton.value.classList.remove('active');
+  }
+  else if (val.value === 'metadata') {
+    generalPageButton.value.classList.remove('active');
+    metadataPageButton.value.classList.add('active');
+    pagesPageButton.value.classList.remove('active');
+  }
+  else if (val.value === 'page') {
+    generalPageButton.value.classList.remove('active');
+    metadataPageButton.value.classList.remove('active');
+    pagesPageButton.value.classList.add('active');
+  }
+});
 </script>
 
 <!-- Not Pending -->
@@ -95,6 +111,7 @@ header.head {
 }
 </style>
 
+<!-- Global style to be shared with pending on [slug] -->
 <style lang="scss">
 .edit-branch-navbar {
   position: relative;
@@ -113,13 +130,10 @@ header.head {
         min-width: 6rem;
         padding: 0.5rem 1.6rem;
         border-top: 1px solid var(--panel-border-color);
-        // border-bottom: 1px solid var(--panel-border-color);
         background-color: var(--panel-color);
         color: var(--panel-text-color);
         cursor: pointer;
-        transition: 
-          background-color 0.3s cubic-bezier(0.075, 0.82, 0.165, 1),
-          border-bottom 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+        transition: background-color 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
 
         &:hover {
           background-color: var(--panel-hover-color);
