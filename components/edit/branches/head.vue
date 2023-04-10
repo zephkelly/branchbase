@@ -177,7 +177,7 @@ header.head {
         min-width: 6rem;
         padding: 0.5rem 1.6rem;
         border-top: 1px solid var(--panel-border-color);
-        background-color: var(--panel-color);
+        background-color: var(--background-color);
         color: var(--panel-text-color);
         cursor: pointer;
         transition: background-color 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -196,8 +196,8 @@ header.head {
       }
 
       button.active {
-        background-color: var(--background-color);
-        border-bottom: 1px solid var(--background-color);
+        background-color: var(--panel-color);
+        border-bottom: 1px solid var(--panel-color);
         border-left: 1px solid var(--panel-border-color);
         border-right: 1px solid var(--panel-border-color);
         color: var(--text-color);

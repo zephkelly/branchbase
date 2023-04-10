@@ -33,7 +33,7 @@ section.pending {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 3rem;
+  padding-top: calc(3rem - 1px);
   background-color: var(--panel-color);
   border-bottom: 1px solid var(--panel-border-color);
   box-sizing: border-box;
@@ -49,7 +49,6 @@ section.pending {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  // padding-top: 3rem;
 
   &.introduction {
     h1 {
