@@ -33,10 +33,24 @@ export default eventHandler(async (event: any) => {
   }
 
   //Validate the query
-  if (validateQuery(branch_name, branch_description, branch_type) == false) {
+  if (validateQuery(branch_description, branch_type) == false) {
     return {
       success: false,
       message: "The details you input are invalid, message too long or missing"
+    }
+  }
+
+  if (branch_type != "public" && branch_type != "private") {
+    return {
+      success: false,
+      message: "The branch type is invalid"
+    }
+  }
+
+  if (validateQueryCustom(branch_name, 1, 21) == false) {
+    return {
+      success: false,
+      message: "The branch name is too long or too short (1-21 chars)"
     }
   }
 
@@ -52,9 +66,6 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  //--------------------Create Branch--------------------
-  //
-  await pool.query('BEGIN');
   const mongoSession = await mongoose.startSession();
   mongoSession.startTransaction();
 

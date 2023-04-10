@@ -2,7 +2,7 @@
   <header class="head">
     <div class="introduction">
       <div class="text">
-        <h1 class="title">EDITING BRANCH</h1>
+        <h1 class="title">EDITING BRANCH:</h1>
         <h2 class="title">b/{{ branchData.branch.branch_name }}</h2>
       </div>
       <div class="icon">

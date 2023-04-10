@@ -1,12 +1,9 @@
 <template>
   <nav class="control-bar">
     <div class="bar-content">
-      <!-- <Transition name="fade">
-        <h3 v-show="isCreating().value">Creation panel</h3>
-      </Transition> -->
     </div>
     <div>
-      <button class="create" @click="toggleCreatePanel()" ref="createButton" alt="Open create panel" title="Open create panel">
+      <button class="create" @click="toggleCreatePanel()" ref="createButton" alt="Toggle the create panel" title="Toggle the create panel">
         <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M450 856V606H200v-60h250V296h60v250h250v60H510v250h-60Z"/></svg>
       </button>
     </div>
@@ -17,9 +14,23 @@
 const props = defineProps(['currentPage']);
 const createButton: Ref = ref(null);
 
-function toggleCreatePanel() {
-  createButton.value.classList.toggle('active');
+watch(isCreatingIndex(), (val) => {
+  if (val === true) {
+    createButton.value.classList.add('active');
+  } else {
+    createButton.value.classList.remove('active');
+  }
+});
 
+watch(isCreatingBranch(), (val) => {
+  if (val === true) {
+    createButton.value.classList.add('active');
+  } else {
+    createButton.value.classList.remove('active');
+  }
+});
+
+function toggleCreatePanel() {
   if (props.currentPage === 'index') {
     isCreatingIndex().value = !isCreatingIndex().value;
   } else if (props.currentPage === 'branch') {

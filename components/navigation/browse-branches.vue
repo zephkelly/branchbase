@@ -10,7 +10,7 @@
         <!-- <p class="label">BRANCHES</p> -->
         <li v-for="//@ts-ignore
         branch in branches?.body?.branches" :title="branch.description">
-          <nuxt-link :to="'/branches/' + branch.branch_name" @click="toggleFeedMenu().value = false">
+          <nuxt-link :to="'/b/' + branch.branch_name" @click="toggleFeedMenu().value = false">
             <img :src="branch.icon_image">
             <p>b/{{ branch.branch_name }}</p>
           </nuxt-link>

@@ -4,7 +4,7 @@
       <div class="post-info">
         <div class="branch-attributes">
           <div class="branch-icon">
-            <img>
+            <img src="https://i.imgur.com/Rnj7kZj.jpeg">
           </div>
           <nuxt-link class="branch-name">b/programming</nuxt-link>
           <p class="dot">.</p>
@@ -151,8 +151,8 @@ function checkTextFadeOut() {
 
       div.branch-attributes {   
         div.branch-icon {
-          width: 1rem;
-          height: 1rem;
+          width: 1.2rem;
+          height: 1.2rem;
           border-radius: 50%;
           margin-right: 0.4rem;
           overflow: hidden;
@@ -162,7 +162,7 @@ function checkTextFadeOut() {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            background-color: var(--text-color);
+            // background-color: var(--text-color);
           }
         }
 

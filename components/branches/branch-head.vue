@@ -7,7 +7,7 @@
       <div class="icon">
       </div>
       <div class="text">
-        <h1 class="branch-title pending-large"><title></title></h1>
+        <h1 class="branch-title pending-large"></h1>
         <p class="pending"></p>
       </div>
     </div>
@@ -28,7 +28,7 @@
         </div>
         <div class="branch-interaction">
           <div class="edit" ref="editBranchButton" v-if="isOwnerAdmin">
-            <nuxt-link class="edit-button" :to="`/edit/branches/${props.branchData.branch.branch_name}`">
+            <nuxt-link class="edit-button" :to="`/edit/b/${props.branchData.branch.branch_name}`">
               <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M180 876h44l443-443-44-44-443 443v44Zm614-486L666 262l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>
             </nuxt-link>
           </div>
@@ -358,7 +358,7 @@ header.pending {
 </style>
 
 <!-- Animation -->
-<style lang="scss" scoped>
+<!-- <style lang="scss" scoped>
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.6s ease-out;
 }
@@ -374,4 +374,4 @@ header.pending {
 .fade2-enter-from, .fade-leave-to {
   opacity: 0;
 }
-</style>
+</style> -->
