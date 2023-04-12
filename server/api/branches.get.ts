@@ -1,5 +1,5 @@
 import { pool } from '~~/server/postgres';
-import { validateQuery } from '~~/utils/validateQuery';
+import { validateQuery } from '~~/utils/forms/validation';
 
 export default eventHandler(async (event: any) => {
 //   return {

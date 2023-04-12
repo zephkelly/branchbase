@@ -39,6 +39,7 @@ export interface Branch_Metadata {
   creator_user_id: string;
   owner_user_id: string;
   background_image: string;
+  tags: [string];
 }
 
 //SQL Schema
@@ -48,7 +49,8 @@ export interface Branch_Metadata {
 //   branch_title VARCHAR(255) NOT NULL,
 //   creator_user_id VARCHAR(255) NOT NULL,
 //   owner_user_id VARCHAR(255) NOT NULL,
-//   background_image VARCHAR(255) NOT NULL
+//   background_image VARCHAR(255) NOT NULL,
+//   tags VARCHAR(255) NOT NULL
 // );
 
 // ---------------Branch Pages-----------------------------

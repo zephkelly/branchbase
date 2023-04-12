@@ -4,7 +4,7 @@ import { pool } from '~~/server/postgres';
 import mongoose from 'mongoose';
 import { Branches, Branch_Metadata, BranchCollections } from '~~/models/branches';
 
-import { validateQuery } from '~~/utils/validateQuery';
+import { validateQuery, validateQueryCustom } from '~~/utils/forms/validation';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
 
 //Creat branch post
@@ -100,19 +100,21 @@ export default eventHandler(async (event: any) => {
       branch_title: branch_name,
       creator_user_id: user_id,
       owner_user_id: user_id,
-      background_image: ""
+      background_image: "",
+      tags: [""],
     }
 
     //Create branch metadata
     const branch_metadata_result = await pool.query(`
-      INSERT INTO branch_metadata (branch_id, branch_title, creator_user_id, owner_user_id, background_image)
-      VALUES ($1, $2, $3, $4, $5)`,
+      INSERT INTO branch_metadata (branch_id, branch_title, creator_user_id, owner_user_id, background_image, tags)
+      VALUES ($1, $2, $3, $4, $5, $6)`,
     [
       branch_metadata.branch_id,
       branch_metadata.branch_title,
       branch_metadata.creator_user_id,
       branch_metadata.owner_user_id,
-      branch_metadata.background_image
+      branch_metadata.background_image,
+      branch_metadata.tags
     ]);
 
     //Create branch post store from BranchCollection model mogoose

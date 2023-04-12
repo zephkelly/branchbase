@@ -1,6 +1,6 @@
 <template>
   <form class="page general">
-    <h3>Name and avatar</h3>
+    <h3>Name and icon</h3>
     <div class="name-avatar">
       <div class="name">
         <label>
@@ -12,7 +12,7 @@
             </svg>
           </div>
         </label>
-        <input type="text" v-model="branchName" placeholder="" @focusin="showBranchNameTooltip()" @focusout="hideBranchNameTooltip()">
+        <input type="text" ref="branchNameRef" v-model="branchName" placeholder="" @focusin="showBranchNameTooltip()" @focusout="hideBranchNameTooltip()">
         <p class="message" ref="branchNameTooltip">Characters remaining: <span>{{ branchCharactersRemaining }}</span></p>
       </div>
       <div class="avatar">
@@ -24,7 +24,7 @@
         <label>
           Branch title
         </label>
-        <input type="text" v-model="branchTitle" placeholder="Branch title">
+        <input type="text" ref="branchTitleRef" v-model="branchTitle" placeholder="Branch title">
       </div>
     </div>
     <h3>Description and metadata</h3>
@@ -40,6 +40,7 @@
 </template>
 
 <script lang="ts" setup>
+import { branchExists } from '@/utils/fetch/branch';
 const props = defineProps(['branchData'])
 
 // -------------- Branch name ------------------
@@ -52,9 +53,26 @@ const branchCharactersRemaining: Ref = ref(21);
 watch(branchName, (value) => {
   branchCharactersRemaining.value = 21 - value.length;
 
+  branchName.value = value.replace(/\s/g, '');
+
   if (value.length > 21) {
     branchName.value = value.slice(0, 21);
   }
+
+  branchExists(value).then((res) => {
+    if (res) {
+      if (value === props.branchData.branch.branch_name) {
+        branchNameTooltip.value.classList.remove('error');
+        branchNameTooltip.value.innerHTML = 'Characters remaining: <span>' + branchCharactersRemaining.value + '</span>';
+        return;
+      }
+      branchNameTooltip.value.classList.add('error');
+      branchNameTooltip.value.innerHTML = 'Branch name already exists';
+    } else {
+      branchNameTooltip.value.classList.remove('error');
+      branchNameTooltip.value.innerHTML = 'Characters remaining: <span>' + branchCharactersRemaining.value + '</span>';
+    }
+  });
 });
 
 //Show branch name tooltip on focus
@@ -73,6 +91,15 @@ const hideBranchNameTooltip = () => {
 // -------------- Branch title ------------------
 const branchTitle: Ref = ref(null);
 branchTitle.value = props.branchData.branchMeta.branch_title;
+
+
+// -------------- Mounted ------------------
+const branchNameRef: Ref = ref(null);
+const branchTitleRef: Ref = ref(null);
+onMounted(() => {
+  branchNameRef.value.placeholder = props.branchData.branch.branch_name;
+  branchTitleRef.value.placeholder = props.branchData.branchMeta.branch_title;
+});
 </script>
 
 <style lang="scss" scoped>

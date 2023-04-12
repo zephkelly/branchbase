@@ -84,16 +84,16 @@ function dockPostFeed() {
   const zoneWidth = browserWidth / 3;
   const zoneThreshold = zoneWidth / 2;
 
-  if (browserWidth > 1200) {
-    indexCurrentLayout().value = 'threeZone';
+  if (browserWidth > 1000) {
+    indexPostCurrentAvailableZones().value = 'three';
     tripleZoneDock(zoneThreshold);
   }
-  else if (browserWidth > 800) {
-    indexCurrentLayout().value = 'twoZone';
-    doubleZoneDock(zoneThreshold);
-  }
+  // else if (browserWidth > 1000) {
+  //   indexPostCurrentAvailableZones().value = 'twoZones';
+  //   doubleZoneDock(zoneThreshold);
+  // }
   else {
-    indexCurrentLayout().value = 'oneZone';
+    indexPostCurrentAvailableZones().value = 'one';
     singleZoneDock();
   }
 
@@ -145,6 +145,16 @@ onBeforeMount(() => {
   browserWidth = document.body.clientWidth;
   leftLimit.value = ((browserWidth - 600) - 50) / 2;
 
+  if (controlBarPostitionIndex().value === 'left') {
+    posX.value = -leftLimit.value;
+  }
+  else if (controlBarPostitionIndex().value === 'right') {
+    posX.value = leftLimit.value;
+  }
+  else {
+    posX.value = 0;
+  }
+  
   dockPostFeed();
 
   window.addEventListener('resize', () => {
