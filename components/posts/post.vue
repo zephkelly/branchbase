@@ -14,7 +14,7 @@
           <p class="user-name"><span>posted by</span> <nuxt-link>zephisthebomb</nuxt-link></p>
         </div>
       </div>
-      <h3 class="title">Post title that is a little bit longer and is cray cray long like why the fuck do you keep rambling on and on and then you just know that you are a loser brain ryan fart</h3>
+      <h3 class="title">Post title that is a little bit longer and is cray cray long like why the do you keep rambling on and on and then you just know that you are a</h3>
     </header>
     <section class="body">
       <div class="text-body">
@@ -45,7 +45,7 @@
         <div ref="textFadeOut" class="fade"></div>
       </div>
     </section>
-    <footer ref="footer">
+    <footer ref="footer" @dblclick="isLiked = true; isDisliked = false;">
       <section class="interaction-bar">
         <div class="like">
           <Transition name="fade">

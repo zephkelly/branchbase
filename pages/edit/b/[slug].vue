@@ -4,7 +4,9 @@
   <EditBranchesHeadPending v-else />
   <!-- Pages -->
   <div v-if="canViewPage" class="pages">
-    <EditBranchesPageGeneral :branchData="branchData" />
+    <Transition name="fade">
+      <EditBranchesPageGeneral v-show="editBranchActivePage().value === 'general'" :branchData="branchData" />
+    </Transition>
   </div>
   <section v-else class="pages"></section>
   <!-- Modals -->
@@ -17,13 +19,14 @@
 const { status, data } = useSession();
 const { slug } = useRoute().params;
 
+// ---------------- Fetch and Auth --------------------
 const authorised: Ref = ref(false);
 const branchExists: Ref = ref(false);
+
 const canViewPage = computed(() => {
   return authorised.value && branchExists.value;
 });
 
-// Get branch data
 const { data: branchData, pending } = await useLazyFetch(`/api/branches/get/branch?name=${slug}`);
 
 checkIsAuthorised();
@@ -62,7 +65,6 @@ function checkIsAuthorised() {
 // ---------------------- Modal ------------------------
 watch(backgroundImageModalEnabled(), (val) => { toggleFixedBody(val); });
 
-// Toggle fixed body
 function toggleFixedBody(val: boolean) {
   const scrollYAbsolute = window.scrollY;
 
@@ -81,12 +83,17 @@ function toggleEditBackgroundModal() {
   backgroundImageModalEnabled().value = !backgroundImageModalEnabled().value;
 }
 
-// Disabled all modals
 function disableActiveModals() {
   if (backgroundImageModalEnabled().value === true) {
     backgroundImageModalEnabled().value = false;
   }
 }
+
+// ---------------------- Lifecycle ------------------------
+onUnmounted(() => {
+  disableActiveModals();
+  editBranchActivePage().value = 'general';
+});
 
 definePageMeta({
   layout: 'center-align',
@@ -102,7 +109,7 @@ definePageMeta({
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: var(--panel-color);
+    background-color: var(--background-color);
 
     .page {
       width: 700px;

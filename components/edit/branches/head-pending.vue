@@ -2,18 +2,12 @@
   <section class="pending">
     <div class="introduction">
       <h1 class="pending-large"></h1>
-      <p class="pending"></p>
     </div>
-    <div class="edit-branch-navbar">
+    <div class="edit-navpanel">
       <nav>
         <ul>
           <li>
             <button class="active">
-              <p class="pending"></p>
-            </button>
-          </li>
-          <li>
-            <button>
               <p class="pending"></p>
             </button>
           </li>
@@ -53,17 +47,11 @@ section.pending {
   &.introduction {
     h1 {
      width: 16rem;
-     height: 2rem;
-    }
- 
-    p {
-     width: 10rem;
-     height: 1.3rem;
-     margin-top: 0.3em;
+     height: 2.2rem;
     }
   }
 
-  &.edit-branch-navbar {
+  &.edit-navpanel {
     position: relative;
     top: 1px;
     
@@ -81,14 +69,14 @@ section.pending {
       &:first-of-type {
         p {
           animation-delay: 1.5s;
-          min-width: 3.8rem;
+          min-width: 3.7rem;
         }
       }
 
       &:last-of-type {
         p {
           animation-delay: 2s;
-          min-width: 3.6rem;
+          min-width: 2.8rem;
         }
       }
     }

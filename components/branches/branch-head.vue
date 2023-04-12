@@ -356,22 +356,3 @@ header.pending {
   }
 }
 </style>
-
-<!-- Animation -->
-<!-- <style lang="scss" scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.6s ease-out;
-}
-
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-
-.fade2-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease-out;
-}
-
-.fade2-enter-from, .fade-leave-to {
-  opacity: 0;
-}
-</style> -->

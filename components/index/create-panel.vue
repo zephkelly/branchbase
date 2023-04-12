@@ -82,9 +82,11 @@
 </template>
 
 <script lang="ts" setup>
+import { branchExists } from '@/utils/fetch/branch';
+
 const { data } = useSession();
 
-//Is the create panel open?
+//are we creating a post or a branch?
 const createPost: Ref = ref(null);
 const createBranch: Ref = ref(null);
 const isCreatePost = ref(true);
@@ -106,6 +108,7 @@ watch(isCreatePost, (value) => {
 const branchCharactersRemaining: Ref = ref(21);
 const branchInputModel: Ref = ref(null);
 watch(branchInputModel, (value) => {
+  branchNameTaken.value = false;
   branchCharactersRemaining.value = 21 - value.length;
 
   if (value.length > 21) {
@@ -122,9 +125,7 @@ watch(branchInputModel, (inputValue) => {
   }
 
   branchNameTakenTimeout.value = setTimeout(async () => {
-    const doesBranchExist = await useFetch(`/api/branches/exists?branchName=${inputValue}`);
-
-    if (doesBranchExist.data.value?.exists) {
+    if (await branchExists(inputValue)) {
       branchNameTaken.value = true;
     } else {
       branchNameTaken.value = false;

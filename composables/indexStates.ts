@@ -1,0 +1,1 @@
+export const indexCurrentLayout = () => useState<string>('indexCurrentLayout', () => 'threeZone');

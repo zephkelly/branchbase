@@ -1,4 +1,4 @@
-import { validateQuery, validateQueryCustom } from '~~/utils/validateQuery';
+import { validateQuery, validateQueryCustom } from '~~/utils/forms/validation';
 import { pool } from '~/server/postgres';
 import bcrypt from 'bcrypt';
 

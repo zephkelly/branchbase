@@ -1,7 +1,11 @@
 <template>
-  <div class="overflow" ref="overflowY">
-    <section class="posts-feed">
-      <ControlBar :currentPage="'index'" />
+  <div class="overflow" ref="overflowY" @mousemove="drag" @mouseup="endDrag()" @mouseleave="endDrag()">
+    <section class="posts-feed" :style="`top: clamp(0px, ${posY + 'px'}, ${smoothDamp(posY)}px); left: clamp(-${leftLimit}px, ${posX + 'px'}, ${leftLimit - 8}px)`">
+      <div class="draggable"
+        @mousedown="startDrag"
+        @mouseup="endDrag()">
+        <ControlBar :currentPage="'index'" />
+      </div>
       <IndexCreatePanel />
       <div v-if="pending" class="posts-pending">
         <p style="margin-top: 3rem;">Loading</p>
@@ -31,15 +35,130 @@ const postsContainer: Ref = ref(null)
 watch(isCreatingIndex, (newIsCreating) => {
   if (newIsCreating.value === true) {
     postsContainer.value.classList.add('creating');
-    overflowY.value.style.height = '100vh';
+    overflowY.value.style.height = 'calc(100vh + 0.5rem)';
   } else {
     postsContainer.value.classList.remove('creating');
     overflowY.value.style.height = '100%';
   }
 })
 
+// Make post component draggable
+const posX = ref(0);
+const posY = ref(0);
+let lastX = 0;
+let lastY = 0;
+
+let browserWidth = 0;
+let postFeedWidth = 0;
+const leftLimit = ref(0);
+
+function startDrag(event: any) {
+  event.preventDefault();
+
+  isDraggingControlBarIndex().value = true;
+
+  browserWidth = document.body.clientWidth;
+  postFeedWidth = postsContainer.value.clientWidth;
+
+  lastX = event.clientX;
+  lastY = event.clientY;
+};
+
+function drag(event: any) {
+  if (!isDraggingControlBarIndex().value) return;
+
+  leftLimit.value = ((browserWidth - postFeedWidth) - 50) / 2;
+
+  const deltaX = event.clientX - lastX;
+  const deltaY = event.clientY - lastY;
+
+  lastX = event.clientX;
+  lastY = event.clientY;
+
+  posX.value += deltaX;
+  posY.value += deltaY;
+};
+
+function dockPostFeed() {
+  const browserWidth = document.body.clientWidth;
+  const zoneWidth = browserWidth / 3;
+  const zoneThreshold = zoneWidth / 2;
+
+  if (browserWidth > 1200) {
+    indexCurrentLayout().value = 'threeZone';
+    tripleZoneDock(zoneThreshold);
+  }
+  else if (browserWidth > 800) {
+    indexCurrentLayout().value = 'twoZone';
+    doubleZoneDock(zoneThreshold);
+  }
+  else {
+    indexCurrentLayout().value = 'oneZone';
+    singleZoneDock();
+  }
+
+  posY.value = 0;
+}
+
+function tripleZoneDock(zoneThreshold: number) {
+  if (posX.value <= -leftLimit.value + zoneThreshold) {
+    posX.value = -leftLimit.value;
+    controlBarPostitionIndex().value = 'left';
+  }
+  else if (posX.value >= leftLimit.value - zoneThreshold) {
+    posX.value = leftLimit.value;
+    controlBarPostitionIndex().value = 'right';
+  }
+  else {
+    posX.value = 0;
+    controlBarPostitionIndex().value = 'middle';
+  }
+}
+
+function doubleZoneDock(zoneThreshold: number) {
+  if (posX.value <= -leftLimit.value + zoneThreshold) {
+    posX.value = -leftLimit.value;
+    controlBarPostitionIndex().value = 'left';
+  }
+  else {
+    posX.value = leftLimit.value;
+    controlBarPostitionIndex().value = 'right';
+  }
+}
+
+function singleZoneDock() {
+  posX.value = 0;
+  controlBarPostitionIndex().value = 'middle';
+}
+
+function endDrag() {
+  dockPostFeed();
+
+  isDraggingControlBarIndex().value = false;
+}
+
+function smoothDamp(t: number, L = 200, k = 0.009, x0 = 199) {
+  return L / (1 + Math.exp(-k * (t - x0)));
+}
+
+onBeforeMount(() => {
+  browserWidth = document.body.clientWidth;
+  leftLimit.value = ((browserWidth - 600) - 50) / 2;
+
+  dockPostFeed();
+
+  window.addEventListener('resize', () => {
+    browserWidth = document.body.clientWidth;
+    leftLimit.value = ((browserWidth - postsContainer.value.clientWidth) - 50) / 2;
+  
+    dockPostFeed();
+  })
+})
+
 onUnmounted(() => {
   isCreatingIndex().value = false;
+
+  window.removeEventListener('resize', () => { });
 })
 </script>
 
@@ -61,6 +180,7 @@ section.posts-feed {
   margin-top: 3rem;
   margin-bottom: 6rem;
   box-sizing: border-box;
+  transition: left 0.15s cubic-bezier(0.075, 0.82, 0.165, 1), top 0.15s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 
 .posts-loaded {
@@ -101,5 +221,10 @@ section.posts-feed {
       opacity: 1;   
     }
   }
+}
+
+.draggable {
+  position: relative;
+  z-index: 12;
 }
 </style>

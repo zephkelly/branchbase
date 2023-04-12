@@ -37,6 +37,7 @@ input, textarea, select {
   color: var(--text-color);
   border-radius: 1rem;
   font-size: 1rem;
+  transition: border 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
 
    &:focus {
     outline: none;
@@ -61,4 +62,13 @@ button {
 
 h1, h2, h3, h4, h5, h6, p {
   color: var(--text-color);
+}
+
+//
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease-out;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
