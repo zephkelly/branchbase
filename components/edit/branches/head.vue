@@ -23,13 +23,14 @@ const props = defineProps(['branchData'])
 <style lang="scss" scoped>
 header.head {
   position: sticky;
-  top: -5rem;
+  top: 0rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding-top: 3rem;
   height: 15rem;
+  top: -8rem;
   background-color: var(--panel-color);
   border-bottom: 1px solid var(--panel-border-color);
   box-sizing: border-box;

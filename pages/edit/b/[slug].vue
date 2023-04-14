@@ -10,9 +10,8 @@
   </div>
   <section v-else class="pages"></section>
   <!-- Modals -->
-  <div v-if="canViewPage" class="modals">
-    <EditBranchesModalBackgroundImage v-if="backgroundImageModalEnabled().value" :branchData="branchData"/>
-  </div>
+  <EditBranchesModalBackgroundImage v-if="backgroundImageModalEnabled().value" :branchData="branchData"/>
+  <EditBranchesModalAvatarImage v-if="avatarImageModalEnabled().value" :branchData="branchData"/>
 </template>
 
 <script lang="ts" setup>
@@ -64,6 +63,7 @@ function checkIsAuthorised() {
 
 // ---------------------- Modal ------------------------
 watch(backgroundImageModalEnabled(), (val) => { toggleFixedBody(val); });
+watch(avatarImageModalEnabled(), (val) => { toggleFixedBody(val); });
 
 function toggleFixedBody(val: boolean) {
   const scrollYAbsolute = window.scrollY;
@@ -77,10 +77,6 @@ function toggleFixedBody(val: boolean) {
     document.body.style.top = '';
     window.scrollTo(0, parseInt(scrollY || '0') * -1);
   }
-}
-
-function toggleEditBackgroundModal() {
-  backgroundImageModalEnabled().value = !backgroundImageModalEnabled().value;
 }
 
 function disableActiveModals() {
@@ -102,22 +98,19 @@ definePageMeta({
 
 <!-- Shared with children -->
 <style lang="scss" scoped>
-  .pages {
-    height: calc(100vh - 21rem);
-    width: 100%;
-    padding-top: 6rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: var(--background-color);
+.pages {
+  height: auto;
+  width: 100%;
+  padding-top: 7rem;
+  padding-bottom: 12rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--background-color);
 
-    .page {
-      width: 700px;
-      max-width: 700px;
-
-      > div {
-
-      }
-    }
+  .page {
+    width: 700px;
+    max-width: 700px;
   }
+}
 </style>

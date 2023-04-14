@@ -57,7 +57,10 @@ function logOut() {
     padding: 0.4rem 1.5rem;
     background-color: var(--panel-color);
     border-bottom: 1px solid var(--panel-border-color);
-    z-index: 100;
+    z-index: 80;
+    top: 0rem;
+    left: 0rem;
+    right: 0rem;
   }
 
   .logo {

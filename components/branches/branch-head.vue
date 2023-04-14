@@ -330,8 +330,8 @@ header.branch-header {
 
   svg {
     position: relative;
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.5rem;
+    height: 1.5rem;
     fill: var(--text-color);
   }
 }

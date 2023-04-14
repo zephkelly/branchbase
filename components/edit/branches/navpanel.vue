@@ -42,7 +42,7 @@ watch(editBranchActivePage, (val) => {
   width: 700px;
   max-width: 700px;
   height: 100%;
-  top: 1px;
+  top: 0.5px;
 
   nav {
     ul {

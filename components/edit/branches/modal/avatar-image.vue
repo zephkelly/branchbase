@@ -2,14 +2,14 @@
   <section class="modal" ref="modal">
     <div class="panel">
       <div class="info">
-        <h3>Background Image</h3>
+        <h3>Avatar image</h3>
         <button class="close-button" @click="shouldClose()">
           <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="m249 849-42-42 231-231-231-231 42-42 231 231 231-231 42 42-231 231 231 231-42 42-231-231-231 231Z"/></svg>
         </button>
       </div>
       <div class="content">
         <div class="image">
-          <img :src="branchData.branchMeta.background_image" />
+          <img :src="branchData.branch.icon_image" />
         </div>
         <div class="actions">
           <button class="button">Change Image</button>
@@ -30,7 +30,7 @@ onMounted(() => {
 });
 
 function shouldClose() {
-  backgroundImageModalEnabled().value = false
+  avatarImageModalEnabled().value = false;
 }
 </script>
 
