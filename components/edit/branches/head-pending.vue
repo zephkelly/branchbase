@@ -27,7 +27,7 @@ section.pending {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: calc(3rem - 1px);
+  padding-top: 3rem;
   background-color: var(--panel-color);
   border-bottom: 1px solid var(--panel-border-color);
   box-sizing: border-box;
@@ -39,7 +39,7 @@ section.pending {
 
  div {
   width: 700px;
-  height: 6rem;
+  height: 8rem;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -52,6 +52,7 @@ section.pending {
   }
 
   &.edit-navpanel {
+    height: 6rem;
     position: relative;
     top: 1px;
     

@@ -79,6 +79,12 @@ function drag(event: any) {
   posY.value += deltaY;
 };
 
+function endDrag() {
+  dockPostFeed();
+
+  isDraggingControlBarIndex().value = false;
+}
+
 function dockPostFeed() {
   const browserWidth = document.body.clientWidth;
   const zoneWidth = browserWidth / 3;
@@ -131,12 +137,6 @@ function singleZoneDock() {
   controlBarPostitionIndex().value = 'middle';
 }
 
-function endDrag() {
-  dockPostFeed();
-
-  isDraggingControlBarIndex().value = false;
-}
-
 function smoothDamp(t: number, L = 200, k = 0.009, x0 = 199) {
   return L / (1 + Math.exp(-k * (t - x0)));
 }
@@ -156,7 +156,9 @@ onBeforeMount(() => {
   }
   
   dockPostFeed();
+})
 
+onMounted(() => {
   window.addEventListener('resize', () => {
     browserWidth = document.body.clientWidth;
     leftLimit.value = ((browserWidth - postsContainer.value.clientWidth) - 50) / 2;

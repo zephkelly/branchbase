@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     ]
   },
   plugins: [
-    '~/plugins/markdown-it.ts',
+    '~/plugins/markdown-it.client.ts'
   ],
   routeRules: {
     '/': { ssr: true },

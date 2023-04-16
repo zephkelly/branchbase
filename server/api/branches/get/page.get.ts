@@ -1,5 +1,5 @@
 import { pool } from '~~/server/postgres';
-import { validateQuery } from '~~/utils/validateQuery';
+import { validateQuery } from '~~/utils/forms/validation';
 
 import mongoose from 'mongoose';
 import { Branch_Page_Metadata, Branch_Pages, BranchCollections } from '~~/models/branches';

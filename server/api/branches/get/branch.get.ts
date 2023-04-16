@@ -1,5 +1,5 @@
 import { pool } from '~~/server/postgres';
-import { validateQuery } from '~~/utils/validateQuery';
+import { validateQuery } from '~~/utils/forms/validation';
 import { Branches, Branch_Metadata, Branch_Page_Metadata } from '~~/models/branches';
 import { Post } from '~~/models/post';
 
@@ -57,7 +57,8 @@ export default eventHandler(async (event: any) => {
     branch_title: branchData.branch_title,
     creator_user_id: branchData.creator_user_id,
     owner_user_id: branchData.owner_user_id,
-    background_image: branchData.background_image
+    background_image: branchData.background_image,
+    tags: branchData.tags
   };
 
   let branchPages: Branch_Page_Metadata[] = [];

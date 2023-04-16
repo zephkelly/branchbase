@@ -23,6 +23,7 @@ const props = defineProps(['branchData'])
 <style lang="scss" scoped>
 header.head {
   position: sticky;
+  z-index: 70;
   top: 0rem;
   display: flex;
   flex-direction: column;
@@ -43,9 +44,6 @@ header.head {
   > div {
     width: 700px;
     max-width: 700px;
-    min-height: 6rem;
-    max-height: 6rem;
-    height: 6rem;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -54,9 +52,10 @@ header.head {
   .introduction {
     display: grid;
     grid-template-columns: 1fr 7rem;
+    height: 7rem;
 
     .text {
-      max-height: 6rem;
+      max-height: 7rem;
       height: 100%;
       display: flex;
       flex-direction: row;
@@ -86,8 +85,8 @@ header.head {
       justify-content: flex-end;
       align-items: flex-end;
       max-width: 100%;
-      height: 6rem;
-      max-height: 6rem;
+      height: 8rem;
+      max-height: 8rem;
 
       button {
       width: 6rem;

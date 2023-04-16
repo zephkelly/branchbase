@@ -29,7 +29,7 @@
         <div class="branch-interaction">
           <div class="edit" ref="editBranchButton" v-if="isOwnerAdmin">
             <nuxt-link class="edit-button" :to="`/edit/b/${props.branchData.branch.branch_name}`">
-              <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M180 876h44l443-443-44-44-443 443v44Zm614-486L666 262l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Zm-107-21-22-22 44 44-22-22Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M794 390 666 262l42-42q17-17 42.5-16.5T793 221l43 43q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Z"/></svg>
             </nuxt-link>
           </div>
         </div>
@@ -197,13 +197,13 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 header.branch-header {
   position: sticky;
-  top: -5rem;
+  top: -7rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
-  height: 12rem;
+  height: 14rem;
   width: 100%;
   margin-top: 3rem;
   background-color: var(--panel-color);
@@ -225,9 +225,9 @@ header.branch-header {
   position: relative;
   overflow: hidden;
   width: 100%;
-  height: 6rem;
-  min-height: 6rem;
-  max-height: 6rem;
+  height: 8rem;
+  min-height: 8rem;
+  max-height: 8rem;
   border-bottom: 1px solid var(--panel-border-color);
 
   .fade {
@@ -296,9 +296,10 @@ header.branch-header {
   }
 
   .text {
-    width: 100%;
+    width: auto;
     justify-content: flex-end;
     padding: 1rem 0rem;
+    margin-right: 1rem;
     font-family: 'Roboto', 'Inter', sans-serif;
 
     h1 {
@@ -325,13 +326,13 @@ header.branch-header {
 
 
 .branch-interaction {
-  padding-top: 1.25rem;
+  padding-top: 1.45rem;
   width: 1.8rem;
 
   svg {
     position: relative;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.4rem;
+    height: 1.4rem;
     fill: var(--text-color);
   }
 }

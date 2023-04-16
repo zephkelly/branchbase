@@ -226,13 +226,13 @@ form {
 
   input, textarea {
     &::placeholder {
-      opacity: 0.3;
+      opacity: 0.4;
     }
   }
 
   p {
     &.placeholder {
-      opacity: 0.3;
+      opacity: 0.45;
     }
 
     &.message {
@@ -407,7 +407,7 @@ form {
       .background-img {
         max-width: 100%;
         max-width: 700px;
-        height: 100%;
+        height: auto;
         max-height: 150px;
         object-fit: cover;
         border-radius: 0.5rem;

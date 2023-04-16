@@ -10,8 +10,12 @@
   </div>
   <section v-else class="pages"></section>
   <!-- Modals -->
-  <EditBranchesModalBackgroundImage v-if="backgroundImageModalEnabled().value" :branchData="branchData"/>
-  <EditBranchesModalAvatarImage v-if="avatarImageModalEnabled().value" :branchData="branchData"/>
+  <Transition name="fade">
+    <EditBranchesModalBackgroundImage v-if="backgroundImageModalEnabled().value" :branchData="branchData"/>
+  </Transition>
+  <Transition name="fade">
+    <EditBranchesModalAvatarImage v-if="avatarImageModalEnabled().value" :branchData="branchData"/>
+  </Transition>
 </template>
 
 <script lang="ts" setup>

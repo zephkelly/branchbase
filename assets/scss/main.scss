@@ -52,6 +52,7 @@ button {
   background-color: var(--accent-color);
   cursor: pointer;
   padding: 0rem;
+  transition: background-color 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
 
   &.disabled {
     color: rgba(255, 255, 255, 0.286);
