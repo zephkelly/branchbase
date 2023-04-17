@@ -34,7 +34,7 @@
       <div class="avatar">
         <div class="container" @click="openAvatarModal()">
           <svg class="edit-svg" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M794 390 666 262l42-42q17-17 42.5-16.5T793 221l43 43q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Z"/></svg>
-          <img :src="props.branchData.branch.icon_image">
+          <img :src="branchData.branch.icon_image">
         </div>
       </div>
       <div class="title">
@@ -62,7 +62,7 @@
         </label>
         <div class="container" @click="openBackgroundModal()">
           <svg class="edit-svg" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M794 390 666 262l42-42q17-17 42.5-16.5T793 221l43 43q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Z"/></svg>
-          <img class="background-img" :src="props.branchData.branchMeta.background_image">
+          <img class="background-img" :src="branchData.branch.background_image">
         </div>
       </div>
       <div class="description">
@@ -188,9 +188,9 @@ const branchNameRef: Ref = ref(null);
 const branchTitleRef: Ref = ref(null);
 onMounted(() => {
   branchName.value = props.branchData.branch.branch_name;
-  branchTitle.value = props.branchData.branchMeta.branch_title;
+  branchTitle.value = props.branchData.branch.branch_title;
   branchNameRef.value.placeholder = props.branchData.branch.branch_name;
-  branchTitleRef.value.placeholder = props.branchData.branchMeta.branch_title;
+  branchTitleRef.value.placeholder = props.branchData.branch.branch_title;
 });
 </script>
 

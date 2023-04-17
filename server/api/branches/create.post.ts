@@ -1,8 +1,7 @@
 import { getServerSession } from '#auth'
 import { pool } from '~~/server/postgres';
 
-import mongoose from 'mongoose';
-import { Branches, Branch_Metadata, BranchCollections } from '~~/models/branches';
+import { Branches } from '~~/models/branches';
 
 import { validateQuery, validateQueryCustom } from '~~/utils/forms/validation';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
@@ -66,69 +65,34 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  const mongoSession = await mongoose.startSession();
-  mongoSession.startTransaction();
-
   const user_id = regexDisplayIdRaw(user_display_name as string);
+
+  await pool.query('BEGIN');
 
   try {
     const branch: Branches = {
       branch_name: branch_name,
-      icon_image: "",
-      branch_type: branch_type,
+      branch_title: branch_name,
       description: branch_description,
-      created_date: new Date(),
-      updated_date: new Date()
+      branch_type: branch_type,
+      creator_user_id: user_id,
+      owner_user_id: user_id,
+      icon_image: "",
+      background_image: "",
+      tags: [""],
+      // pages: [""],
+      updated_at: new Date(),
+      created_at: new Date()
     }
 
     const branch_result = await pool.query(`
-      INSERT INTO branches (branch_name, icon_image, branch_type, description, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id`,
-      [
-        branch.branch_name,
-        branch.icon_image,
-        branch.branch_type,
-        branch.description,
-        branch.created_date,
-        branch.updated_date
-      ]
-    );
-
-    const branch_metadata: Branch_Metadata = {
-      branch_id: branch_result.rows[0].id,
-      branch_title: branch_name,
-      creator_user_id: user_id,
-      owner_user_id: user_id,
-      background_image: "",
-      tags: [""],
-    }
-
-    //Create branch metadata
-    const branch_metadata_result = await pool.query(`
-      INSERT INTO branch_metadata (branch_id, branch_title, creator_user_id, owner_user_id, background_image, tags)
-      VALUES ($1, $2, $3, $4, $5, $6)`,
-    [
-      branch_metadata.branch_id,
-      branch_metadata.branch_title,
-      branch_metadata.creator_user_id,
-      branch_metadata.owner_user_id,
-      branch_metadata.background_image,
-      branch_metadata.tags
-    ]);
-
-    //Create branch post store from BranchCollection model mogoose
-    const branchStore = new BranchCollections({
-      branch_id: branch_result.rows[0].id,
-      branch_pages: [],
-      posts: [],
-    });
-
-    await branchStore.save();
+      Insert INTO branches (branch_name, branch_title, description, branch_type, creator_user_id, owner_user_id, icon_image, background_image, tags, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *;
+    `, [branch.branch_name, branch.branch_title, branch.description, branch.branch_type, branch.creator_user_id, branch.owner_user_id, branch.icon_image, branch.background_image, branch.tags, branch.created_at, branch.updated_at]);
   }
   catch (error) {
     await pool.query('ROLLBACK');
-    await mongoSession.abortTransaction();
 
     console.log(error);
 
@@ -139,7 +103,6 @@ export default eventHandler(async (event: any) => {
   }
 
   await pool.query('COMMIT');
-  await mongoSession.commitTransaction();
 
   return {
     success: true,

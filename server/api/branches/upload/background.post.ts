@@ -6,16 +6,12 @@ import fs from "fs";
 import { fileURLToPath } from 'url';
 import path from "path";
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-
 export default defineEventHandler(async (event) => {
-  // const body = await readBody(event);
   const session = await getServerSession(event);
+
   let imageUrl = "";
   let oldPath = "";
   let newPath = "";
-  
   
   const form = formidable({ multiples: true, uploadDir: path.join("public", "uploads"), maxFileSize: 5 * 1024 * 1024 });
   const data = await new Promise((resolve, reject) => {

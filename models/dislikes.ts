@@ -1,8 +1,8 @@
-//--------------------Likes--------------------
+//------------------Dislikes------------------
 // This is the post schema for storing likes
 //
 //
-export interface Like {
+export interface Dislike {
   id: string;
   post_id: string;
   comment_id: string;

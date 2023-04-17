@@ -14,21 +14,21 @@
   </header>
   <header class="branch-header" ref="branchHeader" v-else>
     <div class="background-image">
-      <img :src="props.branchData.branchMeta.background_image">
+      <img :src="branchData.branch.background_image">
       <div class="fade"></div>
     </div>
     <div class="branch-info">
       <div class="title">
         <div class="icon" ref="branchIcon">
-          <img :src="props.branchData.branch.icon_image">
+          <img :src="branchData.branch.icon_image">
         </div>
         <div class="text">
-          <h1 ref="branchTitle">{{ props.branchData.branchMeta.branch_title }}</h1>
-          <p ref="branchId">b/{{ props.branchData.branch.branch_name }}</p>
+          <h1 ref="branchTitle">{{ branchData.branch.branch_title }}</h1>
+          <p ref="branchId">b/{{ branchData.branch.branch_name }}</p>
         </div>
         <div class="branch-interaction">
           <div class="edit" ref="editBranchButton" v-if="isOwnerAdmin">
-            <nuxt-link class="edit-button" :to="`/edit/b/${props.branchData.branch.branch_name}`">
+            <nuxt-link class="edit-button" :to="`/edit/b/${branchData.branch.branch_name}`">
               <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M794 390 666 262l42-42q17-17 42.5-16.5T793 221l43 43q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Z"/></svg>
             </nuxt-link>
           </div>
@@ -50,7 +50,7 @@ if (isPending.value) {
 } else {
   if (status.value === 'authenticated') {
     const userId = regexDisplayIdRaw(data.value?.user?.name);
-    const branchOwnerId = props.branchData.branchMeta.owner_user_id;
+    const branchOwnerId = props.branchData.branch.owner_user_id;
     if (userId === branchOwnerId) {
       isOwnerAdmin.value = true;
     }

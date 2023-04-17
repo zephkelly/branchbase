@@ -4,7 +4,6 @@ export default defineNuxtConfig({
   scss: ['~/assets/global.scss'],
   nitro: {
     plugins: [
-      '~/server/mongo.ts',
       '~/server/postgres.ts'
     ]
   },

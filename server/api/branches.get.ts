@@ -2,12 +2,6 @@ import { pool } from '~~/server/postgres';
 import { validateQuery } from '~~/utils/forms/validation';
 
 export default eventHandler(async (event: any) => {
-//   return {
-//       statusCode: 400,
-//       body: JSON.stringify({ message: 'To be implemented' })
-//     };
-// });
-
   const query  = getQuery(event);
 
   const page: number = query.page as number || 1;

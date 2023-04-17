@@ -30,8 +30,6 @@ export interface CommentMetadata {
   id: string;
   comment_id: string;
   branch_id: string;
-  tag: string;
-  keyword: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -39,8 +37,7 @@ export interface CommentMetadata {
 // CREATE TABLE comment_metadata (
 //   id SERIAL PRIMARY KEY,
 //   comment_id INTEGER REFERENCES comments(id),
-//   tag VARCHAR(255),
-//   keyword VARCHAR(255)
+//   branch_id INTEGER REFERENCES branches(id),
 //   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 //   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 // );
