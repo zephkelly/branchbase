@@ -392,8 +392,8 @@ form {
       width: 700px;
       max-width: 700px;
       height: 100%;
-      max-height: 150px;
-      min-height: 150px;
+      max-height: 145px;
+      min-height: 145px;
       border-radius: 0.5rem;
       border: 1px solid var(--panel-border-color);
       cursor: pointer;

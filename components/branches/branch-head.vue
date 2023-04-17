@@ -292,6 +292,7 @@ header.branch-header {
       height: 100%;
       object-fit: cover;
       object-position: center;
+      user-select: none;
     }
   }
 
@@ -326,14 +327,28 @@ header.branch-header {
 
 
 .branch-interaction {
-  padding-top: 1.45rem;
+  padding-top: 1.55rem;
   width: 1.8rem;
 
   svg {
     position: relative;
-    width: 1.4rem;
-    height: 1.4rem;
+    width: 1.3rem;
+    height: 1.3rem;
     fill: var(--text-color);
+    top: 0rem;
+    left: 0rem;
+    transition: 
+      width 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
+      height 0.3s cubic-bezier(0.075, 0.82, 0.165, 1),
+      top 0.3s cubic-bezier(0.075, 0.82, 0.165, 1), 
+      left 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
+
+    &:hover {
+      width: 1.5rem;
+      height: 1.5rem;
+      top: -0.15rem;
+      left: -0.15rem;
+    }
   }
 }
 </style>

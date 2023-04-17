@@ -23,9 +23,6 @@
             <li>
               <button @click="enableLinkPage()" ref="linkPageButton">Paste Link</button>
             </li>
-            <li>
-              <button @click="enablePresetPage()" ref="presetPageButton">Select Preset</button>
-            </li>
           </ul>
         </nav>
       </div>
@@ -61,8 +58,6 @@ const modal: Ref = ref(null);
 // --------------- Sub pages ------------------
 const openUploadPage: Ref = ref(true);
 const openLinkPage: Ref = ref(false);
-const openPresetPage: Ref = ref(false);
-
 const uploadPageButton: Ref = ref(null);
 function enableUploadPage() {
   disablePages();
@@ -79,22 +74,12 @@ function enableLinkPage() {
   linkPageButton.value.classList.add('active');
 }
 
-const presetPageButton: Ref = ref(null);
-function enablePresetPage() {
-  disablePages();
-
-  openPresetPage.value = true;
-  presetPageButton.value.classList.add('active');
-}
-
 function disablePages() {
   openUploadPage.value = false;
   openLinkPage.value = false;
-  openPresetPage.value = false;
 
   uploadPageButton.value.classList.remove('active');
   linkPageButton.value.classList.remove('active');
-  presetPageButton.value.classList.remove('active');
 }
 
 // -------------- Show Preview ------------------
@@ -108,6 +93,12 @@ const uploadImageLabel: Ref = ref(null);
 function handleFileUpload() {
   previewImageFile.value = backgroundImage.value.files;
   
+  if (previewImageFile.value[0].size > 5242880) {
+    alert('File size is too big! Can not be more than 5MB');
+    canSave.value = false;
+    return;
+  }
+
   if (previewImageFile.value) {
     previewImage.value.src = URL.createObjectURL(previewImageFile.value[0]);
     uploadImageLabel.value.innerHTML = previewImageFile.value[0].name;
@@ -161,8 +152,10 @@ function saveBackgroundImage() {
 
   const formData = new FormData();
   formData.append('photo', previewImageFile.value[0]);
+  formData.append('top', previewImage.value.style.top);
+  formData.append('branch', props.branchData.branch.id);
 
-  console.log(formData)
+  // console.log(formData)
 
   useFetch('/api/branches/upload/background/', {
     method: 'POST',
@@ -172,7 +165,7 @@ function saveBackgroundImage() {
     // },
     body: formData
   }).then((response) => {
-    console.log(response)
+    // console.log(response)
   });
 }
 
@@ -279,8 +272,8 @@ onMounted(() => {
       position: relative;
       width: 100%;
       height: auto;
-      min-height: 10rem;
-      max-height: 10rem;
+      min-height: 8.2rem;
+      max-height: 8.2rem;
       margin-top: 0.35em;
       border-radius: 0.2rem;
       overflow: hidden;
@@ -295,6 +288,7 @@ onMounted(() => {
         pointer-events: none;
         user-select: none;
         width: 100%;
+        max-height: 1200px;
         object-fit: cover;
         top: 0rem;
       }
@@ -303,8 +297,8 @@ onMounted(() => {
 
   .navbar {
     position: relative;
-    top: 1px;
     margin-top: 2rem;
+    top: 0.5px;
     z-index: 10;
 
     nav {
@@ -336,7 +330,7 @@ onMounted(() => {
           &:nth-child(2) {
             button {
               border-left: none;
-              border-right: none;
+              // border-right: none;
             }
           }
         }
