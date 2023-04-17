@@ -11,7 +11,7 @@
       <div class="preview">
         <label for="previewImage">Preview</label>
         <div class="container" ref="previewContainer" @mousedown="startDrag($event)" @mouseup="endDrag()" @contextmenu="preventContextMenu($event)">
-          <img id="previewImage" ref="previewImage" :src="props.branchData.branchMeta.background_image"/>
+          <img id="previewImage" ref="previewImage" :src="branchData.branch.background_image"/>
         </div>
       </div>
       <div class="navbar">
