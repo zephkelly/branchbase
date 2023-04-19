@@ -3,7 +3,8 @@ import { pool } from '~~/server/postgres';
 
 import { Branches } from '~~/models/branches';
 
-import { validateQuery, validateQueryCustom } from '~~/utils/forms/validation';
+import { perspective } from '~~/utils/moderation/perspective';
+import { validateQuery, validateQueryCustom, isInputAppropriate } from '~~/utils/forms/validation';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
 
 //Creat branch post
@@ -50,6 +51,20 @@ export default eventHandler(async (event: any) => {
     return {
       success: false,
       message: "The branch name is too long or too short (1-21 chars)"
+    }
+  }
+
+  if (!isInputAppropriate(await perspective(branch_description))) {
+    return {
+      success: false,
+      message: "Branch description has been auto-flagged as inappropriate, please change it"
+    }
+  }
+
+  if (!isInputAppropriate(await perspective(branch_name))) {
+    return {
+      success: false,
+      message: "Branch name has been auto-flagged as inappropriate, please change it"
     }
   }
 

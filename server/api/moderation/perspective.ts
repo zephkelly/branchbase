@@ -1,11 +1,11 @@
-import { runSample } from '~~/utils/moderation/perspective';
+import { perspective } from '~~/utils/moderation/perspective';
 import { getServerSession } from '#auth';
 
 export default eventHandler(async (event: any) => {
   const session = await getServerSession(event);
   const ip = event.req.headers.host;
 
-  if (!session?.user && ip !== 'localhost: 3000') {
+  if (!session?.user && ip !== 'localhost:3000') {
     return {
       statusCode: 401,
       status: 'unauthenticated!'
@@ -16,7 +16,7 @@ export default eventHandler(async (event: any) => {
 
   const sample: string = query.sample as string;
 
-  const results = await runSample(sample);
+  const results = await perspective(sample);
 
   return {
     statusCode: 200,
@@ -27,6 +27,7 @@ export default eventHandler(async (event: any) => {
       insult: results.attributeScores.INSULT.summaryScore.value,
       profanity: results.attributeScores.PROFANITY.summaryScore.value,
       identityAttack: results.attributeScores.IDENTITY_ATTACK.summaryScore.value,
+      // sexualExplicit: results.attributeScores.SEXUALLY_EXPLICIT.summaryScore.value,
     }
   }
 });

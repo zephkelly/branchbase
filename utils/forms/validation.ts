@@ -22,3 +22,29 @@ export function validateQueryCustom(param: (string | number), minLength: number 
   }
   return false;
 }
+
+export function isInputAppropriate(result: any) {
+  if (result.attributeScores.TOXICITY.summaryScore.value > 0.75) {
+    return false;
+  }
+
+  if (result.attributeScores.PROFANITY.summaryScore.value > 0.5) {
+    return false;
+  }
+
+  if (result.attributeScores.IDENTITY_ATTACK.summaryScore.value > 0.5) {
+    return false;
+  }
+
+  if (result.attributeScores.IDENTITY_ATTACK.summaryScore.value > 0.35 && result.attributeScores.TOXICITY.summaryScore.value > 0.35) {
+    return false;
+  }
+
+  const totalScore = result.attributeScores.TOXICITY.summaryScore.value + result.attributeScores.PROFANITY.summaryScore.value + result.attributeScores.IDENTITY_ATTACK.summaryScore.value;
+
+  if (totalScore > 0.92) {
+    return false;
+  }
+
+  return true;
+}

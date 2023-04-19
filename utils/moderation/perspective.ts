@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 
-export async function runSample(sample: string) {
+export async function perspective(sample: string) {
   try {
     // @ts-ignore
     const client = await google.discoverAPI(process.env.GOOGLE_DICOVERY_URL);
@@ -16,8 +16,9 @@ export async function runSample(sample: string) {
         INSULT: {},
         PROFANITY: {},
         IDENTITY_ATTACK: {},
+        // SEXUALLY_EXPLICIT: {},
       },
-      languages: ['en', 'es'],
+      languages: ['en'],
     };
 
     // @ts-ignore
