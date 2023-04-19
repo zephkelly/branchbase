@@ -2,7 +2,6 @@ import { pool } from '~~/server/postgres';
 import { getServerSession } from '#auth'
 
 import formidable from "formidable";
-import sharp from "sharp";
 import fs from "fs";
 
 import { fileURLToPath } from 'url';
