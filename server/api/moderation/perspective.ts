@@ -27,7 +27,6 @@ export default eventHandler(async (event: any) => {
       insult: results.attributeScores.INSULT.summaryScore.value,
       profanity: results.attributeScores.PROFANITY.summaryScore.value,
       identityAttack: results.attributeScores.IDENTITY_ATTACK.summaryScore.value,
-      // sexualExplicit: results.attributeScores.SEXUALLY_EXPLICIT.summaryScore.value,
     }
   }
 });

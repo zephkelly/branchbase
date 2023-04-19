@@ -5,6 +5,7 @@ import { Branches } from '~~/models/branches';
 
 import { perspective } from '~~/utils/moderation/perspective';
 import { validateQuery, validateQueryCustom, isInputAppropriate } from '~~/utils/forms/validation';
+import { validateBranchName } from '~~/utils/branches/validation';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
 
 //Creat branch post
@@ -32,14 +33,6 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  //Validate the query
-  if (validateQuery(branch_description, branch_type) == false) {
-    return {
-      success: false,
-      message: "The details you input are invalid, message too long or missing"
-    }
-  }
-
   if (branch_type != "public" && branch_type != "private") {
     return {
       success: false,
@@ -47,10 +40,17 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  if (validateQueryCustom(branch_name, 1, 21) == false) {
+  if (validateQuery(branch_description, branch_type) == false) {
     return {
       success: false,
-      message: "The branch name is too long or too short (1-21 chars)"
+      message: "The details you input are invalid, message too long or missing"
+    }
+  }
+
+  if (validateBranchName(branch_name, true) == false) {
+    return {
+      success: false,
+      message: "The branch name is invalid"
     }
   }
 
@@ -100,7 +100,7 @@ export default eventHandler(async (event: any) => {
       created_at: new Date()
     }
 
-    const branch_result = await pool.query(`
+    await pool.query(`
       Insert INTO branches (branch_name, branch_title, description, branch_type, creator_user_id, owner_user_id, icon_image, background_image, tags, created_at, updated_at)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *;

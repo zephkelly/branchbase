@@ -83,6 +83,7 @@
 
 <script lang="ts" setup>
 import { branchExists } from '@/utils/fetch/branch';
+import { validateBranchName } from '@/utils/branches/validation';
 
 const { data } = useSession();
 
@@ -111,9 +112,7 @@ watch(branchInputModel, (value) => {
   branchNameTaken.value = false;
   branchCharactersRemaining.value = 21 - value.length;
 
-  if (value.length > 21) {
-    branchInputModel.value = value.slice(0, 21);
-  }
+  branchInputModel.value = validateBranchName(value);
 });
 
 //Does branch name exist?
