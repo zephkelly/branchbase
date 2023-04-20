@@ -200,8 +200,10 @@ async function submitBranch() {
 
     if (response.data.value?.success) {
       branchSubmitError.value = false;
+      branchSubmitMessage.value = 'Branch created successfully! Redirecting...';
+
       branchLoadingIndicator.value = true;
-      branchSubmitMessage.value = 'Branch created successfully!';
+      submitBranchButton.value?.classList.add('disabled');
 
       setTimeout(() => {
         branchSubmitMessage.value = '';
@@ -211,8 +213,10 @@ async function submitBranch() {
     }
     else {
       branchSubmitError.value = true;
-      branchLoadingIndicator.value = false;
       branchSubmitMessage.value = '';
+
+      branchLoadingIndicator.value = false;
+      submitBranchButton.value?.classList.remove('disabled');
 
       if (response.data.value?.field === "branch_name") {
         nameError.value = response.data.value?.message;

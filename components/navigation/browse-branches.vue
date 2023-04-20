@@ -9,14 +9,20 @@
       <ul v-else>
         <!-- <p class="label">BRANCHES</p> -->
         <li v-for="//@ts-ignore
-        branch in branches?.body?.branches" :title="branch.description">
+        branch in branchList" :title="branch.description">
           <nuxt-link :to="'/b/' + branch.branch_name" @click="toggleFeedMenu().value = false">
             <img :src="branch.icon_image">
             <p>b/{{ branch.branch_name }}</p>
           </nuxt-link>
         </li>
-        <div v-if="loadMoreBranches" v-on:click="loadMore" class="more-button">
-          <a>+ More</a>
+        <div v-if="loadMoreBranches && !showViewAll" v-on:click="loadMore" class="more-button">
+          <a v-if="!showViewAll">+ View more</a>
+        </div>
+        <nuxt-link v-if="loadMoreBranches && showViewAll" to="/branches/all" class="more-button viewall">
+          <a>+ View all</a>
+        </nuxt-link>
+        <div v-if="loadMoreBranches && showViewAll" @click="hideMore" class="more-button hide">
+          <a>- Hide more</a>
         </div>
       </ul>
     </nav>
@@ -26,25 +32,31 @@
 <script lang="ts" setup>
 const loadMoreBranches = computed(() => {
   //@ts-expect-error
-  return moreBranches.data.value.body.branches.length > 0;
+  return branches?.value?.body?.metadata.totalBranches > limit;
 });
 
 const showViewAll = ref(false);
 const limit: number = 6;
 
 const { data: branches, pending } = await useFetch(`/api/branches?page=1&limit=${limit}`, { pick: ['body']});
-const moreBranches = await useFetch(`/api/branches?page=2&limit=12&lastLimit=${limit}`);
 
-function loadMore() {
-  //@ts-expect-error
-  moreBranches.data.value.body.metadata.totalBranches > moreBranches.data.value.body.branches.length
-    ? showViewAll.value = false
-    : showViewAll.value = true;
+const branchList: Ref = ref([]);
+// @ts-expect-error
+branchList.value = branches.value.body.branches;
+
+async function loadMore() {
+  showViewAll.value = true;
+
+  const { data: moreBranches } = await useFetch(`/api/branches?page=2&limit=16&lastLimit=6`, { pick: ['body'] });
+
+  // @ts-expect-error
+  branchList.value = [...branchList.value, ...moreBranches.value.body.branches];
 }
 
-defineExpose({
-  moreBranches
-})
+function hideMore() {
+  showViewAll.value = false;
+  branchList.value.splice(limit, branchList.value.length - limit);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -166,20 +178,18 @@ p.label {
       }
     }
 
-    .all {
-      display: flex;
-      align-items: center;
-      height: 2.4rem;
+    .more-button.viewall {
       margin-top: 0.5rem;
-      opacity: 0.7;
-      cursor: pointer;
+      height: 2rem;
 
       a {
-        padding-left: 1.5rem;
+         opacity: 0.3;
       }
+    }
 
-      &:hover {
-        background-color: rgb(40, 40, 40);
+    .more-button.hide {
+      a {
+        padding-left: 1.5rem;
       }
     }
   }

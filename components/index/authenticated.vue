@@ -7,17 +7,19 @@
         <ControlBar :currentPage="'index'" />
       </div>
       <IndexCreatePanel />
-      <div v-if="pending" class="posts-pending">
-        <p style="margin-top: 3rem;">Loading</p>
-      </div>
-      <div v-else ref="postsContainer" class="posts-loaded">
-        <section class="posts">
-          <div class="fade"></div>
-          <PostsPost class="text" />
-          <PostsPost class="text rising"/>
-          <PostsPost class="media" />
-          <PostsPost class="media rising" />
-        </section>
+      <div class="post-container" ref="postsContainer">
+        <div v-if="pending" class="posts-pending">
+          <p style="margin-top: 3rem;">Loading</p>
+        </div>
+        <div v-else class="posts-loaded">
+          <section class="posts">
+            <div class="fade"></div>
+            <PostsPost class="text" />
+            <PostsPost class="text rising"/>
+            <PostsPost class="media" />
+            <PostsPost class="media rising" />
+          </section>
+        </div>
       </div>
     </section>
   </div>
@@ -159,18 +161,26 @@ onBeforeMount(() => {
 })
 
 onMounted(() => {
-  window.addEventListener('resize', () => {
-    browserWidth = document.body.clientWidth;
-    leftLimit.value = ((browserWidth - postsContainer.value.clientWidth) - 50) / 2;
-  
-    dockPostFeed();
-  })
+  if (postsContainer.value !== null) {
+    window.addEventListener('resize', () => {
+      browserWidth = document.body.clientWidth;
+      if (postsContainer.value === null) return;
+      leftLimit.value = ((browserWidth - postsContainer.value.clientWidth) - 50) / 2;
+    
+      dockPostFeed();
+    })
+  }
 })
 
 onUnmounted(() => {
   isCreatingIndex().value = false;
 
-  window.removeEventListener('resize', () => { });
+  window.removeEventListener('resize', () => {
+    browserWidth = document.body.clientWidth;
+    leftLimit.value = ((browserWidth - postsContainer.value.clientWidth) - 50) / 2;
+
+    dockPostFeed();
+  })
 })
 </script>
 
@@ -222,11 +232,10 @@ section.posts-feed {
   }
 }
 
-.posts-loaded.creating {
+.post-container.creating {
   .posts {
     transform: translateY(36rem);
     transition: transform 0.15s cubic-bezier(0.075, 0.82, 0.165, 1);
-    
     
     .fade {
       z-index: 10;

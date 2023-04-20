@@ -9,7 +9,7 @@
       <!-- <h3>Hello</h3> -->
     </div>
     <div>
-      <button class="create" @click="toggleCreatePanel()" ref="createButton" title="Toggle create panel">
+      <button class="create" @click="toggleCreatePanel(); toggleFeedMenu().value = false;" ref="createButton" title="Toggle create panel">
         <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M450 856V606H200v-60h250V296h60v250h250v60H510v250h-60Z"/></svg>
       </button>
     </div>
