@@ -46,11 +46,11 @@
             <div class="field name container">
               <div>
                 <label for="branch-name">Name your branch</label>
-                <input id="branch-name" class="branch-name-input" v-model="branchInputModel" type="text" @input="canEnableSumbit()" required>
+                <input id="branch-name" class="branch-name-input" v-model="branchInputModel" type="text" autocomplete="off" @input="canEnableSumbit()" required>
                 <p class="placeholder">b/</p>
                 <div class="tooltip">
-                  <p class="tip" v-show="!branchNameTaken">Characters remaining: <span>{{ branchCharactersRemaining }}</span></p>
-                  <p class="error" ref="nameError" v-show="branchNameTaken">Sorry, that name is already in use!</p>
+                  <p class="tip" v-show="!branchNameError">Characters remaining: <span>{{ branchCharactersRemaining }}</span></p>
+                  <p class="error" v-show="branchNameError">{{ nameError }}</p>
                 </div>
               </div>
               <div>
@@ -63,15 +63,18 @@
             </div>
             <div class="field description">
               <label for="branch-description">Describe your branch</label>
-              <textarea id="branch-description" class="branch-description-input" v-model="branchDescriptionModel" placeholder="Let people know what your community is all about" @input="canEnableSumbit()" required></textarea>
+              <textarea id="branch-description" class="branch-description-input" v-model="branchDescriptionModel" placeholder="Let people know what your community is all about" autocomplete="off" @input="canEnableSumbit()" required></textarea>
               <div class="tooltip">
-                <p class="tip">Characters remaining: <span>{{ descriptionCharsRemaining }}</span></p>
-                <p class="error" ref="descriptionError" v-show="false">Sorry, that description is too long!</p>
+                <p class="tip" v-show="!branchDescError">Characters remaining: <span>{{ descriptionCharsRemaining }}</span></p>
+                <p class="error" id="description-error" v-show="branchDescError">{{ descriptionError }}</p>
               </div>
             </div>
             <div class="field submit">
+              <p class="message" v-show="!branchSubmitError">{{ branchSubmitMessage }}</p>
+              <p class="error" v-show="branchSubmitError"></p>
               <button class="submit disabled" alt="Submit" ref="submitBranchButton" @click="submitBranch()" title="Submit">
-                <h3>Submit</h3>
+                <h3 v-show="!branchLoadingIndicator">Submit</h3>
+                <svg v-show="branchLoadingIndicator" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M196 725q-20-36-28-72.5t-8-74.5q0-131 94.5-225.5T480 258h43l-80-80 39-39 149 149-149 149-40-40 79-79h-41q-107 0-183.5 76.5T220 578q0 29 5.5 55t13.5 49l-43 43Zm280 291L327 867l149-149 39 39-80 80h45q107 0 183.5-76.5T740 577q0-29-5-55t-15-49l43-43q20 36 28.5 72.5T800 577q0 131-94.5 225.5T480 897h-45l80 80-39 39Z"/></svg>
               </button>
             </div>
           </form>
@@ -109,14 +112,15 @@ watch(isCreatePost, (value) => {
 const branchCharactersRemaining: Ref = ref(21);
 const branchInputModel: Ref = ref(null);
 watch(branchInputModel, (value) => {
-  branchNameTaken.value = false;
+  branchNameError.value = false;
   branchCharactersRemaining.value = 21 - value.length;
 
   branchInputModel.value = validateBranchName(value);
 });
 
 //Does branch name exist?
-const branchNameTaken: Ref = ref(false);
+const nameError: Ref = ref('');
+const branchNameError: Ref = ref(false);
 const branchNameTakenTimeout: Ref = ref(null);
 watch(branchInputModel, (inputValue) => {
   if (branchNameTakenTimeout.value) {
@@ -125,9 +129,11 @@ watch(branchInputModel, (inputValue) => {
 
   branchNameTakenTimeout.value = setTimeout(async () => {
     if (await branchExists(inputValue)) {
-      branchNameTaken.value = true;
+      branchNameError.value = true;
+      nameError.value = 'Sorry, that name is already in use!';
     } else {
-      branchNameTaken.value = false;
+      branchNameError.value = false;
+      nameError.value = '';
     }
   }, 800);
 });
@@ -136,19 +142,35 @@ watch(branchInputModel, (inputValue) => {
 const maxDescriptionChars: number = 200;
 const descriptionCharsRemaining: Ref = ref(maxDescriptionChars);
 const branchDescriptionModel: Ref = ref(null);
+const descriptionError: Ref = ref('');
+const branchDescError: Ref = ref(false);
 watch(branchDescriptionModel, (value) => {
   descriptionCharsRemaining.value = maxDescriptionChars - value.length;
 
   if (value.length > maxDescriptionChars) {
     branchDescriptionModel.value = value.slice(0, maxDescriptionChars);
   }
+
+  branchDescError.value = value.length > maxDescriptionChars;
+
+  if (branchDescError.value) {
+    descriptionError.value = 'Sorry, your description is too long!';
+  } else {
+    descriptionError.value = '';
+  }
 });
+
 
 //Watch can we submit
 const branchForm: Ref = ref(null);
 const branchTypeModel: Ref = ref(null);
 const submitBranchButton: Ref = ref(null);
-function canEnableSumbit() {
+function canEnableSumbit(set: boolean = false) {
+  if (set) {
+    submitBranchButton.value?.classList.add('disabled');
+    return;
+  }
+
   if (branchForm.value?.checkValidity()) {
     submitBranchButton.value?.classList.remove('disabled');
   } else {
@@ -157,6 +179,9 @@ function canEnableSumbit() {
 }
 
 //Watch submit button
+const branchSubmitError: Ref = ref(false);
+const branchLoadingIndicator: Ref = ref(false);
+const branchSubmitMessage: Ref = ref('');
 async function submitBranch() {
   if (branchForm?.value?.checkValidity()) {
     const branchName = branchInputModel.value;
@@ -174,9 +199,32 @@ async function submitBranch() {
     });
 
     if (response.data.value?.success) {
-      console.log("Branch created successfully!");
-    } else {
-      console.log("Branch creation failed!");
+      branchSubmitError.value = false;
+      branchLoadingIndicator.value = true;
+      branchSubmitMessage.value = 'Branch created successfully!';
+
+      setTimeout(() => {
+        branchSubmitMessage.value = '';
+        branchSubmitError.value = false;
+        navigateTo(`/b/${branchName}`)
+      }, 3000);
+    }
+    else {
+      branchSubmitError.value = true;
+      branchLoadingIndicator.value = false;
+      branchSubmitMessage.value = '';
+
+      if (response.data.value?.field === "branch_name") {
+        nameError.value = response.data.value?.message;
+        branchNameError.value = true;
+      }
+
+      if (response.data.value?.field === 'branch_description') {
+        descriptionError.value = response.data.value?.message;
+        branchDescError.value = true;
+      }
+
+      canEnableSumbit(true);
     }
   }
 }
@@ -310,11 +358,19 @@ section.content {
         position: absolute;
         color: var(--text-color-darker);
         opacity: 0.6;
+        transition: opacity 0.2s cubic-bezier(0.075, 0.82, 0.165, 1);
+        width: 20rem;
+        max-width: 20rem;
 
         &.error {
           font-size: 0.9rem;
           color: rgb(255, 0, 0);
         }
+      }
+
+      #description-error {
+        width: 100%;
+        max-width: 100%;
       }
     }
 
@@ -329,7 +385,6 @@ section.content {
     position: relative;
     display: flex;
     flex-direction: column;
-    font-family: 'Roboto', sans-serif;
 
     &.container {
       flex-direction: row;
@@ -365,6 +420,19 @@ form.create-branch {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  .field.submit {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    .message {
+      color: var(--accent-color-text);
+      font-size: 0.9rem;
+      opacity: 1;
+      width: 18rem;
+    }
+  }
 }
 
 .field.name {
@@ -424,15 +492,38 @@ form.create-branch {
   }
 }
 
-.field.submit {
+section.content {
   align-items: flex-end;
   margin-right: 0rem;
 
   button {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 1rem;
     width: 6rem;
     height: 2.5rem;
     font-size: 1rem;
+
+    h3 {
+      position: absolute;
+      color: var(--text-color-dark);
+    }
+
+    svg {
+      position: absolute;
+      height: 1.6rem;
+      width: 1.6rem;
+      fill: var(--text-color-dark);
+      animation: spin 1.5s linear infinite;
+
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    }
   }
 }
 </style>

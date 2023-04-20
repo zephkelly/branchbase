@@ -23,12 +23,14 @@ export default eventHandler(async (event: any) => {
   if (!session) {
     return { 
       success: false,
+      field: "user",
       message: "You are not logged in"
     }
   }
   else if (user_email == null || user_email == undefined) {
     return {
       success: false,
+      field: "user",
       message: "You are not logged in"
     }
   }
@@ -36,47 +38,53 @@ export default eventHandler(async (event: any) => {
   if (branch_type != "public" && branch_type != "private") {
     return {
       success: false,
-      message: "The branch type is invalid"
+      field: "branch_type",
+      message: "Branch visibility is invalid"
     }
   }
 
-  if (validateQuery(branch_description, branch_type) == false) {
+  if (validateQuery(branch_description) == false) {
     return {
       success: false,
-      message: "The details you input are invalid, message too long or missing"
+      field: "branch_description",
+      message: "The description is too long or missing!"
     }
   }
 
   if (validateBranchName(branch_name, true) == false) {
     return {
       success: false,
+      field: "branch_name",
       message: "The branch name is invalid"
     }
   }
+  
+    if (!isInputAppropriate(await perspective(branch_name))) {
+      return {
+        success: false,
+        field: "branch_name",
+        message: "Branch name has been auto-flagged as inappropriate, please change it"
+      }
+    }
 
   if (!isInputAppropriate(await perspective(branch_description))) {
     return {
       success: false,
+      field: "branch_description",
       message: "Branch description has been auto-flagged as inappropriate, please change it"
     }
   }
 
-  if (!isInputAppropriate(await perspective(branch_name))) {
-    return {
-      success: false,
-      message: "Branch name has been auto-flagged as inappropriate, please change it"
-    }
-  }
-
   //Check if branch exists
-  const doesBranchExist = pool.query(`
+  const doesBranchExist = await pool.query(`
     SELECT branch_name FROM branches WHERE branch_name = $1
   `, [branch_name]);
 
   if (doesBranchExist.rowCount > 0) {
     return {
       success: false,
-      message: "Branch with that name already exists"
+      field: "branch_name",
+      message: "Sorry, that name is already in use!"
     }
   }
 
@@ -113,6 +121,7 @@ export default eventHandler(async (event: any) => {
 
     return {
       success: false,
+      field: "branches",
       message: "There was an error creating the branch"
     }
   }
@@ -121,6 +130,7 @@ export default eventHandler(async (event: any) => {
 
   return {
     success: true,
+    field: "branches",
     message: "Branch created successfully"
   }
 });
