@@ -5,13 +5,14 @@ export default defineNuxtConfig({
   ],
   scss: ['~/assets/global.scss'],
   nitro: {
+    hooks: {
+      'dev:reload': () => require('sharp')
+    },
     plugins: [
-      '~/server/postgres.ts',
     ]
   },
   plugins: [
     '~/plugins/markdown-it.client.ts',
-    '~/plugins/sharp.server.ts',
   ],
   routeRules: {
     '/': { ssr: true },

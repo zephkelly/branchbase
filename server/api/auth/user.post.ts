@@ -1,5 +1,5 @@
-import { validateQuery, validateQueryCustom } from '~~/utils/forms/validation';
-import { pool } from '~/server/postgres';
+import { validateQueryLength, validateQueryCustom } from '~~/utils/forms/validation';
+import { pool } from '~~/server/plugins/postgres';
 import bcrypt from 'bcrypt';
 
 import { AuthProvider, UserMetadata, Users, user_metadata, user_stats } from '~/models/user';
@@ -32,7 +32,7 @@ export default eventHandler(async (event: any) => {
       }
     }
   }
-  else if (validateQuery(user.email, user.auth_provider, userMetadata.display_name) == false) {
+  else if (validateQueryLength(user.email, user.auth_provider, userMetadata.display_name) == false) {
     return {
       statusCode: 400,
       body: 'We couldn\'t validate your info.'

@@ -1,6 +1,6 @@
 import { NuxtAuthHandler } from "#auth";
 import { Users } from "~~/models/user";
-import { pool } from "~~/server/postgres";
+import { pool } from "~~/server/plugins/postgres";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import DiscordProvider from "next-auth/providers/discord";

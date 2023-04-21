@@ -1,8 +1,15 @@
-import { pool } from '~~/server/postgres';
-import { validateQuery } from '~~/utils/validateQuery';
+import { pool } from '~~/server/plugins/postgres';
+import { validateQueryLength } from '~~/utils/forms/validation';
 
 export default eventHandler(async (event: any) => {
-  const query  = getQuery(event);
+  const query = getQuery(event);
+  
+  if (!validateQueryLength(query.branchName as string)) {
+    return {
+      statusCode: 400,
+      body: 'Invalid query. Missing or too long/short.'
+    };
+  }
 
   if (await doesBranchExist()) {
     return {

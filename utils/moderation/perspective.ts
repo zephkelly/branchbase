@@ -16,7 +16,7 @@ export async function perspective(sample: string) {
         INSULT: {},
         PROFANITY: {},
         IDENTITY_ATTACK: {},
-        // SEXUALLY_EXPLICIT: {},
+        SEXUALLY_EXPLICIT: {},
       },
       languages: ['en'],
     };

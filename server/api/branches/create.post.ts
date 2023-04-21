@@ -1,10 +1,10 @@
 import { getServerSession } from '#auth'
-import { pool } from '~~/server/postgres';
+import { pool } from '~~/server/plugins/postgres';
 
 import { Branches } from '~~/models/branches';
 
 import { perspective } from '~~/utils/moderation/perspective';
-import { validateQuery, validateQueryCustom, isInputAppropriate } from '~~/utils/forms/validation';
+import { validateQueryLength, validateQueryCustom, isInputAppropriate } from '~~/utils/forms/validation';
 import { validateBranchName } from '~~/utils/branches/validation';
 import { regexDisplayIdRaw } from '~~/utils/filterName';
 
@@ -43,7 +43,7 @@ export default eventHandler(async (event: any) => {
     }
   }
 
-  if (validateQuery(branch_description) == false) {
+  if (validateQueryLength(branch_description) == false) {
     return {
       success: false,
       field: "branch_description",

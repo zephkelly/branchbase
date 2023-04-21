@@ -151,21 +151,17 @@ function saveBackgroundImage() {
   if (!canSave.value) return;
 
   const formData = new FormData();
+  console.log(props.branchData.branch.background_image)
   formData.append('photo', previewImageFile.value[0]);
   formData.append('top', previewImage.value.style.top);
   formData.append('branch', props.branchData.branch.id);
-
-  // console.log(formData)
+  formData.append('background_image', props.branchData.branch.background_image);
 
   useFetch('/api/branches/upload/background/', {
     method: 'POST',
-    // headers: {
-    //   'Accept': 'image/*',
-    //   'Content-Type': 'multipart/form-data'
-    // },
     body: formData
   }).then((response) => {
-    // console.log(response)
+    console.log(response)
   });
 }
 

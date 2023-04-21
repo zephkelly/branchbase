@@ -1,5 +1,5 @@
-import { pool } from '~~/server/postgres';
-import { validateQuery } from '~~/utils/forms/validation';
+import { pool } from '~~/server/plugins/postgres';
+import { validateQueryLength } from '~~/utils/forms/validation';
 
 export default eventHandler(async (event: any) => {
   const query  = getQuery(event);
@@ -8,7 +8,7 @@ export default eventHandler(async (event: any) => {
   let limit: number = query.limit as number || 6;
   const lastLimit: number = query.lastLimit as number || limit;
 
-  const isValid = validateQuery(page, limit, lastLimit);
+  const isValid = validateQueryLength(page, limit, lastLimit);
 
   if (!isValid) {
     return {

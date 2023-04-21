@@ -1,5 +1,6 @@
-import { pool } from '~~/server/postgres';
-import { getServerSession } from '#auth'
+import { pool } from '~~/server/plugins/postgres';
+import sharp from '~~/server/plugins/sharp';
+import { getServerSession } from '#auth';
 
 import formidable from "formidable";
 import fs from "fs";
@@ -39,8 +40,10 @@ export default defineEventHandler(async (event) => {
   });
 
   const file = data.files.photo;
+  const previousBackroundImage = data.fields.background_image;
   const top: number = data.fields.top === '' ? 0 : Math.abs(parseInt(data.fields.top));
   const topMultiplier: number = Math.floor(top * 3.3);
+
 
   const user_id = regexDisplayIdRaw(session?.user?.name);
   const branchId: string = data.fields.branch;
@@ -79,12 +82,21 @@ export default defineEventHandler(async (event) => {
     .resize(1920, 1200)
     .extract({ left: 0, top: top, width: 1920, height: 400 })
     .webp({ quality: 80 })
-    .toFile(mewFilePath, (err, info) => {
+    .toFile(mewFilePath, (err: any, info: any) => {
       fs.unlink(filePath, (err) => {
         if (err) {
           console.error(err);
         }
       });
+
+      if (previousBackroundImage) {
+        const previousImagePath = "./public" + previousBackroundImage;
+        fs.unlink(previousImagePath, (err) => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      }
       
       if (err) {
         console.log(err);

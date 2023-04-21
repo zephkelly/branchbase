@@ -1,4 +1,4 @@
-import { pool } from '~~/server/postgres';
+import { pool } from '~~/server/plugins/postgres';
 
 export default eventHandler(async (event: any) => {
   const query = getQuery(event);

@@ -1,14 +1,13 @@
-import { pool } from '~~/server/postgres';
-import { validateQuery } from '~~/utils/forms/validation';
+import { pool } from '~~/server/plugins/postgres';
+import { validateQueryLength } from '~~/utils/forms/validation';
 import { Branches } from '~~/models/branches';
-// import { Post } from '~~/models/post';
 
 export default eventHandler(async (event: any) => {
   const query  = getQuery(event);
   const branchName: string = query.name as string;
 
   //-----------------Validation-----------------
-  if (!validateQuery(branchName)) {
+  if (!validateQueryLength(branchName)) {
     console.log("Invalid query.")
     return {
       statusCode: 400,

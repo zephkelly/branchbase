@@ -1,5 +1,5 @@
 // Ensure that the query is not empty and is not longer than 255 characters
-export function validateQuery(...params: (string | number)[]): boolean {
+export function validateQueryLength(...params: (string | number)[]): boolean {
   const minLength = 1;
   const maxLength = 255;
 
@@ -36,7 +36,7 @@ export function isInputAppropriate(result: any) {
     return false;
   }
 
-  if (result.attributeScores.IDENTITY_ATTACK.summaryScore.value > 0.35 && result.attributeScores.TOXICITY.summaryScore.value > 0.35) {
+  if (result.attributeScores.IDENTITY_ATTACK.summaryScore.value > 0.35 && result.attributeScores.TOXICITY.summaryScore.value > 0.45) {
     return false;
   }
 
