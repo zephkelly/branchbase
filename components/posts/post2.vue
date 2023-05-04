@@ -6,15 +6,15 @@
           <div class="branch-icon">
             <img src="https://i.imgur.com/Rnj7kZj.jpeg">
           </div>
-          <nuxt-link class="branch-name">b/freelance</nuxt-link>
+          <nuxt-link class="branch-name">b/overwatch</nuxt-link>
           <p class="dot">.</p>
-          <p class="post-time">1hr ago</p>
+          <p class="post-time">4hr ago</p>
         </div>
         <div class="user-attributes">
-          <p class="user-name"><span>posted by</span> <nuxt-link>zephisthebomb</nuxt-link></p>
+          <p class="user-name"><span>posted by</span> <nuxt-link>cadywamapus</nuxt-link></p>
         </div>
       </div>
-      <h3 class="title">Burnout and the effects of it. Looking for advice.</h3>
+      <h3 class="title">For real though, what is the counterplay for Widow?</h3>
     </header>
     <section class="body">
       <div class="text-body">
@@ -23,17 +23,13 @@
             Hey guys,
           </p>
           <p>
-            I've been working on my freelance side hussle as a web developer for a good 1.5 years now. I do this on the side whilst maintaining a full-time job.
-          </p>
+            I recently got my DPS to Plat 1, which means all my roles are now that rank or higher. My MMR has hit the point where Widow players can dominate lobbies now. I'm going to be real with you, it's so SO incredibly frustrating. She's picked in over half of my games and I cannot find adequate counterplay no matter what I try. It's to the point where I can only play a few games before I have to quit for the day because I'm so tilted by Widow players.          </p>
           <p>
-            My typical day consists of; commuting to work (45 min), primary job (7.5 hrs), commute home (45 mins), work on freelance (3-4hrs). On the weekends, I try and take at least every other Saturday off. In total I'm working roughly 60hrs (sometimes 70hrs if I need to finish a website) a week.
-          </p>
+            I mainly play support. I can try and click on her head as Kiriko, right-click her as Zen or harass her as Ana, but she clicks on my head faster so I have a low success rate of even forcing her to reposition.          </p>
           <p>
-            I know that's a fair amount of hours to work a week, and I fear my work quality is declining. I find it hard to focus on the task, and get distracted a lot more by my phone. A good night sleep usually restores my focus for a day, but then I feel myself get into another slump.
-          </p>
+            I only play Cass and Ashe for DPS and both of them have too much fall-off to scare a Widow away. Even if I try, I usually get my head clicked on and it's a 4v5 for my team.          </p>
           <p>
-            I suppose my question is, how long can I keep this up before my work really starts to suffer? I want to maintain my quality in my work. My main focus is to go fully freelance, but I've been trying to line-up work in the pipeline whilst I work my 9-5.
-          </p>
+            Edit: I know a lot of the responses for DPS will be to just mirror the Widow. I understand this is probably the best option, but my Widow win rate is ~40%. I can get a few picks here and there but I instantly lose any Widow 1v1. I find her boring to play as and she is not the hero I want to focus on getting better at.          </p>
         </div>
         <div ref="textFadeOut" class="fade"></div>
       </div>
@@ -49,7 +45,7 @@
           <Transition name="fade">
             <svg v-if="!isLiked" @click="isLiked = true; isDisliked = false;" class="unliked" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="m480 935-41-37q-105.768-97.121-174.884-167.561Q195 660 154 604.5T96.5 504Q80 459 80 413q0-90.155 60.5-150.577Q201 202 290 202q57 0 105.5 27t84.5 78q42-54 89-79.5T670 202q89 0 149.5 60.423Q880 322.845 880 413q0 46-16.5 91T806 604.5Q765 660 695.884 730.439 626.768 800.879 521 898l-41 37Zm0-79q101.236-92.995 166.618-159.498Q712 630 750.5 580t54-89.135q15.5-39.136 15.5-77.72Q820 347 778 304.5T670.225 262q-51.524 0-95.375 31.5Q531 325 504 382h-49q-26-56-69.85-88-43.851-32-95.375-32Q224 262 182 304.5t-42 108.816Q140 452 155.5 491.5t54 90Q248 632 314 698t166 158Zm0-297Z"/></svg>
           </Transition>
-          <p>22</p>
+          <p>623</p>
         </div>
         <div class="dislike">
           <Transition name="fade">
@@ -58,7 +54,7 @@
           <Transition name="fade">
             <svg v-if="!isDisliked" @click="isDisliked = true; isLiked = false;" class="undisliked" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M242 216h444v512l-278 288-39-31q-6-5-9-14t-3-22v-10l45-211H103q-24 0-42-18t-18-42v-81.839Q43 579 41.5 571.5T43 557l126-290q8.878-21.25 29.595-36.125Q219.311 216 242 216Zm384 60H229L103 575v93h373l-53 249 203-214V276Zm0 427V276v427Zm60 25v-60h133V276H686v-60h193v512H686Z"/></svg>
           </Transition>
-          <p>2</p>
+          <p>8</p>
         </div>
         <div class="comment">
           <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M80 976V236q0-23 18-41.5t42-18.5h680q23 0 41.5 18.5T880 236v520q0 23-18.5 41.5T820 816H240L80 976Zm60-145 75-75h605V236H140v595Zm0-595v595-595Z"/></svg>

@@ -3,8 +3,8 @@
   <BranchesBranchHead :branchData="branchData" :isPending="pending" v-else/>
   <section class="post-feed">
     <ControlBar :currentPage="'branch'"/>
-    <PostsPost />
-    <PostsPost />
+    <PostsPost3 class="text" />
+    <PostsPost class="text rising"/>
     <PostsPost />
     <PostsPost />
     <PostsPost />

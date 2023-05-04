@@ -15,7 +15,7 @@
           <section class="posts">
             <div class="fade"></div>
             <PostsPost class="text" />
-            <PostsPost class="text rising"/>
+            <PostsPost2 class="text rising"/>
             <PostsPost class="media" />
             <PostsPost class="media rising" />
           </section>
