@@ -18,11 +18,11 @@
         <nav>
           <ul>
             <li>
-              <button class="active" @click="enableUploadPage()" ref="uploadPageButton">Upload image</button>
+              <button class="active" ref="uploadPageButton">Upload image</button>
             </li>
-            <li>
+            <!-- <li>
               <button @click="enableLinkPage()" ref="linkPageButton">Paste Link</button>
-            </li>
+            </li> -->
           </ul>
         </nav>
       </div>
