@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SessionData } from 'h3';
+import type { SessionData } from 'h3';
 const { status, data, signIn } = useSession();
 
 const route = useRoute();

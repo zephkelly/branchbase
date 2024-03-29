@@ -1,8 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  typescript: {
+    typeCheck: true
+  },
   modules: [
     '@sidebase/nuxt-auth'
   ],
+  //@ts-expect-error
   scss: ['~/assets/global.scss'],
   nitro: {
     hooks: {
@@ -12,7 +16,7 @@ export default defineNuxtConfig({
     ]
   },
   plugins: [
-    '~/plugins/markdown-it.client.ts',
+    // '~/plugins/markdown-it.client.ts',
   ],
   routeRules: {
     '/': { ssr: true },

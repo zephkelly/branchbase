@@ -1,5 +1,3 @@
-import mongoose from 'mongoose';
-
 export enum AuthProvider {
   email = 'email',
   discord = 'discord',

@@ -2,7 +2,8 @@ import { validateQueryLength, validateQueryCustom } from '~~/utils/forms/validat
 import { pool } from '~~/server/plugins/postgres';
 import bcrypt from 'bcrypt';
 
-import { AuthProvider, UserMetadata, Users, user_metadata, user_stats } from '~/models/user';
+import { AuthProvider, user_stats } from '~/models/user';
+import type { UserMetadata, Users } from '~/models/user';
 
 export default eventHandler(async (event: any) => {
   const body = await readBody(event);

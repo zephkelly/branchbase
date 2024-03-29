@@ -1,7 +1,7 @@
 import { getServerSession } from '#auth'
 import { pool } from '~~/server/plugins/postgres';
 
-import { Branches } from '~~/models/branches';
+import type { Branches } from '~~/models/branches';
 
 import { perspective } from '~~/utils/moderation/perspective';
 import { validateQueryLength, validateQueryCustom, isInputAppropriate } from '~~/utils/forms/validation';

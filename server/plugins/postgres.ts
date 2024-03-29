@@ -1,6 +1,6 @@
 //@ts-ignore
 import pg from 'pg';
-import { Nitro } from 'nitropack';
+import type { Nitro } from 'nitropack';
 
 import dotenv from 'dotenv';
 dotenv.config();

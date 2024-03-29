@@ -110,7 +110,7 @@
 
 <script lang="ts" setup>
 import generateUsername from '@/utils/generateUsername';
-import { SessionData } from 'h3';
+import type { SessionData } from 'h3';
 const { signIn, signOut, data, status } = useSession();
 
 const route = useRoute();

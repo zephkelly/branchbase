@@ -16,7 +16,7 @@
   }
 </style>
 
-<script>
+<script lang="ts">
 
 import '~/assets/scss/main.scss';
 </script>

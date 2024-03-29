@@ -1,6 +1,6 @@
 import { pool } from '~~/server/plugins/postgres';
 import { validateQueryLength } from '~~/utils/forms/validation';
-import { Branches } from '~~/models/branches';
+import type { Branches } from '~~/models/branches';
 
 export default eventHandler(async (event: any) => {
   const query  = getQuery(event);
