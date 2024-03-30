@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-const { status, data } = useSession();
+const { status, data } = useAuth();
 const { slug } = useRoute().params;
 
 // ---------------- Fetch and Auth --------------------

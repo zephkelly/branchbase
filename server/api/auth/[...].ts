@@ -15,29 +15,30 @@ export default NuxtAuthHandler({
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      async profile(profile: any) {
-        return await setJWT(profile);
-      }
-    }),
-    DiscordProvider({
-      clientId: process.env.DISCORD_CLIENT_ID!,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET!,
-      async profile(profile: any) {
-        return await setJWT(profile);
-      }
-    }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      async profile(profile: any) {
-        return await setJWT(profile);
-      }
-    }),
-    CredentialsProvider({
-        id: 'credentials',
+    // GithubProvider({
+    //   clientId: process.env.GITHUB_CLIENT_ID!,
+    //   clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    //   async profile(profile: any) {
+    //     return await setJWT(profile);
+    //   }
+    // }),
+    // DiscordProvider.default({
+    //   clientId: process.env.DISCORD_CLIENT_ID!,
+    //   clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+    //   async profile(profile: any) {
+    //     return await setJWT(profile);
+    //   }
+    // }),
+    // GoogleProvider.default({
+    //   clientId: process.env.GOOGLE_CLIENT_ID!,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    //   async profile(profile: any) {
+    //     return await setJWT(profile);
+    //   }
+    // })
+    // @ts-expect-error
+    CredentialsProvider.default({
+        // id: 'credentials',
         name: 'Credentials',
         async authorize(credentials: any) {
             const { email, password } = credentials;
@@ -49,7 +50,7 @@ export default NuxtAuthHandler({
           WHERE u.email = $1;
         `;
 
-            const result = await pool.query(findUserQuery, [email]);
+            const result = await pool.query(findUserQuery, [credentials.email]);
 
             const userObject = {
                 name: `${result.rows[0].display_name}*${result.rows[0].id}`,
@@ -66,7 +67,7 @@ export default NuxtAuthHandler({
                 console.error("User is not signed up via email");
             }
 
-            const passwordMatch = await bcrypt.compare(password, result.rows[0].password);
+            const passwordMatch = await bcrypt.compare(credentials.password, result.rows[0].password);
 
             if (!passwordMatch) {
                 console.error("Passwords don't match");

@@ -20,7 +20,7 @@ useHead({
   },],
 });
 
-const { status, signOut, data } = useSession();
+const { status, signOut, data } = useAuth();
 const showMessage: Ref = ref(false);
 const message: Ref = ref('');
 

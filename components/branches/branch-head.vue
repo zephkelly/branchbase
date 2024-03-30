@@ -39,7 +39,7 @@
 </template>
 
 <script lang="ts" setup>
-const { status, data } = useSession();
+const { status, data } = useAuth();
 const props = defineProps(['branchData', 'isPending']);
 const isPending = ref(props.isPending);
 const isOwnerAdmin: Ref = ref(false);

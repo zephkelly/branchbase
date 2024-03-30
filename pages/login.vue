@@ -56,7 +56,7 @@
 
 <script lang="ts" setup>
 import type { SessionData } from 'h3';
-const { status, data, signIn } = useSession();
+const { status, data, signIn } = useAuth();
 
 const route = useRoute();
 const router = useRouter();
@@ -179,15 +179,16 @@ async function handleDiscordSignIn() {
   await signIn('discord', { callbackUrl: '/login?provider=discord' });
 }
 
+
 const emailRegex = /.+@.+/;
 async function submitCredsLogin() {
   const email: string = emailInput.value;
   const password: string = passwordInput.value;
 
-  const { error, url } = await signIn('credentials', { email, password, redirect: false })
+  const result = await signIn('credentials', { email, password, redirect: false })
 
-  if (error) {
-    if (error === 'CredentialsSignin') {
+  if (result) {
+    if (result.error === 'CredentialsSignin') {
       emailInputRef.value.classList.add('invalid');
       emailInputRef.value.classList.remove('valid');
 

@@ -88,7 +88,7 @@
 import { branchExists } from '@/utils/fetch/branch';
 import { validateBranchName } from '@/utils/branches/validation';
 
-const { data } = useSession();
+const { data } = useAuth();
 
 //are we creating a post or a branch?
 const createPost: Ref = ref(null);

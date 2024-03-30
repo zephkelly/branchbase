@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
 const route = useRoute();
-const { data, signOut } = useSession();
+const { data, signOut } = useAuth();
 
 
 const userName = computed(() => {
