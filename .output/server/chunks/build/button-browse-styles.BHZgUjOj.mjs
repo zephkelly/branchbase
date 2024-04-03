@@ -1,0 +1,6 @@
+const buttonBrowse_vue_vue_type_style_index_0_scoped_c690de6d_lang = "button[data-v-c690de6d]{align-items:center;background-color:transparent;border:1px solid var(--panel-border-color);border-radius:.4rem;cursor:pointer;display:flex;height:100%;justify-content:space-between;margin-right:2rem;min-width:6.5rem;padding:0;position:relative;transition:background-color .2s cubic-bezier(.075,.82,.165,1),borderColor .2s cubic-bezier(.075,.82,.165,1)}button *[data-v-c690de6d]{box-sizing:border-box;color:var(--text-color);width:100%}button p[data-v-c690de6d]{align-items:center;display:flex;font-size:1rem;height:.9rem;justify-content:flex-start;padding:0 .8rem}button svg[data-v-c690de6d]{height:1.4rem;position:absolute;right:.5rem;top:.4rem;width:1.4rem;fill:var(--text-color);transform:rotate(90deg) translate(0);transition:transform .2s ease-in-out}button.active[data-v-c690de6d]{background-color:var(--panel-hover-color);border:1px solid var(--panel-border-color)}button.active svg[data-v-c690de6d]{transform:rotate(270deg) translate(0)}button[data-v-c690de6d]:hover{border:1px solid var(--panel-border-hover-color)}";
+
+const buttonBrowseStyles_BHZgUjOj = [buttonBrowse_vue_vue_type_style_index_0_scoped_c690de6d_lang];
+
+export { buttonBrowseStyles_BHZgUjOj as default };
+//# sourceMappingURL=button-browse-styles.BHZgUjOj.mjs.map
