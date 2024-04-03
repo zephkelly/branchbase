@@ -77,12 +77,13 @@ const passwordInputRef: Ref = ref(null);
 const passwordLabel: Ref = ref(null);
 
 onBeforeMount(async () => {
-  if (status.value === 'authenticated') {
-    const profile = await getUserProfile(await Promise.resolve(data.value) as SessionData);
+    const provider: string = route.query.provider as string;
+    // const authSignup: string = route.query.authSignup as string;
+
+    if (status.value === 'authenticated') {
+      const profile = await getUserProfile(await Promise.resolve(data.value) as SessionData);
 
     if (profile == null) {
-      const provider: string = route.query.provider as string;
-
       if (provider === undefined || provider === null) {
         return;
       }
@@ -107,7 +108,7 @@ onBeforeMount(async () => {
 
   if (route.query.callbackUrl) {
     showErrorLogin.value = true;
-    errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in with a different provider.';
+    errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in again, or try a different login method.';
     await history.pushState({}, '', '/login');
   }
 
@@ -197,14 +198,16 @@ async function submitCredsLogin() {
 
       showErrorLogin.value = true;
       errorMessageInitial.value = 'Invalid email or password. Did you sign up with a different provider?';
+      return;
     }
-    else {
+    else if (result.error != null) {
       showErrorLogin.value = true;
-      errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in with a different provider.';
+      errorMessageInitial.value = 'Sorry, there was an issue. (' + result.error + ')';
+      return;
     }
-  } else {
+  } 
+
     return navigateTo('/', { external: true })
-  }
 }
 
 function canSubmitLogin() {

@@ -81,6 +81,8 @@ export default eventHandler(async (event: any) => {
   `, [branch_name]);
 
   if (doesBranchExist.rowCount > 0) {
+
+    console.log(doesBranchExist)
     return {
       success: false,
       field: "branch_name",

@@ -25,7 +25,7 @@ export default eventHandler(async (event: any) => {
   //--------------------Validation--------------------
   //
   //Input checks
-  if (!user.password) {
+  if (!user.password && user.password != undefined) {
     if (validatePassword(user.password)) {
       return {
         statusCode: 400,

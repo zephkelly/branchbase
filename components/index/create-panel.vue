@@ -129,6 +129,7 @@ watch(branchInputModel, (inputValue) => {
 
   branchNameTakenTimeout.value = setTimeout(async () => {
     if (await branchExists(inputValue)) {
+        console.log(await branchExists(inputValue))
       branchNameError.value = true;
       nameError.value = 'Sorry, that name is already in use!';
     } else {
