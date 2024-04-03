@@ -28,7 +28,7 @@ const _____ = NuxtAuthHandler({
     // 30 days
   },
   providers: [
-    // @ts-expect-error
+    //@ts-expect-error
     GithubProvider.default({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
@@ -36,7 +36,7 @@ const _____ = NuxtAuthHandler({
         return await setJWT(profile);
       }
     }),
-    // @ts-expect-error
+    //@ts-expect-error
     DiscordProvider.default({
       clientId: process.env.DISCORD_CLIENT_ID,
       clientSecret: process.env.DISCORD_CLIENT_SECRET,
@@ -44,7 +44,7 @@ const _____ = NuxtAuthHandler({
         return await setJWT(profile);
       }
     }),
-    // @ts-expect-error
+    //@ts-expect-error
     GoogleProvider.default({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -53,7 +53,7 @@ const _____ = NuxtAuthHandler({
         return await setJWT(profile);
       }
     }),
-    // @ts-expect-error
+    //@ts-expect-error
     CredentialsProvider.default({
       id: "credentials",
       name: "Credentials",

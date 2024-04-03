@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   modules: [
     '@sidebase/nuxt-auth'
   ],
+  auth: {
+    baseURL: 'http://localhost:8001',
+  },
   //@ts-expect-error
   scss: ['~/assets/global.scss'],
   nitro: {
