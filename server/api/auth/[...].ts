@@ -7,6 +7,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 
 export default NuxtAuthHandler({
+    secret: process.env.AUTH_SECRET,
   pages: {
     signIn: '/login',
   },
