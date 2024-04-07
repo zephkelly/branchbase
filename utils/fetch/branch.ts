@@ -2,7 +2,8 @@
 export async function branchExists(name: string): Promise<boolean> {
   const doesBranchExist = await useFetch(`/api/branches/exists?branchName=${name}`);
 
-  if (doesBranchExist.data.value?.statusCode == 200) {
+  //@ts-expect-error
+  if (doesBranchExist.data.value?.exists == "true") {
     return true;
   } else {
     return false;

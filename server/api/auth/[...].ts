@@ -18,8 +18,8 @@ export default NuxtAuthHandler({
   providers: [
     //@ts-expect-error
     GithubProvider.default({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientId: process.env.GHUB_CLIENT_ID!,
+      clientSecret: process.env.GHUB_CLIENT_SECRET!,
       async profile(profile: any) {
         return await setJWT(profile);
       }
