@@ -161,12 +161,12 @@ function saveAvatarImage() {
   formData.append('branch', props.branchData.branch.id);
   formData.append('background_image', props.branchData.branch.avatar_image);
 
-  // useFetch('/api/branches/upload/avatar/', {
-  //   method: 'POST',
-  //   body: formData
-  // }).then((response) => {
-  //   console.log(response)
-  // });
+//   useFetch('/api/branches/upload/avatar/', {
+//     method: 'POST',
+//     body: formData
+//   }).then((response) => {
+//     console.log(response)
+//   });
 }
 
 // --------------- Close modal ------------------

@@ -103,7 +103,7 @@ function updateHideHeader(progress: number) {
 const branchIcon: Ref = ref(null);
 function updateIconElement(progress: number) {
   const scale = 1 - progress * 0.55;
-  const top = `${-3 * (1 - progress) + 0.535}rem`;
+  const top = `${-3 * (1 - progress) + 0.51}rem`;
   const left = `${(progress * 1.1)}rem`;
 
   branchIcon.value.style.transform = `scale(${scale})`;

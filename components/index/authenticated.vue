@@ -6,7 +6,7 @@
         @mouseup="endDrag()">
         <ControlBar :currentPage="'index'" />
       </div>
-      <IndexCreatePanel />
+      <CreatePanel />
       <div class="post-container" ref="postsContainer">
         <div v-if="pending" class="posts-pending">
           <p style="margin-top: 3rem;">Loading</p>
@@ -161,6 +161,8 @@ onBeforeMount(() => {
 })
 
 onMounted(() => {
+    isCreatingIndex().value = false;
+
   if (postsContainer.value !== null) {
     window.addEventListener('resize', () => {
       browserWidth = document.body.clientWidth;
@@ -172,9 +174,11 @@ onMounted(() => {
   }
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
   isCreatingIndex().value = false;
+});
 
+onUnmounted(() => {
   window.removeEventListener('resize', () => {
     browserWidth = document.body.clientWidth;
     leftLimit.value = ((browserWidth - postsContainer.value.clientWidth) - 50) / 2;

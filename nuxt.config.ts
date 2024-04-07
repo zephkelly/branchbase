@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     '@sidebase/nuxt-auth'
   ],
   auth: {
-    // baseURL: 'http://localhost:8001',
+    baseURL: 'https://upbranched.com',
   },
   //@ts-expect-error
   scss: ['~/assets/global.scss'],
