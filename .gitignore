@@ -8,4 +8,4 @@ dist
 .DS_Store
 .output
 
-./public/uploads
+public/uploads

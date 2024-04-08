@@ -4,7 +4,7 @@
   <div class="overflow" ref="overflowY" >
     <section class="post-feed">
         <ControlBar :currentPage="'branch'"/>
-        <CreatePanel />
+        <CreatePanel :currentPage="'branch'"/>
         <div class="post-container" ref="postsContainer">
             <section class="posts">
                 <div class="fade"></div>

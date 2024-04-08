@@ -40,9 +40,10 @@ export default defineEventHandler(async (event) => {
   });
 
   const file = data.files.photo;
-  const previousBackroundImage = data.fields.background_image;
+  const previousBackgroundImage = data.fields.background_image;
   const top: number = data.fields.top === '' ? 0 : Math.abs(parseInt(data.fields.top));
-  const topMultiplier: number = Math.floor(top * 3.3);
+    //This ensures that the top height set by the user matches what they expect
+  const topMultiplier: number = Math.floor(top * 3.35);
 
 
   const user_id = regexDisplayIdRaw(session?.user?.name);
@@ -80,7 +81,7 @@ export default defineEventHandler(async (event) => {
 
   sharp(filePath)
     .resize(1920, 1200)
-    .extract({ left: 0, top: top, width: 1920, height: 400 })
+    .extract({ left: 0, top: topMultiplier, width: 1920, height: 400 })
     .webp({ quality: 80 })
     .toFile(mewFilePath, (err: any, info: any) => {
       fs.unlink(filePath, (err) => {
@@ -89,8 +90,8 @@ export default defineEventHandler(async (event) => {
         }
       });
 
-      if (previousBackroundImage) {
-        const previousImagePath = "./public" + previousBackroundImage;
+      if (previousBackgroundImage) {
+        const previousImagePath = "./public" + previousBackgroundImage;
         fs.unlink(previousImagePath, (err) => {
           if (err) {
             console.error(err);

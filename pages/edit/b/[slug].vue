@@ -66,7 +66,10 @@ function checkIsAuthorised() {
 }
 
 // ---------------------- Modal ------------------------
-watch(backgroundImageModalEnabled(), (val) => { toggleFixedBody(val); });
+watch(backgroundImageModalEnabled(), (val) => { 
+    
+    toggleFixedBody(val); 
+});
 watch(avatarImageModalEnabled(), (val) => { toggleFixedBody(val); });
 
 function toggleFixedBody(val: boolean) {

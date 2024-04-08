@@ -4,12 +4,12 @@
       <nav class="options">
         <ul>
           <li>
-            <button class="create-post active" @click="isCreatePost = true" ref="createBranch" alt="Create a post" title="Create a post">
+            <button class="create-post active" @click="isCreatePost = true" ref="createPost" alt="Create a post" title="Create a post">
               <h3 class="title">Create a post</h3>
             </button>
           </li>
           <li>
-            <button class="create-post inactive" @click="isCreatePost = false" ref="createPost" alt="Create a branch" title="Create a branch">
+            <button class="create-post inactive" @click="isCreatePost = false" ref="createBranch" alt="Create a branch" title="Create a branch">
               <h3 class="title">Create a branch</h3>
             </button>
           </li>
@@ -88,7 +88,7 @@
 import { branchExists } from '@/utils/fetch/branch';
 import { validateBranchName } from '@/utils/branches/validation';
 
-const { data } = useAuth();
+const { data } = useAuth();const props = defineProps(['currentPage']);
 
 //are we creating a post or a branch?
 const createPost: Ref = ref(null);
@@ -96,15 +96,15 @@ const createBranch: Ref = ref(null);
 const isCreatePost = ref(true);
 watch(isCreatePost, (value) => {
   if (value) {
-    createPost.value?.classList.add('inactive');
-    createPost.value?.classList.remove('active');
-    createBranch.value?.classList.remove('inactive');
-    createBranch.value?.classList.add('active');
-  } else {
-    createPost.value?.classList.remove('inactive');
-    createPost.value?.classList.add('active');
-    createBranch.value?.classList.add('inactive');
-    createBranch.value?.classList.remove('active');
+      createPost.value?.classList.remove('inactive');
+      createPost.value?.classList.add('active');
+      createBranch.value?.classList.add('inactive');
+      createBranch.value?.classList.remove('active');
+    } else {
+      createPost.value?.classList.add('inactive');
+      createPost.value?.classList.remove('active');
+      createBranch.value?.classList.remove('inactive');
+      createBranch.value?.classList.add('active');
   }
 });
 

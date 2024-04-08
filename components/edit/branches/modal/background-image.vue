@@ -42,8 +42,12 @@
           </div>
         </Transition>
       </div>
-      <div class="actions">
-        <button class="save disabled" ref="saveBackground" @click="saveBackgroundImage">Save</button>
+      <div class="field submit">
+            <p class="message" v-show="!branchSubmitError">{{ branchSubmitMessage }}</p>
+            <button class="save disabled" ref="submitBackgroundButton" @click="submitBackgroundButtonImage">
+                <h3 v-show="!branchLoadingIndicator">Submit</h3>
+                <svg v-show="branchLoadingIndicator" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M196 725q-20-36-28-72.5t-8-74.5q0-131 94.5-225.5T480 258h43l-80-80 39-39 149 149-149 149-40-40 79-79h-41q-107 0-183.5 76.5T220 578q0 29 5.5 55t13.5 49l-43 43Zm280 291L327 867l149-149 39 39-80 80h45q107 0 183.5-76.5T740 577q0-29-5-55t-15-49l43-43q20 36 28.5 72.5T800 577q0 131-94.5 225.5T480 897h-45l80 80-39 39Z"/></svg>
+            </button>
       </div>
     </div>
   </div>
@@ -136,22 +140,26 @@ function preventContextMenu(event: any) {
   event.preventDefault();
 }
 
+// --------------- Submit ------------------
+const branchSubmitError: Ref = ref(false);
+const branchSubmitMessage: Ref = ref('');
+const branchLoadingIndicator: Ref = ref(false);
+
 // --------------- Save ------------------
-const saveBackground: Ref = ref(null);
+const submitBackgroundButton: Ref = ref(null);
 const canSave: Ref = ref(false);
 watch(canSave, (value) => {
   if (value) {
-    saveBackground.value.classList.remove('disabled');
+    submitBackgroundButton.value.classList.remove('disabled');
   } else {
-    saveBackground.value.classList.add('disabled');
+    submitBackgroundButton.value.classList.add('disabled');
   }
 });
 
-function saveBackgroundImage() {
+function submitBackgroundButtonImage() {
   if (!canSave.value) return;
 
   const formData = new FormData();
-  console.log(props.branchData.branch.background_image)
   formData.append('photo', previewImageFile.value[0]);
   formData.append('top', previewImage.value.style.top);
   formData.append('branch', props.branchData.branch.id);
@@ -161,7 +169,27 @@ function saveBackgroundImage() {
     method: 'POST',
     body: formData
   }).then((response) => {
-    console.log(response)
+    if (response.status.value === 'success') {
+        branchSubmitError.value = false;
+        branchSubmitMessage.value = 'Background image saved successfully...';
+
+        branchLoadingIndicator.value = true;
+        submitBackgroundButton.value?.classList.add('disabled');
+
+        setTimeout(() => {
+            branchSubmitMessage.value = '';
+            branchSubmitError.value = false;
+            branchLoadingIndicator.value = false;
+            backgroundImageModalEnabled().value = false;
+      }, 3000);
+    }
+    else {
+        branchSubmitError.value = true;
+        branchSubmitMessage.value = response.error;
+
+        branchLoadingIndicator.value = false;
+        submitBackgroundButton.value?.classList.remove('disabled');
+    }
   });
 }
 
@@ -392,22 +420,49 @@ onMounted(() => {
     }
   }
 
-  .actions {
+  .field.submit {
     margin-top: 2rem;
     height: 3rem;
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+
+    .message {
+      color: var(--accent-color-text);
+      font-size: 0.9rem;
+      opacity: 1;
+      width: 18rem;
+    }
 
     button {
-      width: 8rem;
-      height: 100%;
-      border: none;
-      border-radius: 0.5rem;
-      color: var(--text-color);
-      font-size: 1.2rem;
-      font-weight: 500;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 1rem;
+        width: 6rem;
+        height: 2.5rem;
+        font-size: 1rem;
+
+        h3 {
+            position: absolute;
+            color: var(--text-color-dark);
+        }
+
+        svg {
+            position: absolute;
+            height: 1.6rem;
+            width: 1.6rem;
+            fill: var(--text-color-dark);
+            animation: spin 1.5s linear infinite;
+
+            @keyframes spin {
+                100% {
+                transform: rotate(360deg);
+                }
+            }
+        }
     }
   }
 }

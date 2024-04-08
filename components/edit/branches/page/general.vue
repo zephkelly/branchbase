@@ -62,7 +62,7 @@
         </label>
         <div class="container" @click="openBackgroundModal()">
           <svg class="edit-svg" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M794 390 666 262l42-42q17-17 42.5-16.5T793 221l43 43q17 17 17 42t-17 42l-42 42Zm-42 42L248 936H120V808l504-504 128 128Z"/></svg>
-          <img class="background-img" :src="branchData.branch.background_image">
+          <img class="background-img" :src="branchBackgroundImage">
         </div>
       </div>
       <div class="description">
@@ -175,6 +175,8 @@ const hideBranchTitleMessage = () => {
 // -------------- Branch description ------------------
 
 // -------------- Branch background -------------------
+const branchBackgroundImage: Ref = ref(null);
+
 function openBackgroundModal() {
   backgroundImageModalEnabled().value = true;
 }
@@ -191,6 +193,14 @@ onMounted(() => {
   branchTitle.value = props.branchData.branch.branch_title;
   branchNameRef.value.placeholder = props.branchData.branch.branch_name;
   branchTitleRef.value.placeholder = props.branchData.branch.branch_title;
+  branchBackgroundImage.value = props.branchData.branch.background_image;
+});
+
+watch(backgroundImageModalEnabled(), async (value) => {
+    const { data: branchData } = await useFetch(`/api/branches/get/branch?name=${props.branchData.branch.branch_name}`);
+    
+    //@ts-expect-error
+    branchBackgroundImage.value = branchData.value?.branch.background_image;
 });
 </script>
 
