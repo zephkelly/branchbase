@@ -79,20 +79,23 @@ const passwordLabel: Ref = ref(null);
 onBeforeMount(async () => {
     const provider: string = route.query.provider as string;
     // const authSignup: string = route.query.authSignup as string;
+    console.log(status.value);
+    console.log(provider)
 
     if (status.value === 'authenticated') {
-      const profile = await getUserProfile(await Promise.resolve(data.value) as SessionData);
+        const profile = await getUserProfile(await Promise.resolve(data.value) as SessionData);
 
-    if (profile == null) {
-      if (provider === undefined || provider === null) {
-        return;
-      }
+        if (profile == null) {
+            if (provider === undefined || provider === null) {
+                console.log('No provider');
+                return;
+            }
 
-      router.push(`/register?authSignup=true&provider=${provider}`);
-    }
-    else {
-      router.push('/');
-    }
+            router.push(`/register?authSignup=true&provider=${provider}`);
+        }
+        else {
+            router.push('/');
+        }
   }
 
   if (route.query.message === 'signedUpOAuth') {
@@ -107,8 +110,11 @@ onBeforeMount(async () => {
   }
 
   if (route.query.callbackUrl) {
-    showErrorLogin.value = true;
-    errorMessageInitial.value = 'Sorry, there was an issue. Try to sign in again, or try a different login method.';
+      showErrorLogin.value = true;
+      console.log(route.query.callbackUrl);
+      console.log(route.query.provider);
+        console.log(route.query.message);
+    errorMessageInitial.value = 'Sorry, there was an issue. Have you registered an account?.';
     await history.pushState({}, '', '/login');
   }
 

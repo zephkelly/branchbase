@@ -31,8 +31,12 @@
 
 <script lang="ts" setup>
 const loadMoreBranches = computed(() => {
-  //@ts-expect-error
-  return branches?.value?.body?.metadata.totalBranches > limit;
+    console.log(branches?.value);
+    if (!branches?.value?.body === undefined) return false;
+    // @ts-expect-error
+    if (branches?.value?.body?.metadata === undefined) return false;
+    // @ts-expect-error
+    return branches?.value?.body?.metadata.totalBranches > limit;
 });
 
 const showViewAll = ref(false);
