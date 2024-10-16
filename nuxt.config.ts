@@ -11,6 +11,7 @@ export default defineNuxtConfig({
 
     modules: ['nuxt-auth-utils'],
     runtimeConfig: {
+        databaseConnectionString: process.env.POSTGRES_CONNECTION_STRING,
         oauth: {
             google: {
                 clientId: process.env.NUXT_OAUTH_GOOGLE_CLIENT_ID,
