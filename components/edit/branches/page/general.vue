@@ -199,7 +199,6 @@ onMounted(() => {
 watch(backgroundImageModalEnabled(), async (value) => {
     const { data: branchData } = await useFetch(`/api/branches/get/branch?name=${props.branchData.branch.branch_name}`);
     
-    //@ts-expect-error
     branchBackgroundImage.value = branchData.value?.branch.background_image;
 });
 </script>

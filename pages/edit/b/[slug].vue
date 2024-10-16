@@ -52,7 +52,6 @@ function checkIsAuthorised() {
     }
   
     //Check if user is authorised to view this page
-    //@ts-expect-error
     const owner_id = branchData.value.branch.owner_user_id;
   
     if (owner_id !== regexDisplayId(data)) {
