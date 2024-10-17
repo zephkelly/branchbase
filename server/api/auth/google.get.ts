@@ -1,3 +1,5 @@
+import { userExists } from "@/server/utils/database/user"
+
 export default defineOAuthGoogleEventHandler({
     config: {
         authorizationParams: {
