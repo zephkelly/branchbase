@@ -19,5 +19,11 @@ export default defineNuxtConfig({
                 redirectURL: process.env.NUXT_OAUTH_GOOGLE_REDIRECT_URL
             }
         }
-    }
+    },
+
+    nitro: {
+        routeRules: {
+            '/api/**': { cors: true, headers: { 'access-control-allow-methods': 'GET,POST' } },
+        },
+    },
 })

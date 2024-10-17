@@ -1,13 +1,17 @@
 declare module '#auth-utils' {
+    export type Provider = 'google' | 'github' | 'email';
+
     interface User {
-        email?: string;
+        email: string;
+        provider: Provider;
+        registered?: boolean;
     }
-  
+
     interface UserSession {
-        extended?: any;
         loggedInAt: number;
+        extended?: any;
         secure?: Record<string, unknown>;
     }
 }
-  
-export {}
+
+export { }

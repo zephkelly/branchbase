@@ -6,14 +6,29 @@ export default defineOAuthGoogleEventHandler({
         },
     },
     async onSuccess(event, { user }) {
-        await setUserSession(event, {
+        const existingUser = await userExists(user.email)
+
+        if (existingUser === false) {
+            await setUserSession(event, {
+                user: {
+                    email: user.email,
+                    provider: 'google',
+                    registered: false,
+                },
+                loggedInAt: Date.now(),
+            })
+
+            return sendRedirect(event, '/register')
+        }
+
+        const session = await setUserSession(event, {
             user: {
-               email: user.email,
+                email: user.email,
+                provider: 'google',
             },
             loggedInAt: Date.now(),
         })
-        
-        console.log('User logged in with Google:', user.email)
+
         return sendRedirect(event, '/')
     },
     onError(event, error) {
