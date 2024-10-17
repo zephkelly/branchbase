@@ -2,11 +2,15 @@
     <main>
         <button @click="signInWithGoogle">Google Sign-in</button>
         <button @click="signOut">Sign Out</button>
+        <div v-if="loggedIn">
+            <p>Logged in as {{ user?.email }}</p>
+            <p>Session: {{ session }}</p>
+        </div>
     </main>
 </template>
 
 <script setup lang="ts">
-const { loggedIn, user, session, fetch, clear } = useUserSession()
+const { loggedIn, user, session, clear } = useUserSession()
 
 const signInWithGoogle = async () => {
     await clear();
@@ -16,6 +20,4 @@ const signInWithGoogle = async () => {
 const signOut = () => {
     clear();
 }
-
-console.log('session', session)
 </script>

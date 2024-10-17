@@ -1,8 +1,6 @@
 declare module '#auth-utils' {
     interface User {
         email?: string;
-        password?: string;
-        google?: string;
     }
   
     interface UserSession {
