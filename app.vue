@@ -24,9 +24,4 @@ const signOut = () => {
     clear();
     userExistsStatus.value = 'No user logged in...'
 }
-
-const isRegistered = ref<boolean>(false)
-onMounted(async () => {
-    console.log(session.value)
-})
 </script>

@@ -1,4 +1,5 @@
 export const createUserRegistration = () => {
+    const optedOutOfModals = ref(false)
     const isRegistrationModalOpen = ref(false)
     const isLoginModalOpen = ref(false)
     let userSession: ReturnType<typeof useUserSession>
@@ -26,6 +27,11 @@ export const createUserRegistration = () => {
         isLoginModalOpen.value = false
     }
 
+    const cancelLoginModal = async () => {
+        hideLoginModal()
+        optedOutOfModals.value = true
+    }
+
     const continueRegistration = async () => {
         await initDependencies()
         hideRegistrationModal()
@@ -35,6 +41,7 @@ export const createUserRegistration = () => {
     const cancelRegistration = async () => {
         await initDependencies()
         hideRegistrationModal()
+        optedOutOfModals.value = true
         await userSession.clear()
     }
 
@@ -43,6 +50,12 @@ export const createUserRegistration = () => {
         if (userSession.user.value) {
             if (userSession.user.value.registered === false) {
                 console.log('User is not registered. Showing registration modal...')
+
+                if (router.currentRoute.value.path === '/register') {
+                    console.log('User is already on the registration page. Skipping modal...')
+                    return
+                }
+
                 showRegistrationModal()
             }
         } else {
@@ -55,9 +68,7 @@ export const createUserRegistration = () => {
     const setupWatcher = async () => {
         await initDependencies()
         watch(() => userSession.user.value, (newUser) => {
-            if (newUser && newUser.registered === false) {
-                showRegistrationModal()
-            }
+            checkRegistrationStatus();
         })
     }
 
@@ -70,6 +81,7 @@ export const createUserRegistration = () => {
         hideRegistrationModal,
         showLoginModal,
         hideLoginModal,
+        cancelLoginModal,
         continueRegistration,
         cancelRegistration,
         checkRegistrationStatus,
