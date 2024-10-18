@@ -32,10 +32,10 @@ export default defineEventHandler(async (event) => {
 
         await replaceUserSession(event, {
             user: {
-                email: newUser.email,
-                provider: newUser.provider,
-                picture: newUser.picture,
-                display_name: newUser.display_name,
+                id: newUser.id,
+                provider,
+                picture,
+                display_name,
             },
             loggedInAt: Date.now(),
         })
@@ -46,6 +46,12 @@ export default defineEventHandler(async (event) => {
         }
     }
     catch (error) {
+        if (error instanceof ValidationError) {
+            return createError({
+                statusCode: error.statusCode,
+                statusMessage: error.message,
+            });
+        }
         console.error('Error registering user:', error)
         return createError({
             statusCode: 500,
