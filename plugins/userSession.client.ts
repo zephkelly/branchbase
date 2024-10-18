@@ -1,7 +1,12 @@
+import { type User } from '#auth-utils';
+import { isRegisteredUser } from '~/types/auth';
+
 export default defineNuxtPlugin(async (nuxtApp) => {
     const userSession = await useUserSession()
 
-    if (userSession.user.value && userSession.user.value.registered !== false) {
+    const user = userSession.user.value
+
+    if (isRegisteredUser(user as User)) {
         console.log('User is logged in and fully registered. Skipping registration checks.')
         return
     }
@@ -10,6 +15,5 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const { createUserRegistration } = await import('@/utils/useUserRegistration')
     const userRegistration = createUserRegistration()
 
-    // Check registration status
     userRegistration.checkRegistrationStatus()
 });

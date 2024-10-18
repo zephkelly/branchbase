@@ -32,6 +32,16 @@ export interface RegisteredUserSession extends BaseUserSession {
 }
 
 import { type User } from '#auth-utils';
-export function isUnregisteredUser(user: User): user is UnregisteredUser {
+export function isUnregisteredUser(user: User | null): user is UnregisteredUser {
+    if (!user) {
+        return false;
+    }
     return (user as UnregisteredUser).registered === false;
+}
+
+export function isRegisteredUser(user: User | null): user is RegisteredUser {
+    if (!user) {
+        return false;
+    }
+    return (user as RegisteredUser).id !== undefined;
 }
