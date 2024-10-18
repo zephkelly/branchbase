@@ -11,6 +11,9 @@ export default defineNuxtConfig({
 
     modules: ['nuxt-auth-utils'],
     runtimeConfig: {
+        session: {
+            maxAge: 60 * 60 * 24 * 7
+        },
         databaseConnectionString: process.env.POSTGRES_CONNECTION_STRING,
         oauth: {
             google: {

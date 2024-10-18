@@ -15,6 +15,14 @@ export interface RegisteredUser extends BaseUser {
     display_name: string;
 }
 
+export interface AnyUser {
+    id?: string;
+    email?: string;
+    provider?: Provider;
+    picture?: string;
+    display_name?: string;
+}
+
 export type BackendUser = RegisteredUser & Pick<UnregisteredUser, 'email' | 'provider'>;
 
 interface BaseUserSession {
