@@ -20,6 +20,8 @@ export default defineOAuthGoogleEventHandler({
                     registered: false,
                 },
                 loggedInAt: Date.now(),
+            }, {
+                maxAge: 60 * 60 // 1 hour 
             })
 
             return sendRedirect(event, '/register')

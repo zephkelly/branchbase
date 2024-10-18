@@ -5,7 +5,7 @@
             <button @click="signInWithGoogle">Link Google</button>
         </div>
         <form @submit.prevent="register">
-            <p v-if="user">You are signing up through {{ user?.provider }} with email {{ user?.email }}</p>
+            <p v-if="user">You are signing up through {{ (user as UnregisteredUser).provider }} with email {{ (user as UnregisteredUser).email }}</p>
             <div class="field-container email">
                 <div v-if="user === null" class="new-registration">
                     <div class="field">
@@ -13,10 +13,10 @@
                         <input type="email" id="email" name="email" required v-model="userEmail">
                     </div>
                 </div>
-                <div v-if="user !== null && user.provider !== 'credentials'" class="oauth-registration">
+                <div v-if="user !== null && (user as UnregisteredUser).provider !== 'credentials'" class="oauth-registration">
                     <div class="field">
-                        <p> Imagine this is the {{ user.provider }} logo</p>
-                        <p>{{ user.email }}</p>
+                        <p> Imagine this is the {{ (user as UnregisteredUser).provider }} logo</p>
+                        <p>{{ (user as UnregisteredUser).email }}</p>
                     </div>
                 </div>
             </div>
@@ -27,7 +27,7 @@
                         <input type="password" id="password" name="password" required>
                     </div>
                 </div>
-                <div v-if="user !== null && user.provider !== 'credentials'" class="oauth-registration">
+                <div v-if="user !== null && (user as UnregisteredUser).provider !== 'credentials'" class="oauth-registration">
                     <div class="field">
                         <label for="displayName">Display Name</label>
                         <input type="text" id="displayName" name="displayName" v-model="displayName" required>
@@ -50,8 +50,10 @@
 </template>
 
 <script setup lang="ts">
+import { isUnregisteredUser, type UnregisteredUser } from '~/types/auth';
+
 const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
-const userEmail = ref<string>(user?.value?.email || '')
+const userEmail = ref<string>((user?.value as UnregisteredUser).email || '')
 const displayName = ref<string>('')
 const router = useRouter()
 
@@ -65,7 +67,7 @@ const wantsToReRegisterChoice = ref<boolean>(false);
 
 const alreadyRegistered = computed(() => {
     if (user && user.value) {
-        if (user.value.registered === false) {
+        if (isUnregisteredUser(user.value)) {
             return false;
         }
         else {

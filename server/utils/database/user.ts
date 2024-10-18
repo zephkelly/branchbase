@@ -1,6 +1,7 @@
 import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
 import { User } from '#auth-utils'
 import { BackendUser, UnregisteredUser } from '~/types/auth';
+import { ValidationError } from '@/server/utils/database/validationError';
 
 const MAX_DISPLAY_NAME_LENGTH = 36;
 const MAX_PICTURE_URL_LENGTH = 255;
