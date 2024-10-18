@@ -1,17 +1,20 @@
 <template>
     <div class="page wrapper-container">
-        <button @click="signInWithGoogle">Google Sign-in</button>
-        <button @click="signOut">Sign Out</button>
         <AuthState>
             <template #default="{ loggedIn, clear }">
                 <div v-if="loggedIn && isRegisteredUser">
                     <p>Logged in as {{ userData?.display_name }}</p>
                     <img :src="userData?.picture" alt="User Picture" />
                     <p>Session: {{ session }}</p>
+                    <button @click="signOut">Sign Out</button>
                 </div>
                 <div v-else-if="loggedIn && !isRegisteredUser">
                     <p>Logged in as {{ userData?.email }}</p>
                     <p>Session: {{ session }}</p>
+                    <NuxtLink to="/register">Finish Signing up</NuxtLink>
+                </div>
+                <div v-else>
+                    <button @click="signInWithGoogle">Sign in with Google</button>
                 </div>
             </template>
             <template #placeholder>
