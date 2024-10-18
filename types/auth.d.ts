@@ -1,20 +1,9 @@
+import { UnregisteredUser, RegisteredUser, UnregisteredUserSession, RegisteredUserSession } from './auth';
+
 declare module '#auth-utils' {
-    export type Provider = 'google' | 'github' | 'credentials';
+    export type User = UnregisteredUser | RegisteredUser;
 
-    interface User {
-        id?: string;
-        email?: string;
-        provider?: Provider;
-        display_name?: string;
-        picture?: string;
-        registered?: boolean;
-    }
-
-    interface UserSession {
-        loggedInAt: number;
-        extended?: any;
-        secure?: Record<string, unknown>;
-    }
+    export type UserSession = UnregisteredUserSession | RegisteredUserSession;
 }
 
 export { }

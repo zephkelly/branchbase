@@ -1,3 +1,4 @@
+import { BackendUser, UnregisteredUser } from '@/types/auth'
 import { createUser } from '@/server/utils/database/user'
 
 export default defineEventHandler(async (event) => {
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
     const { display_name } = body
-    const { email, provider, picture } = session.user
+    const { email, provider, picture } = session.user as UnregisteredUser
 
     if (!display_name) {
         return createError({
@@ -23,19 +24,18 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const newUser = await createUser({
+        const newUser: BackendUser = await createUser({
             email,
             display_name,
             picture,
-            provider,
+            provider
         })
 
         await replaceUserSession(event, {
             user: {
                 id: newUser.id,
-                provider,
-                picture,
                 display_name,
+                picture,
             },
             loggedInAt: Date.now(),
         })

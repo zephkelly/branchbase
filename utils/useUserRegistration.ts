@@ -1,3 +1,6 @@
+import { type User } from "#auth-utils"
+import { isUnregisteredUser } from "~/types/auth"
+
 export const createUserRegistration = () => {
     const optedOutOfModals = ref(false)
     const isRegistrationModalOpen = ref(false)
@@ -51,7 +54,9 @@ export const createUserRegistration = () => {
         console.log('Checking registration status...')
         await initDependencies()
         if (userSession.user.value) {
-            if (userSession.user.value.registered === false) {
+            const user = userSession.user.value;
+
+            if (isUnregisteredUser(user as User)) {
                 console.log('User is not registered. Showing registration modal...')
 
                 if (router.currentRoute.value.path === '/register') {
@@ -61,7 +66,8 @@ export const createUserRegistration = () => {
 
                 showRegistrationModal()
             }
-        } else {
+        }
+        else {
             console.log('User is not logged in. Showing login modal...')
             const delay = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000 // Random delay between 5-10 seconds
             setTimeout(showLoginModal, delay)

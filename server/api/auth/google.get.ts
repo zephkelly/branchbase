@@ -1,5 +1,5 @@
 import { getUserByEmail } from "@/server/utils/database/user"
-import { User } from "#auth-utils"
+import { BackendUser } from "~/types/auth"
 
 export default defineOAuthGoogleEventHandler({
     config: {
@@ -9,7 +9,7 @@ export default defineOAuthGoogleEventHandler({
         },
     },
     async onSuccess(event, { user }) {
-        const existingUser: User | null = await getUserByEmail(user.email)
+        const existingUser: BackendUser | null = await getUserByEmail(user.email)
 
         if (existingUser === null) {
             await setUserSession(event, {
@@ -28,7 +28,6 @@ export default defineOAuthGoogleEventHandler({
         await setUserSession(event, {
             user: {
                 id: existingUser.id,
-                provider: 'google',
                 picture: user.picture,
                 display_name: existingUser?.display_name,
             },

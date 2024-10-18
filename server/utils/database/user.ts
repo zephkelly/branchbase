@@ -1,5 +1,6 @@
 import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
 import { User } from '#auth-utils'
+import { BackendUser, UnregisteredUser } from '~/types/auth';
 
 const MAX_DISPLAY_NAME_LENGTH = 36;
 const MAX_PICTURE_URL_LENGTH = 255;
@@ -84,7 +85,7 @@ export async function getUserById(id: string): Promise<User | null> {
     }
 }
 
-export async function getUserByEmail(email: string): Promise<User | null> {
+export async function getUserByEmail(email: string): Promise<BackendUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -102,7 +103,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
             return null
         }
 
-        const fetchedUser: User = {
+        const fetchedUser: BackendUser = {
             id: result.rows[0].id,
             email: result.rows[0].email,
             provider: result.rows[0].provider,
@@ -121,9 +122,9 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     }
 }
 
-type UserInput = Pick<User, 'email' | 'display_name' | 'provider' | 'picture'>
+type UserInput = Pick<UnregisteredUser, 'email' | 'picture' | 'provider'> & { display_name: string }
 
-export async function createUser(userInput: UserInput, sanitize: boolean = true): Promise<User> {
+export async function createUser(userInput: UserInput, sanitize: boolean = true): Promise<BackendUser> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -175,7 +176,7 @@ export async function createUser(userInput: UserInput, sanitize: boolean = true)
         const values = [email, display_name, provider, picture]
         const result = await pool.query(query, values)
 
-        const newUser: User = {
+        const newUser: BackendUser = {
             id: result.rows[0].id,
             email: result.rows[0].email,
             provider: result.rows[0].provider,
