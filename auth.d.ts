@@ -1,5 +1,5 @@
 declare module '#auth-utils' {
-    export type Provider = 'google' | 'github' | 'email';
+    export type Provider = 'google' | 'github' | 'credentials';
 
     interface User {
         email: string;

@@ -23,7 +23,7 @@ export default defineOAuthGoogleEventHandler({
             return sendRedirect(event, '/register')
         }
 
-        const session = await setUserSession(event, {
+        await setUserSession(event, {
             user: {
                 email: user.email,
                 provider: 'google',

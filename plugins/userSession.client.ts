@@ -6,7 +6,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         return
     }
 
-    console.log('Checking registration status...')
+    console.log('Try to show complete registration / signup modals');
     const { createUserRegistration } = await import('@/utils/useUserRegistration')
     const userRegistration = createUserRegistration()
 

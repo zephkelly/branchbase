@@ -1,0 +1,109 @@
+<template>
+    <div class="page wrapper-container">
+        <h1>Register</h1>
+        <form>
+            <p v-if="user">You are signing up through {{ user?.provider }} with email {{ user?.email }}</p>
+            <div class="field-container email">
+                <div v-if="user === null" class="new-registration">
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required v-model="userEmail">
+                    </div>
+                </div>
+                <div v-if="user !== null && user.provider !== 'credentials'" class="oauth-registration">
+                    <div class="field">
+                        <p> Imagine this is the {{ user.provider }} logo</p>
+                        <p>{{ user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="field-container password">
+                <div v-if="user === null" class="new-registration">
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+                <div v-if="user !== null && user.provider !== 'credentials'" class="oauth-registration">
+                    <div class="field">
+                        <label for="displayName">Display Name</label>
+                        <input type="text" id="displayName" name="displayName" required>
+                    </div>
+                </div>
+                <button type="submit">Register</button>
+            </div>
+        </form>
+        <ClientOnly>        
+            <div class="re-register" v-if="alreadyRegistered && wantsToReRegisterChoice !== false">
+                <button @click="showWantsToReRegisterConfirm = true">Already logged in, want to Register with a different account?</button>
+                <div v-if="showWantsToReRegisterConfirm">
+                    <p>Are you sure you want to register with a different account?</p>
+                    <button @click="wantsToReRegister(false)">No</button>
+                    <button @click="wantsToReRegister(true)">Yes</button>
+                </div>
+            </div>
+        </ClientOnly>
+    </div>
+</template>
+
+<script setup lang="ts">
+const { user, clear: clearSession } = useUserSession()
+const userEmail = ref<string>(user?.value?.email || '')
+
+const showWantsToReRegisterConfirm = ref<boolean>(false);
+const wantsToReRegisterChoice = ref<boolean>(false);
+
+const alreadyRegistered = computed(() => {
+    if (user && user.value) {
+        if (user.value.registered === false) {
+            return true;
+        }
+        else {
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
+})
+
+const wantsToReRegister = async (option: boolean) => {
+    if (option) {
+        console.log("User wants to re-register with a different account");
+        wantsToReRegisterChoice.value = true;
+        await clearSession();
+    }
+    else {
+        console.log("User does not want to re-register with a different account");
+        wantsToReRegisterChoice.value = false;
+    }
+}
+
+onBeforeMount(() => {
+    if (alreadyRegistered.value) {
+        console.log("User is already registered, maybe they want to make a new account ? Display modal asking if they want to make a new account or return with their existing account");
+        wantsToReRegisterChoice.value = true;
+    }
+    else {
+        console.log("User is not finished registering, continue with registration");
+    }
+})
+
+// onBeforeUnmount(async () => {
+//     if (alreadyRegistered.value === false) {
+//         await clearSession();
+//     }
+// })
+</script>
+
+<style scoped>
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .re-register {
+        margin-top: 2rem;
+    }
+</style>

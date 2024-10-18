@@ -46,6 +46,9 @@ export const createUserRegistration = () => {
     }
 
     const checkRegistrationStatus = async () => {
+        if (optedOutOfModals.value) return
+
+        console.log('Checking registration status...')
         await initDependencies()
         if (userSession.user.value) {
             if (userSession.user.value.registered === false) {
