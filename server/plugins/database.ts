@@ -34,9 +34,13 @@ export default defineNitroPlugin(async (nitroApp) => {
                 CREATE TABLE IF NOT EXISTS users (
                     id BIGSERIAL PRIMARY KEY,
                     email VARCHAR(255) NOT NULL,
-                    password VARCHAR(255),
-                    auth_provider VARCHAR(255),
-                    verified BOOLEAN DEFAULT FALSE
+                    password VARCHAR(255) DEFAULT NULL,
+                    provider VARCHAR(255),
+                    verified BOOLEAN DEFAULT FALSE,
+                    display_name VARCHAR(255) NOT NULL,
+                    picture VARCHAR(255) DEFAULT NULL,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                 );
 
                 CREATE TABLE IF NOT EXISTS branches (

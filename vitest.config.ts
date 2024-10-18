@@ -1,6 +1,5 @@
 import { defineVitestConfig } from '@nuxt/test-utils/config'
 import vue from '@vitejs/plugin-vue'
-import { ModuleResolutionKind } from 'typescript'
 import { fileURLToPath } from 'url'
 
 export default defineVitestConfig({

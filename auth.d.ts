@@ -4,6 +4,8 @@ declare module '#auth-utils' {
     interface User {
         email: string;
         provider: Provider;
+        display_name?: string;
+        picture?: string;
         registered?: boolean;
     }
 

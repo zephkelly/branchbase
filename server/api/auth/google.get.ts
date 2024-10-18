@@ -1,4 +1,5 @@
-import { userExists } from "@/server/utils/database/user"
+import { getUser } from "@/server/utils/database/user"
+import { User } from "#auth-utils"
 
 export default defineOAuthGoogleEventHandler({
     config: {
@@ -8,13 +9,15 @@ export default defineOAuthGoogleEventHandler({
         },
     },
     async onSuccess(event, { user }) {
-        const existingUser = await userExists(user.email)
+        const existingUser: User | null = await getUser(user.email)
+        console.log('existingUser:', existingUser)
 
-        if (existingUser === false) {
+        if (existingUser === null) {
             await setUserSession(event, {
                 user: {
                     email: user.email,
                     provider: 'google',
+                    picture: user.picture,
                     registered: false,
                 },
                 loggedInAt: Date.now(),
@@ -27,6 +30,8 @@ export default defineOAuthGoogleEventHandler({
             user: {
                 email: user.email,
                 provider: 'google',
+                picture: user.picture,
+                display_name: existingUser?.display_name,
             },
             loggedInAt: Date.now(),
         })

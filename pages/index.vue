@@ -4,6 +4,7 @@
         <button @click="signOut">Sign Out</button>
         <div v-if="loggedIn">
             <p>Logged in as {{ user?.email }}</p>
+            <img :src="user?.picture" alt="User Picture" />
             <p>Session: {{ session }}</p>
         </div>
     </div>
