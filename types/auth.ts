@@ -48,7 +48,7 @@ export interface SecureSessionDataType {
 }
 
 // Type guard functions
-export function isRegisteredUser(user: UserData | User): user is RegisteredUser {
+export function isRegisteredUser(user: UserData | User | RegisteredUser | UnregisteredUser): user is RegisteredUser {
     //@ts-expect-error
     return user.id !== null;
 }

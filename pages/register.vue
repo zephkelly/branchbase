@@ -1,59 +1,81 @@
+<!-- THIS ENTIRE FILE NEEDS TO BE RE-WRITTEN TO USE AuthState component -->
+<!-- This page CANNOT be cached or prendered -->
 <template>
     <div class="page wrapper-container">
         <h1>Register</h1>
-        <div v-if="alreadyRegistered && wantsToReRegisterChoice !== false" class="oauth-buttons">
-            <button @click="signInWithGoogle">Link Google</button>
-        </div>
-        <form @submit.prevent="register">
-            <p v-if="user">You are signing up through {{ (user as UnregisteredUser).provider }} with email {{ (user as UnregisteredUser).email }}</p>
-            <div class="field-container email">
-                <div v-if="user === null" class="new-registration">
-                    <div class="field">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required v-model="userEmail">
+        <form v-if="user" @submit.prevent="register">
+            <div v-if="isUnregisteredUser(user)" class="unregistered">
+                <p>You are signing up through {{ user.provider }} with email {{ user?.email }}</p>
+                <div class="field-container email">
+                    <div v-if="user === null" class="new-registration">
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required v-model="userEmail">
+                        </div>
+                    </div>
+                    <div v-if="user !== null && user?.provider !== 'credentials'" class="oauth-registration">
+                        <div class="field">
+                            <p> Imagine this is the {{ user.provider }} logo</p>
+                            <p>{{ user.email }}</p>
+                        </div>
                     </div>
                 </div>
-                <div v-if="user !== null && (user as UnregisteredUser).provider !== 'credentials'" class="oauth-registration">
-                    <div class="field">
-                        <p> Imagine this is the {{ (user as UnregisteredUser).provider }} logo</p>
-                        <p>{{ (user as UnregisteredUser).email }}</p>
+                <div class="field-container password">
+                    <div v-if="user === null" class="new-registration">
+                        <div class="field">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
                     </div>
+                    <div v-if="user !== null && user.provider !== 'credentials'" class="oauth-registration">
+                        <div class="field">
+                            <label for="displayName">Display Name</label>
+                            <input type="text" id="displayName" name="displayName" v-model="displayName" required>
+                        </div>
+                    </div>
+                    <button type="submit">Register</button>
                 </div>
             </div>
-            <div class="field-container password">
-                <div v-if="user === null" class="new-registration">
-                    <div class="field">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
+            <div v-else-if="isRegisteredUser" class="registered">
+                <p>You are already registered as {{ user.display_name }}</p>
+                <button @click.prevent="clearSession">Sign Out</button>
+                <!-- <ClientOnly> -->
+                    <p>Howdy doody</p>       
+                    <div class="re-register" v-if="alreadyRegistered && wantsToReRegisterChoice === true">
+                        <button @click="showWantsToReRegisterConfirm = true">Want to register a different account?</button>
+                        <div v-if="showWantsToReRegisterConfirm">
+                            <p>Confirm signout?</p>
+                            <button @click="wantsToReRegister(false)">No</button>
+                            <button @click="wantsToReRegister(true)">Yes</button>
+                        </div>
                     </div>
-                </div>
-                <div v-if="user !== null && (user as UnregisteredUser).provider !== 'credentials'" class="oauth-registration">
-                    <div class="field">
-                        <label for="displayName">Display Name</label>
-                        <input type="text" id="displayName" name="displayName" v-model="displayName" required>
-                    </div>
-                </div>
-                <button type="submit">Register</button>
+                <!-- </ClientOnly> -->
             </div>
         </form>
-        <ClientOnly>        
-            <div class="re-register" v-if="alreadyRegistered && wantsToReRegisterChoice !== false">
-                <button @click="showWantsToReRegisterConfirm = true">Already logged in, want to Register with a different account?</button>
-                <div v-if="showWantsToReRegisterConfirm">
-                    <p>Are you sure you want to register with a different account?</p>
-                    <button @click="wantsToReRegister(false)">No</button>
-                    <button @click="wantsToReRegister(true)">Yes</button>
-                </div>
-            </div>
-        </ClientOnly>
+        <form v-else>
+            <p>Continue with Google</p>
+            <button @click.prevent="signInWithGoogle">Sign in with Google</button>
+        </form>
     </div>
 </template>
 
 <script setup lang="ts">
-import { isUnregisteredUser, type UnregisteredUser } from '~/types/auth';
+import { isUnregisteredUser, type UnregisteredUser, type RegisteredUser } from '~/types/auth';
 
-const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
-const userEmail = ref<string>((user?.value as UnregisteredUser).email || '')
+const { user: userSession, clear: clearSession, fetch: getNewSession } = useUserSession()
+
+const user = computed(() => userSession.value as UnregisteredUser | RegisteredUser | null)
+const isRegisteredUser = computed(() => user.value && !isUnregisteredUser(user.value))
+
+const userEmail = computed(() => {
+    if (user && isUnregisteredUser(userSession)) {
+        return (user.value as UnregisteredUser).email
+    }
+    else {
+        return ''
+    }
+})
+
 const displayName = ref<string>('')
 const router = useRouter()
 
@@ -121,15 +143,18 @@ const register = async () => {
     }
 }
 
-onBeforeMount(() => {
+if (user && user.value) {
     if (alreadyRegistered.value) {
-        console.log("User is already registered, maybe they want to make a new account ? Display modal asking if they want to make a new account or return with their existing account");
+        console.log("User is already registered, maybe they want to make a new account?");
         wantsToReRegisterChoice.value = true;
     }
     else {
         console.log("User is not finished registering, continue with registration");
     }
-})
+}
+else {
+    console.log("New user is trying to signup");
+}
 </script>
 
 <style scoped>

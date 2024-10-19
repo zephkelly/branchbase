@@ -1,4 +1,4 @@
-import { BackendUser, UnregisteredUser } from '@/types/auth'
+import { UnregisteredUser, UserData } from '@/types/auth'
 import { createUser } from '@/server/utils/database/user'
 import { ValidationError } from '@/server/utils/database/validationError'
 
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        const newUser: BackendUser = await createUser({
+        const newUser: UserData = await createUser({
             email,
             display_name,
             picture,

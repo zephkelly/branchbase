@@ -1,3 +1,5 @@
+<!-- THIS ENTIRE FILE NEEDS TO BE RE-WRITTEN TO USE AuthState component -->
+<!-- This page CANNOT be cached or prendered -->
 <template>
     <div class="page wrapper-container">
         <AuthState>
