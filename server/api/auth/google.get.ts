@@ -1,5 +1,6 @@
 import { getUserByEmail } from "@/server/utils/database/user"
-import { type UserData, VerificationStatusEnum  } from "@/types/auth"
+import { VerificationStatus, Provider, isRegisteredUser, isUnregisteredUser } from "@/types/auth"
+import { type User } from '#auth-utils'
 
 export default defineOAuthGoogleEventHandler({
     config: {
@@ -8,7 +9,7 @@ export default defineOAuthGoogleEventHandler({
         },
     },
     async onSuccess(event, { user, tokens }) {
-        const existingUser: UserData | null = await getUserByEmail(user.email)
+        const existingUser: User | null = await getUserByEmail(user.email)
         
         if (existingUser === null) {
             await setUserSession(event, {
@@ -24,7 +25,7 @@ export default defineOAuthGoogleEventHandler({
                     expires_in: tokens.expires_in,
                     access_token: tokens.access_token,
                     refresh_token: tokens.refresh_token,
-                    verification_status: VerificationStatusEnum.Pending,
+                    verification_status: VerificationStatus.Pending,
                 },
                 loggedInAt: Date.now(),
             }, {
@@ -33,20 +34,25 @@ export default defineOAuthGoogleEventHandler({
             
             return sendRedirect(event, '/register')
         }
-        
+
+
+        if (isRegisteredUser(existingUser) === false) {
+            return sendRedirect(event, '/register')
+        }
+
         await setUserSession(event, {
             user: {
                 id: existingUser.id,
                 picture: user.picture,
                 display_name: existingUser?.display_name,
-                provider: 'google',
+                provider: Provider.Google,
                 registered: true,
             },
             secure: {
                 expires_in: tokens.expires_in,
                 access_token: tokens.access_token,
                 refresh_token: tokens.refresh_token,
-                verification_status: VerificationStatusEnum.VerifiedBasic,
+                verification_status: VerificationStatus.VerifiedBasic,
             },
             loggedInAt: Date.now(),
         })

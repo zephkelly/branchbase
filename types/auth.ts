@@ -1,8 +1,10 @@
-import { type User } from '#auth-utils';
+export enum Provider {
+    Google = 'google',
+    GitHub = 'github',
+    Credentials = 'credentials'
+  }
 
-export type Provider = 'google' | 'github' | 'credentials';
-
-export enum VerificationStatusEnum {
+export enum VerificationStatus {
     Pending = 'pending',
     Unverified = 'unverified',
     VerifiedBasic = 'verified_basic',
@@ -10,35 +12,31 @@ export enum VerificationStatusEnum {
     Rejected = 'rejected'
 }
 
-export type VerificationStatus = VerificationStatusEnum;
-
-export interface UserSessionData {
-    loggedInAt: number;
-    user: UserData;
-    secure: Record<string, unknown>;
-}
-
-export interface UserData {
-    // Store email instead of id for unregistered users
-    email?: string;
-    //Registered Users will have:
-    id: string | null;              //  << Null for unregistered users
-    display_name: string | null;    //  << "                         "
+export interface BaseUser {
     picture: string;
     provider: Provider;
 }
-
-// For stricter type checking, we can use the following interfaces
-export interface RegisteredUser extends Omit<UserData, 'email' | 'id' | 'display_name'> {
+  
+export interface RegisteredUser extends BaseUser {
     id: string;
     display_name: string;
+    email: string;
 }
 
-export interface UnregisteredUser extends Omit<UserData, 'id' | 'display_name'> {
+export interface UnregisteredUser extends BaseUser {
     id: null;
     display_name: null;
     email: string;
 }
+
+export type BackendUser = RegisteredUser | UnregisteredUser;
+
+export interface UserSessionData {
+    loggedInAt: number;
+    user: BackendUser;
+    secure: Record<string, unknown>;
+}
+
 
 export interface SecureSessionDataType {
     expires_in: number;
@@ -48,12 +46,18 @@ export interface SecureSessionDataType {
 }
 
 // Type guard functions
-export function isRegisteredUser(user: UserData | User | RegisteredUser | UnregisteredUser): user is RegisteredUser {
-    //@ts-expect-error
-    return user.id !== null;
+import { type User } from '#auth-utils';
+
+export function isRegisteredUser(user: User | null): user is RegisteredUser {
+    if (user === null) {
+        return false;
+    }
+    return (user as RegisteredUser).id !== null;
 }
 
-export function isUnregisteredUser(user: UserData | User): user is UnregisteredUser {
-    //@ts-expect-error
-    return user.id === null;
+export function isUnregisteredUser(user: User | null): user is UnregisteredUser {
+    if (user === null) {
+        return false;
+    }
+    return (user as RegisteredUser).id === null;
 }

@@ -3,16 +3,15 @@
 <template>
     <div class="page wrapper-container">
         <AuthState>
-            <template #default="{ loggedIn, clear }">
-                <div v-if="loggedIn && isRegisteredUser">
+            <template #default="{ user, loggedIn, clear }">
+                <div v-if="loggedIn && isRegisteredUser(user)">
                     <p>Logged in as {{ (user as RegisteredUser).display_name }}</p>
                     <img :src="(user as RegisteredUser).picture" alt="User Picture" />
                     <p>Session: {{ session }}</p>
                     <button @click="signOut">Sign Out</button>
                 </div>
-                <div v-else-if="loggedIn && !isRegisteredUser">
-                    <p>Logged in as {{ (user as UnregisteredUser)?.email }}</p>
-                    <p>Session: {{ session.value }}</p>
+                <div v-else-if="loggedIn && isRegisteredUser(user) === false">
+                    <p>Partial signup as {{ (user as UnregisteredUser)?.email }}</p>
                     <NuxtLink to="/register">Finish Signing up</NuxtLink>
                 </div>
                 <div v-else>
@@ -27,11 +26,9 @@
 </template>
 
 <script setup lang="ts">
-import { type RegisteredUser, type UnregisteredUser, type UserData, isRegisteredUser as checkIsRegisteredUser} from '~/types/auth';
+import { type RegisteredUser, type UnregisteredUser, isRegisteredUser} from '~/types/auth';
 
 const { user, session, clear } = useUserSession()
-
-const isRegisteredUser = computed(() => checkIsRegisteredUser(user.value as UserData))
 
 const signInWithGoogle = async () => {
     await clear();

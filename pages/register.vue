@@ -5,7 +5,7 @@
         <h1>Register</h1>
         <form v-if="user" @submit.prevent="register">
             <div v-if="isUnregisteredUser(user)" class="unregistered">
-                <p>You are signing up through {{ user.provider }} with email {{ user?.email }}</p>
+                <p>You are signing up through {{ user.provider }} with email {{ user.email }}</p>
                 <div class="field-container email">
                     <div v-if="user === null" class="new-registration">
                         <div class="field">
@@ -36,7 +36,7 @@
                     <button type="submit">Register</button>
                 </div>
             </div>
-            <div v-else-if="isRegisteredUser" class="registered">
+            <div v-else-if="isRegisteredUser(user)" class="registered">
                 <p>You are already registered as {{ user.display_name }}</p>
                 <button @click.prevent="clearSession">Sign Out</button>
                 <!-- <ClientOnly> -->
@@ -60,15 +60,12 @@
 </template>
 
 <script setup lang="ts">
-import { isUnregisteredUser, type UnregisteredUser, type RegisteredUser } from '~/types/auth';
+import { isUnregisteredUser, isRegisteredUser, type UnregisteredUser, type RegisteredUser } from '~/types/auth';
 
-const { user: userSession, clear: clearSession, fetch: getNewSession } = useUserSession()
-
-const user = computed(() => userSession.value as UnregisteredUser | RegisteredUser | null)
-const isRegisteredUser = computed(() => user.value && !isUnregisteredUser(user.value))
+const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
 
 const userEmail = computed(() => {
-    if (user && isUnregisteredUser(userSession)) {
+    if (user && user.value && isUnregisteredUser(user.value)) {
         return (user.value as UnregisteredUser).email
     }
     else {
