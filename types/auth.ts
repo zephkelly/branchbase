@@ -1,55 +1,59 @@
+import { type User } from '#auth-utils';
+
 export type Provider = 'google' | 'github' | 'credentials';
 
-interface BaseUser {
-    picture?: string;
+export enum VerificationStatusEnum {
+    Pending = 'pending',
+    Unverified = 'unverified',
+    VerifiedBasic = 'verified_basic',
+    VerifiedTrusted = 'verified_trusted',
+    Rejected = 'rejected'
 }
 
-export interface UnregisteredUser extends BaseUser {
+export type VerificationStatus = VerificationStatusEnum;
+
+export interface UserSessionData {
+    loggedInAt: number;
+    user: UserData;
+    secure: Record<string, unknown>;
+}
+
+export interface UserData {
+    // Store email instead of id for unregistered users
+    email?: string;
+    //Registered Users will have:
+    id: string | null;              //  << Null for unregistered users
+    display_name: string | null;    //  << "                         "
+    picture: string;
     provider: Provider;
-    email: string;
-    registered: false;
 }
 
-export interface RegisteredUser extends BaseUser {
+// For stricter type checking, we can use the following interfaces
+export interface RegisteredUser extends Omit<UserData, 'email' | 'id' | 'display_name'> {
     id: string;
     display_name: string;
 }
 
-export interface AnyUser {
-    id?: string;
-    email?: string;
-    provider?: Provider;
-    picture?: string;
-    display_name?: string;
+export interface UnregisteredUser extends Omit<UserData, 'id' | 'display_name'> {
+    id: null;
+    display_name: null;
+    email: string;
 }
 
-export type BackendUser = RegisteredUser & Pick<UnregisteredUser, 'email' | 'provider'>;
-
-interface BaseUserSession {
-    loggedInAt: number;
-    extended?: any;
-    secure?: Record<string, unknown>;
+export interface SecureSessionDataType {
+    expires_in: number;
+    access_token: string;
+    refresh_token: string;
+    verification_status: VerificationStatus;
 }
 
-export interface UnregisteredUserSession extends BaseUserSession {
-    user: UnregisteredUser;
+// Type guard functions
+export function isRegisteredUser(user: UserData | User): user is RegisteredUser {
+    //@ts-expect-error
+    return user.id !== null;
 }
 
-export interface RegisteredUserSession extends BaseUserSession {
-    user: RegisteredUser;
-}
-
-import { type User } from '#auth-utils';
-export function isUnregisteredUser(user: User | null): user is UnregisteredUser {
-    if (!user) {
-        return false;
-    }
-    return (user as UnregisteredUser).registered === false;
-}
-
-export function isRegisteredUser(user: User | null): user is RegisteredUser {
-    if (!user) {
-        return false;
-    }
-    return (user as RegisteredUser).id !== undefined;
+export function isUnregisteredUser(user: UserData | User): user is UnregisteredUser {
+    //@ts-expect-error
+    return user.id === null;
 }

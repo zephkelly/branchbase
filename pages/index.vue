@@ -10,7 +10,7 @@
                 </div>
                 <div v-else-if="loggedIn && !isRegisteredUser">
                     <p>Logged in as {{ (user as UnregisteredUser)?.email }}</p>
-                    <p>Session: {{ session }}</p>
+                    <p>Session: {{ session.value }}</p>
                     <NuxtLink to="/register">Finish Signing up</NuxtLink>
                 </div>
                 <div v-else>
@@ -25,11 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import { type RegisteredUser, type UnregisteredUser, type AnyUser, isRegisteredUser as checkIsRegisteredUser} from '~/types/auth';
+import { type RegisteredUser, type UnregisteredUser, type UserData, isRegisteredUser as checkIsRegisteredUser} from '~/types/auth';
 
 const { user, session, clear } = useUserSession()
 
-const isRegisteredUser = computed(() => checkIsRegisteredUser(user.value))
+const isRegisteredUser = computed(() => checkIsRegisteredUser(user.value as UserData))
 
 const signInWithGoogle = async () => {
     await clear();

@@ -1,9 +1,9 @@
-import { UnregisteredUser, RegisteredUser, UnregisteredUserSession, RegisteredUserSession } from './auth';
+import { type UserData, type UserSessionData, type SecureSessionDataType } from './auth';
 
 declare module '#auth-utils' {
-    export type User = UnregisteredUser | RegisteredUser;
-
-    export type UserSession = UnregisteredUserSession | RegisteredUserSession;
+    interface User extends UserData {}
+    interface UserSession extends UserSessionData {}
+    interface SecureSessionData extends SecureSessionDataType {}
 }
 
 export { }
