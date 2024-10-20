@@ -1,11 +1,7 @@
-import { BaseUser, UserSessionData, SecureSessionDataType, RegisteredUser, UnregisteredUser } from './auth';
+import { BaseUser, UserSessionData, SecureSessionDataType } from './auth';
 
 declare module '#auth-utils' {
-    interface User extends BaseUser {
-        id: string | null;
-        display_name: string | null;
-        email?: string;
-    }
+    type User = BaseUser;
     interface UserSession extends UserSessionData {}
     interface SecureSessionData extends SecureSessionDataType {}
 }

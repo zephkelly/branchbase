@@ -4,7 +4,6 @@ import { BackendUser, RegisteredUser, UnregisteredUser, Provider } from '~/types
 // import { ValidationError } from '@/server/utils/database/validationError';
 import { H3Event } from 'h3';
 
-//make a ValidProviders const based on the Provider enum
 const VALID_PROVIDERS = Object.values(Provider);
 const MAX_DISPLAY_NAME_LENGTH = 36;
 const MAX_PICTURE_URL_LENGTH = 255;
@@ -30,12 +29,12 @@ export async function userExistsByEmail(email: string): Promise<boolean> {
     }
 }
 
-export async function userExistsById(id: string): Promise<boolean> {
+export async function userExistsById(id: number): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
     try {
-        if (!id || typeof id !== 'string') {
+        if (!id || typeof id !== 'number') {
             throw new ValidationError('Invalid user ID', 400);
         }
 
@@ -80,12 +79,12 @@ export async function userExistsByProviderId(provider: Provider, provider_id: nu
     }
 }
 
-export async function getUserById(id: string): Promise<User | null> {
+export async function getUserById(id: number): Promise<User | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
     try {
-        if (!id || typeof id !== 'string') {
+        if (!id || typeof id !== 'number') {
             throw new ValidationError('Invalid user ID', 400);
         }
 
@@ -96,10 +95,11 @@ export async function getUserById(id: string): Promise<User | null> {
             return null
         }
 
-        const fetchedUser: User = {
-            id: result.rows[0].id,
+        const fetchedUser: RegisteredUser = {
+            id: parseInt(result.rows[0].id),
             email: result.rows[0].email,
             provider: result.rows[0].provider,
+            provider_id: parseInt(result.rows[0].provider_id),
             display_name: result.rows[0].display_name,
             picture: result.rows[0].picture,
         }
@@ -115,7 +115,7 @@ export async function getUserById(id: string): Promise<User | null> {
     }
 }
 
-export async function getUserByEmail(event: H3Event, email: string): Promise<BackendUser | null> {
+export async function getUserByEmail(event: H3Event, email: string): Promise<RegisteredUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -139,29 +139,27 @@ export async function getUserByEmail(event: H3Event, email: string): Promise<Bac
             return null
         }
 
-        const fetchedUser: BackendUser = {
-            id: result.rows[0].id,
+        const fetchedUser: RegisteredUser = {
+            id: parseInt(result.rows[0].id),
             email: result.rows[0].email,
             provider: result.rows[0].provider,
-            provider_id: result.rows[0].provider_id,
+            provider_id: parseInt(result.rows[0].provider_id),
             display_name: result.rows[0].display_name,
             picture: result.rows[0].picture,
         }
 
         return fetchedUser
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error in getUserByEmail:', error)
         setResponseStatus(event, 500)
         return null
     }
 }
 
-export async function getUserByProviderId(event: H3Event, provider: Provider, provider_id: number): Promise<BackendUser | null> {
+export async function getUserByProviderId(event: H3Event, provider: Provider, provider_id: number): Promise<RegisteredUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
-
-    console.log('provider', provider)
-    console.log('provider_id', provider_id)
 
     if (!provider || !provider_id) {
         setResponseStatus(event, 400)
@@ -182,8 +180,8 @@ export async function getUserByProviderId(event: H3Event, provider: Provider, pr
             return null
         }
 
-        const fetchedUser: BackendUser = {
-            id: result.rows[0].id,
+        const fetchedUser: RegisteredUser = {
+            id: parseInt(result.rows[0].id),
             email: result.rows[0].email,
             provider: provider,
             provider_id: provider_id,
@@ -192,22 +190,21 @@ export async function getUserByProviderId(event: H3Event, provider: Provider, pr
         }
 
         return fetchedUser
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error in getUserByProviderId:', error)
         setResponseStatus(event, 500)
         return null
     }
 }
 
-type UserInput = Pick<UnregisteredUser, 'email' | 'picture' | 'provider' | 'provider_id' | 'display_name'>
+type UserInput = Omit<UnregisteredUser, 'id'>
 
 export async function createUser(userInput: UserInput, sanitize: boolean = true): Promise<RegisteredUser> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
     let { email, display_name, provider, provider_id, picture } = userInput;
-
-    console.log('userInput', userInput)
 
     try {
         if (!display_name || !provider || !picture || (!email && !provider_id)) {
@@ -242,6 +239,10 @@ export async function createUser(userInput: UserInput, sanitize: boolean = true)
                 }
                 picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
             }
+
+            if (provider_id !== undefined && typeof provider_id !== 'number') {
+                provider_id = parseInt(provider_id);
+            }
         }
 
         let userAlreadyExists = false;
@@ -257,8 +258,6 @@ export async function createUser(userInput: UserInput, sanitize: boolean = true)
             throw new ValidationError('User already exists', 409);
         }
 
-        console.log('Trying to create user')
-
         const query = `
             INSERT INTO users (email, display_name, provider, provider_id, picture)
             VALUES ($1, $2, $3, $4, $5)
@@ -268,10 +267,10 @@ export async function createUser(userInput: UserInput, sanitize: boolean = true)
         const result = await pool.query(query, values)
 
         const newUser: RegisteredUser = {
-            id: result.rows[0].id,
+            id: parseInt(result.rows[0].id),
             email: result.rows[0].email,
             provider: result.rows[0].provider,
-            provider_id: provider_id,
+            provider_id: provider_id as number,
             display_name: result.rows[0].display_name,
             picture: result.rows[0].picture,
         }

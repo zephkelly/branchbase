@@ -1,5 +1,5 @@
 import { getUserByProviderId } from "@/server/utils/database/user"
-import { VerificationStatus, Provider, isRegisteredUser, isUnregisteredUser } from "@/types/auth"
+import { VerificationStatus, Provider, RegisteredUser, isRegisteredUser, UnregisteredUser } from "@/types/auth"
 import { type User } from '#auth-utils'
 
 export default defineOAuthGitHubEventHandler({
@@ -9,19 +9,22 @@ export default defineOAuthGitHubEventHandler({
         },
     },
     async onSuccess(event, { user, tokens }) {
-        const existingUser: User | null = await getUserByProviderId(event, Provider.GitHub, user.id)
-        
-        console.log('existing user', existingUser)
+        const githubProviderId: number = user.id
+        const existingUser: RegisteredUser | null = await getUserByProviderId(event, Provider.GitHub, githubProviderId)
+
         if (existingUser === null) {
+            
+            const unregisteredUser: UnregisteredUser = {
+                id: null,
+                display_name: user.login,
+                picture: user.avatar_url,
+                provider: Provider.GitHub,
+                provider_id: user.id,
+                email: null
+            }
+
             await setUserSession(event, {
-                user: {
-                    id: null,
-                    display_name: user.login,
-                    picture: user.avatar_url,
-                    provider: Provider.GitHub,
-                    provider_id: user.id,
-                    email: null
-                },
+                user: unregisteredUser,
                 secure: {
                     expires_in: tokens.expires_in,
                     access_token: tokens.access_token,
@@ -36,19 +39,16 @@ export default defineOAuthGitHubEventHandler({
             return sendRedirect(event, '/register')
         }
 
-
-        if (isRegisteredUser(existingUser) === false) {
-            return sendRedirect(event, '/register')
+        const registeredUser: RegisteredUser = {
+            id: existingUser.id,
+            display_name: existingUser.display_name,
+            provider: existingUser.provider,
+            provider_id: existingUser.provider_id,
+            picture: existingUser.picture,
         }
 
         await setUserSession(event, {
-            user: {
-                id: existingUser.id,
-                picture: existingUser.picture,
-                display_name: existingUser?.display_name,
-                provider: Provider.GitHub,
-                provider_id: existingUser.provider_id,
-            },
+            user: registeredUser,
             secure: {
                 expires_in: tokens.expires_in,
                 access_token: tokens.access_token,
