@@ -1,31 +1,34 @@
-<!-- THIS ENTIRE FILE NEEDS TO BE RE-WRITTEN TO USE AuthState component -->
-<!-- This page CANNOT be cached or prendered -->
 <template>
     <div class="page wrapper-container">
+        <h1>Welcome to Upbranched</h1>
         <AuthState>
             <template #default="{ user, loggedIn, clear }">
-                <div v-if="loggedIn && isRegisteredUser(user)">
-                    <p>Logged in as {{ (user as RegisteredUser).display_name }}</p>
-                    <img :src="(user as RegisteredUser).picture" alt="User Picture" />
-                    <p>Session: {{ session }}</p>
-                    <button @click="signOut">Sign Out</button>
-                </div>
-                <div v-else-if="loggedIn && isRegisteredUser(user) === false">
-                    <p>Partial signup through {{ (user as UnregisteredUser)?.provider }}</p>
-                    <NuxtLink to="/register">Finish Signing up</NuxtLink>
-                    <button @click="clear">Cancel</button>
-                </div>
-                <div v-else>
-                    <button @click="signInWithGoogle">Sign in with Google</button>
-                    <button @click="signIntWithGitHub">Sign in with GitHub</button>
-                </div>
+            <div v-if="loggedIn && isRegisteredUser(user)">
+                <h2>Welcome, {{ (user as RegisteredUser).display_name }}!</h2>
+                <img :src="(user as RegisteredUser).picture" alt="User Picture" />
+                <p>Provider: {{ (user as RegisteredUser).provider }}</p>
+                <button @click="signOut">Sign Out</button>
+            </div>
+            <div v-else-if="loggedIn && !isRegisteredUser(user)">
+                <h2>Complete Your Registration</h2>
+                <p>You've started the signup process through {{ (user as UnregisteredUser).provider }}</p>
+                <NuxtLink to="/register" class="button">Finish Signing Up</NuxtLink>
+                <button @click="cancelRegistration">Cancel Registration</button>
+            </div>
+            <div v-else>
+                <h2>Sign In</h2>
+                <button @click="signInWithGoogle" class="auth-button google">Sign in with Google</button>
+                <button @click="signInWithGitHub" class="auth-button github">Sign in with GitHub</button>
+                <button @click="signInWithDiscord" class="auth-button discord">Sign in with Discord</button>
+                <NuxtLink to="/register" class="button">Register with Email</NuxtLink>
+            </div>
             </template>
             <template #placeholder>
-                <p>Loading...</p>
+            <p>Loading...</p>
             </template>
         </AuthState>
     </div>
-</template>
+  </template>
 
 <script setup lang="ts">
 import { type RegisteredUser, type UnregisteredUser, isRegisteredUser} from '~/types/auth';
@@ -37,12 +40,21 @@ const signInWithGoogle = async () => {
     window.location.href = '/api/auth/google'
 }
 
-const signIntWithGitHub = async () => {
+const signInWithGitHub = async () => {
     await clear();
     window.location.href = '/api/auth/github'
+}
+
+const signInWithDiscord = async () => {
+    await clear();
+    window.location.href = '/api/auth/discord'
 }
 
 const signOut = () => {
     clear();
 }
+
+const cancelRegistration = () => {
+  clear();
+};
 </script>

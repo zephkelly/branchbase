@@ -4,14 +4,12 @@ import { type User } from '#auth-utils'
 
 export default defineOAuthGitHubEventHandler({
     config: {
-        authorizationParams: {
-            access_type: 'offline'
-        },
+        emailRequired: true,
+        scope: ['user:email']
     },
     async onSuccess(event, { user, tokens }) {
-        const githubProviderId: number = user.id
-        const existingUser: RegisteredUser | null = await getUserByProviderId(event, Provider.GitHub, githubProviderId)
-
+        const userId: number = user.id
+        const existingUser: RegisteredUser | null = await getUserByProviderId(event, Provider.GitHub, userId)
         if (existingUser === null) {
             
             const unregisteredUser: UnregisteredUser = {
@@ -20,7 +18,7 @@ export default defineOAuthGitHubEventHandler({
                 picture: user.avatar_url,
                 provider: Provider.GitHub,
                 provider_id: user.id,
-                email: null
+                email: user.email
             }
 
             await setUserSession(event, {

@@ -2,24 +2,23 @@ import { getUserByEmail } from "@/server/utils/database/user"
 import { VerificationStatus, Provider, isRegisteredUser, isUnregisteredUser, RegisteredUser, UnregisteredUser } from "@/types/auth"
 import { type User } from '#auth-utils'
 
-export default defineOAuthGoogleEventHandler({
+export default defineOAuthDiscordEventHandler({
     config: {
-        authorizationParams: {
-            access_type: 'offline'
-        },
+        scope: ['identify', 'email']
     },
     async onSuccess(event, { user, tokens }) {
-        const userId: number = user.sub
-        const existingUser: RegisteredUser | null = await getUserByProviderId(event, Provider.Google, userId)
+        console.log('Discord user:', user)
+        const userId: number = user.id
+        const existingUser: RegisteredUser | null = await getUserByProviderId(event, Provider.Discord, userId)
 
         if (existingUser === null) {
-
+            
             const unregisteredUser: UnregisteredUser = {
                 id: null,
-                display_name: null,
-                picture: user.picture,
-                provider: Provider.Google,
-                provider_id: user.sub,
+                display_name: user.login,
+                picture: 'https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png',
+                provider: Provider.Discord,
+                provider_id: user.id,
                 email: user.email
             }
 
@@ -61,7 +60,7 @@ export default defineOAuthGoogleEventHandler({
         return sendRedirect(event, '/')
     },
     onError(event, error) {
-        console.error('Error logging in with Google:', error)
+        console.error('Error logging in with Discord:', error)
         return sendRedirect(event, '/login')
     }
 })
