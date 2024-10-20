@@ -1,3 +1,5 @@
+import { type User } from '#auth-utils';
+
 export enum Provider {
     Google = 'google',
     GitHub = 'github',
@@ -6,8 +8,8 @@ export enum Provider {
 }
 
 export enum VerificationStatus {
-    Pending = 'pending',
     Unverified = 'unverified',
+    Pending = 'pending',
     VerifiedBasic = 'verified_basic',
     VerifiedTrusted = 'verified_trusted',
     Rejected = 'rejected'
@@ -20,16 +22,18 @@ export interface BaseUser {
   
 export interface RegisteredUser extends BaseUser {
     id: number;
-    display_name: string;
-    email?: string;
+    username: string;
+    // email?: string;
     provider_id?: number;
+    verification_status: VerificationStatus;
 }
 
 export interface UnregisteredUser extends BaseUser {
     id: null;
-    display_name: string | null;
-    email: string | null;
-    provider_id?: number;
+    username: string | null;
+    primary_email: string;
+    provider_id: number | null;
+    provider_verified: boolean;
 }
 
 export type BackendUser = RegisteredUser | UnregisteredUser;
@@ -48,17 +52,15 @@ export interface SecureSessionDataType {
 }
 
 // Type guard functions
-import { type User } from '#auth-utils';
-
-export function isRegisteredUser(user: User | null): user is RegisteredUser {
-    if (user === null) {
+export function isRegisteredUser(user: User | null | undefined): user is RegisteredUser {
+    if (user === null || user === undefined) {
         return false;
     }
     return (user as RegisteredUser).id !== null;
 }
 
-export function isUnregisteredUser(user: User | null): user is UnregisteredUser {
-    if (user === null) {
+export function isUnregisteredUser(user: User | null | undefined): user is UnregisteredUser {
+    if (user === null || user === undefined) {
         return false;
     }
     return (user as RegisteredUser).id === null;

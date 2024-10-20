@@ -1,6 +1,5 @@
-import { getUserByEmail } from "@/server/utils/database/user"
-import { VerificationStatus, Provider, isRegisteredUser, isUnregisteredUser, RegisteredUser, UnregisteredUser } from "@/types/auth"
-import { type User } from '#auth-utils'
+import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '@/types/auth'
+import { getProviderUser } from '@/server/utils/database/user'
 
 export default defineOAuthGoogleEventHandler({
     config: {
@@ -9,22 +8,28 @@ export default defineOAuthGoogleEventHandler({
         },
     },
     async onSuccess(event, { user, tokens }) {
-        const userId: number = user.sub
-        const existingUser: RegisteredUser | null = await getUserByProviderId(event, Provider.Google, userId)
+        const provider: Provider = Provider.Google
+        const provider_id: number = parseInt(user.sub)
+        const provider_email: string = user.email
+        const provider_verified: boolean = user.email_verified
+        const picture: string = user.picture
 
+        const existingUser: RegisteredUser | null = await getProviderUser(event, provider, provider_id)
+
+        // Send the user through the register flow if they are new
         if (existingUser === null) {
-
-            const unregisteredUser: UnregisteredUser = {
+            const temporaryUser: UnregisteredUser = {
                 id: null,
-                display_name: null,
-                picture: user.picture,
-                provider: Provider.Google,
-                provider_id: user.sub,
-                email: user.email
+                username: null,
+                primary_email: provider_email,
+                provider: provider,
+                provider_id: provider_id,
+                picture: picture,
+                provider_verified: provider_verified
             }
 
             await setUserSession(event, {
-                user: unregisteredUser,
+                user: temporaryUser,
                 secure: {
                     expires_in: tokens.expires_in,
                     access_token: tokens.access_token,
@@ -39,21 +44,20 @@ export default defineOAuthGoogleEventHandler({
             return sendRedirect(event, '/register')
         }
 
+        // Otherwise, log the user in
         const registeredUser: RegisteredUser = {
             id: existingUser.id,
-            display_name: existingUser.display_name,
+            username: existingUser.username,
             provider: existingUser.provider,
             provider_id: existingUser.provider_id,
             picture: existingUser.picture,
+            verification_status: existingUser.verification_status
         }
 
         await setUserSession(event, {
             user: registeredUser,
             secure: {
-                expires_in: tokens.expires_in,
-                access_token: tokens.access_token,
-                refresh_token: tokens.refresh_token,
-                verification_status: VerificationStatus.VerifiedBasic,
+                verification_status: existingUser.verification_status,
             },
             loggedInAt: Date.now(),
         })

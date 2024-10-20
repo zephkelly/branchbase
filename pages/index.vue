@@ -4,7 +4,7 @@
         <AuthState>
             <template #default="{ user, loggedIn, clear }">
             <div v-if="loggedIn && isRegisteredUser(user)">
-                <h2>Welcome, {{ (user as RegisteredUser).display_name }}!</h2>
+                <h2>Welcome, {{ (user as RegisteredUser).username }}!</h2>
                 <img :src="(user as RegisteredUser).picture" alt="User Picture" />
                 <p>Provider: {{ (user as RegisteredUser).provider }}</p>
                 <button @click="signOut">Sign Out</button>

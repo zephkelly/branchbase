@@ -6,7 +6,7 @@
             <form v-if="loggedIn" @submit.prevent="register">
                 <div v-if="isUnregisteredUser(user)" class="unregistered">
                     <p>You are signing up through {{ user.provider }}</p>
-                    <p v-if="user.provider === 'github'">User {{ user.display_name }}</p>
+                    <p v-if="user.provider === 'github'">User {{ user.username }}</p>
                     <div class="field-container email">
                         <div v-if="user.provider === 'credentials'" class="new-registration">
                             <div class="field">
@@ -31,14 +31,14 @@
                         <div v-else class="oauth-registration">
                             <div class="field">
                                 <label for="displayName">Display Name</label>
-                                <input type="text" id="displayName" name="displayName" v-model="displayName" required>
+                                <input type="text" id="displayName" name="displayName" v-model="username" required>
                             </div>
                         </div>
                         <button type="submit">Register</button>
                     </div>
                     </div>
                     <div v-else-if="isRegisteredUser(user)" class="registered">
-                    <p>You are already registered as {{ user.display_name }}</p>
+                    <p>You are already registered as {{ user.username }}</p>
                     <button @click.prevent="clear">Sign Out</button>
                     <div class="re-register" v-if="wantsToReRegisterChoice">
                         <button @click="showWantsToReRegisterConfirm = true">Want to register a different account?</button>
@@ -79,7 +79,7 @@ const userEmail = computed(() => {
 
 const password = ref('')
 
-const displayName = ref<string>('')
+const username = ref<string>('')
 const router = useRouter()
 
 const signInWithGoogle = async () => {
@@ -129,7 +129,7 @@ const register = async () => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                display_name: displayName.value,
+                username: username.value,
             }),
         })
 

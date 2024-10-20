@@ -33,54 +33,31 @@ export default defineNitroPlugin(async (nitroApp) => {
             await client.query(`
                 CREATE TABLE IF NOT EXISTS users (
                     id BIGSERIAL PRIMARY KEY,
-                    email VARCHAR(255) DEFAULT NULL,
-                    password VARCHAR(255) DEFAULT NULL,
+                    primary_email VARCHAR(255) NOT NULL,
+                    password VARCHAR(255),
+                    verification_status VARCHAR(255) DEFAULT 'unverified',
+                    username VARCHAR(255) NOT NULL,
+                    picture VARCHAR(255),
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+
+                CREATE TABLE IF NOT EXISTS user_providers (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
                     provider VARCHAR(255) NOT NULL,
-                    provider_id VARCHAR(255) NOT NULL,
-                    verified BOOLEAN DEFAULT FALSE,
-                    display_name VARCHAR(255) NOT NULL,
-                    picture VARCHAR(255) NOT NULL,
+                    provider_id NUMERIC NOT NULL,
+                    provider_email VARCHAR(255) NOT NULL,
+                    provider_verified BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    UNIQUE (provider, provider_id)
                 );
 
-                CREATE TABLE IF NOT EXISTS branches (
-                    id BIGSERIAL PRIMARY KEY,
-                    name VARCHAR(255) NOT NULL,
-                    title VARCHAR(255) NOT NULL,
-                    type VARCHAR(255) NOT NULL,
-                    description VARCHAR(255) NOT NULL,
-                    pages JSONB,
-                    user_id VARCHAR(255) NOT NULL,
-                    owner_user_id VARCHAR(255) NOT NULL,
-                    background_image_url VARCHAR(255) NOT NULL,
-                    icon_image_url VARCHAR(255) NOT NULL,
-                    tags VARCHAR(255) NOT NULL,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                );
-
-                CREATE TABLE IF NOT EXISTS posts (
-                    id BIGSERIAL PRIMARY KEY,
-                    branch_id INTEGER REFERENCES branches(id),
-                    user_id INTEGER REFERENCES users(id),
-                    post_title VARCHAR(255) NOT NULL,
-                    content_type VARCHAR(255) NOT NULL,
-                    content JSONB NOT NULL,
-                    post_status VARCHAR(255) NOT NULL,
-                    post_flairs VARCHAR(255) NOT NULL,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                );
-
-                CREATE TABLE IF NOT EXISTS comments (
-                    id BIGSERIAL PRIMARY KEY,
-                    post_id INTEGER REFERENCES posts(id),
-                    user_id INTEGER REFERENCES users(id),
-                    content TEXT NOT NULL,
-                    parent_id INTEGER REFERENCES comments(id),
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                );
+                CREATE INDEX IF NOT EXISTS idx_users_email ON users(primary_email);
+                CREATE INDEX IF NOT EXISTS idx_user_providers_user_id ON user_providers(user_id);
+                CREATE INDEX IF NOT EXISTS idx_user_providers_provider_email ON user_providers(provider_email);
             `)
 
             console.log('Tables created or already exist')
