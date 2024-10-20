@@ -1,25 +1,26 @@
-import { getUserByEmail } from "@/server/utils/database/user"
+import { getUserByProviderId } from "@/server/utils/database/user"
 import { VerificationStatus, Provider, isRegisteredUser, isUnregisteredUser } from "@/types/auth"
 import { type User } from '#auth-utils'
 
-export default defineOAuthGoogleEventHandler({
+export default defineOAuthGitHubEventHandler({
     config: {
         authorizationParams: {
             access_type: 'offline'
         },
     },
     async onSuccess(event, { user, tokens }) {
-        const existingUser: User | null = await getUserByEmail(event, user.email)
-        console.log('google user', user)
+        const existingUser: User | null = await getUserByProviderId(event, Provider.GitHub, user.id)
+        
+        console.log('existing user', existingUser)
         if (existingUser === null) {
             await setUserSession(event, {
                 user: {
                     id: null,
-                    display_name: null,
-                    picture: user.picture,
-                    provider: Provider.Google,
-                    provider_id: user.sub,
-                    email: user.email,
+                    display_name: user.login,
+                    picture: user.avatar_url,
+                    provider: Provider.GitHub,
+                    provider_id: user.id,
+                    email: null
                 },
                 secure: {
                     expires_in: tokens.expires_in,
@@ -43,9 +44,9 @@ export default defineOAuthGoogleEventHandler({
         await setUserSession(event, {
             user: {
                 id: existingUser.id,
-                picture: user.picture,
+                picture: existingUser.picture,
                 display_name: existingUser?.display_name,
-                provider: Provider.Google,
+                provider: Provider.GitHub,
                 provider_id: existingUser.provider_id,
             },
             secure: {
@@ -60,7 +61,7 @@ export default defineOAuthGoogleEventHandler({
         return sendRedirect(event, '/')
     },
     onError(event, error) {
-        console.error('Error logging in with Google:', error)
-        return sendRedirect(event, '/login')
+        console.error('Error logging in with GitHub:', error)
+        // return sendRedirect(event, '/login')
     }
 })

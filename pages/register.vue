@@ -5,7 +5,8 @@
         <h1>Register</h1>
         <form v-if="user" @submit.prevent="register">
             <div v-if="isUnregisteredUser(user)" class="unregistered">
-                <p>You are signing up through {{ user.provider }} with email {{ user.email }}</p>
+                <p>You are signing up through {{ user.provider }}</p>
+                <p v-if="user.provider === 'github'">User {{ user.display_name }}</p>
                 <div class="field-container email">
                     <div v-if="user === null" class="new-registration">
                         <div class="field">
@@ -27,12 +28,18 @@
                             <input type="password" id="password" name="password" required>
                         </div>
                     </div>
-                    <div v-if="user !== null && user.provider !== 'credentials'" class="oauth-registration">
+                    <div v-if="user !== null && user.provider === 'google'" class="oauth-registration">
                         <div class="field">
                             <label for="displayName">Display Name</label>
                             <input type="text" id="displayName" name="displayName" v-model="displayName" required>
                         </div>
                     </div>
+                    <div v-if="user !== null && user.provider === 'github'" class="oauth-registration">
+                        <div class="field">
+                            <label for="displayName">Display Name</label>
+                            <input type="text" id="displayName" name="displayName" v-model="displayName" required>
+                        </div>
+                    </div> 
                     <button type="submit">Register</button>
                 </div>
             </div>
@@ -63,6 +70,8 @@
 import { isUnregisteredUser, isRegisteredUser, type UnregisteredUser, type RegisteredUser } from '~/types/auth';
 
 const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
+
+console.log(user.value)
 
 const userEmail = computed(() => {
     if (user && user.value && isUnregisteredUser(user.value)) {

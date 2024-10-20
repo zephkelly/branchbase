@@ -1,11 +1,13 @@
-import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
 import { User } from '#auth-utils'
-import { BackendUser, UnregisteredUser } from '~/types/auth';
-import { ValidationError } from '@/server/utils/database/validationError';
+import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
+import { BackendUser, RegisteredUser, UnregisteredUser, Provider } from '~/types/auth';
+// import { ValidationError } from '@/server/utils/database/validationError';
+import { H3Event } from 'h3';
 
+//make a ValidProviders const based on the Provider enum
+const VALID_PROVIDERS = Object.values(Provider);
 const MAX_DISPLAY_NAME_LENGTH = 36;
 const MAX_PICTURE_URL_LENGTH = 255;
-const VALID_PROVIDERS = ['google'];
 
 export async function userExistsByEmail(email: string): Promise<boolean> {
     const nitroApp = useNitroApp()
@@ -39,6 +41,33 @@ export async function userExistsById(id: string): Promise<boolean> {
 
         const query = 'SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)'
         const result = await pool.query(query, [id])
+
+        return result.rows[0].exists as boolean
+    }
+    catch (error) {
+        if (error instanceof ValidationError) {
+            throw error;
+        }
+
+        throw new Error('An unexpected error occurred while checking if the user exists');
+    }
+}
+
+export async function userExistsByProviderId(provider: Provider, provider_id: number): Promise<boolean> {
+    const nitroApp = useNitroApp()
+    const pool = nitroApp.database
+
+    try {
+        if (!provider || !provider_id) {
+            throw new ValidationError('Invalid provider or provider ID', 400);
+        }
+
+        if (!VALID_PROVIDERS.includes(provider)) {
+            throw new ValidationError('Invalid provider', 400);
+        }
+
+        const query = 'SELECT EXISTS(SELECT 1 FROM users WHERE provider = $1 AND provider_id = $2)'
+        const result = await pool.query(query, [provider, provider_id])
 
         return result.rows[0].exists as boolean
     }
@@ -86,21 +115,27 @@ export async function getUserById(id: string): Promise<User | null> {
     }
 }
 
-export async function getUserByEmail(email: string): Promise<BackendUser | null> {
+export async function getUserByEmail(event: H3Event, email: string): Promise<BackendUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
+    if (!email || typeof email !== 'string') {
+        setResponseStatus(event, 400)
+        return null
+    }
+
     try {
         email = sanitizeEmail(email)
-
         if (!isValidEmail(email)) {
-            throw new ValidationError('Invalid email format', 400);
+            setResponseStatus(event, 400)
+            return null
         }
 
-        const query = 'SELECT id, email, provider, display_name, picture FROM users WHERE email = $1'
+        const query = 'SELECT id, email, provider, provider_id, display_name, picture FROM users WHERE email = $1'
         const result = await pool.query(query, [email])
 
         if (result.rows.length === 0) {
+            setResponseStatus(event, 404)
             return null
         }
 
@@ -108,38 +143,84 @@ export async function getUserByEmail(email: string): Promise<BackendUser | null>
             id: result.rows[0].id,
             email: result.rows[0].email,
             provider: result.rows[0].provider,
+            provider_id: result.rows[0].provider_id,
             display_name: result.rows[0].display_name,
             picture: result.rows[0].picture,
         }
 
         return fetchedUser
-    }
-    catch (error) {
-        if (error instanceof ValidationError) {
-            throw error;
-        }
-
-        throw new Error('An unexpected error occurred while getting the user');
+    } catch (error) {
+        console.error('Error in getUserByEmail:', error)
+        setResponseStatus(event, 500)
+        return null
     }
 }
 
-type UserInput = Pick<UnregisteredUser, 'email' | 'picture' | 'provider'> & { display_name: string }
-
-export async function createUser(userInput: UserInput, sanitize: boolean = true): Promise<BackendUser> {
+export async function getUserByProviderId(event: H3Event, provider: Provider, provider_id: number): Promise<BackendUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
-    try {
-        let { email, display_name, provider, picture } = userInput;
+    console.log('provider', provider)
+    console.log('provider_id', provider_id)
 
-        if (!display_name || !email || !provider) {
-            throw new ValidationError('Required fields are missing. Please provide email, display_name and provider', 400);
+    if (!provider || !provider_id) {
+        setResponseStatus(event, 400)
+        return null
+    }
+
+    if (!VALID_PROVIDERS.includes(provider)) {
+        setResponseStatus(event, 400)
+        return null
+    }
+
+    try {
+        const query = 'SELECT id, email, display_name, picture FROM users WHERE provider = $1 AND provider_id = $2'
+        const result = await pool.query(query, [provider, provider_id])
+
+        if (result.rows.length === 0) {
+            setResponseStatus(event, 404)
+            return null
+        }
+
+        const fetchedUser: BackendUser = {
+            id: result.rows[0].id,
+            email: result.rows[0].email,
+            provider: provider,
+            provider_id: provider_id,
+            display_name: result.rows[0].display_name,
+            picture: result.rows[0].picture,
+        }
+
+        return fetchedUser
+    } catch (error) {
+        console.error('Error in getUserByProviderId:', error)
+        setResponseStatus(event, 500)
+        return null
+    }
+}
+
+type UserInput = Pick<UnregisteredUser, 'email' | 'picture' | 'provider' | 'provider_id' | 'display_name'>
+
+export async function createUser(userInput: UserInput, sanitize: boolean = true): Promise<RegisteredUser> {
+    const nitroApp = useNitroApp()
+    const pool = nitroApp.database
+
+    let { email, display_name, provider, provider_id, picture } = userInput;
+
+    console.log('userInput', userInput)
+
+    try {
+        if (!display_name || !provider || !picture || (!email && !provider_id)) {
+            throw new ValidationError('Required fields are missing. Please provide email or provider_id, display_name, provider and picture', 400);
         }
 
         if (sanitize) {
-            email = sanitizeEmail(email)
-            if (!isValidEmail(email)) {
-                throw new ValidationError('Invalid email format', 400);
+            if (email && email !== null && email !== undefined) {
+                email = sanitizeEmail(email)
+
+                if (!isValidEmail(email)) {
+                    throw new ValidationError('Invalid email format', 400);
+                }
             }
 
             display_name = stripHtmlTags(display_name);
@@ -163,24 +244,34 @@ export async function createUser(userInput: UserInput, sanitize: boolean = true)
             }
         }
 
-        const userAlreadyExists = await userExistsByEmail(email)
+        let userAlreadyExists = false;
+
+        if (email) {
+            userAlreadyExists = await userExistsByEmail(email)
+        }
+        else if (provider_id) {
+            userAlreadyExists = await userExistsByProviderId(provider, provider_id)
+        }
 
         if (userAlreadyExists) {
             throw new ValidationError('User already exists', 409);
         }
 
+        console.log('Trying to create user')
+
         const query = `
-        INSERT INTO users (email, display_name, provider, picture)
-        VALUES ($1, $2, $3, $4)
-        RETURNING id, email, display_name, provider, picture
-    `
-        const values = [email, display_name, provider, picture]
+            INSERT INTO users (email, display_name, provider, provider_id, picture)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id, email, display_name, provider, provider_id, picture
+        `
+        const values = [email, display_name, provider, provider_id, picture]
         const result = await pool.query(query, values)
 
-        const newUser: BackendUser = {
+        const newUser: RegisteredUser = {
             id: result.rows[0].id,
             email: result.rows[0].email,
             provider: result.rows[0].provider,
+            provider_id: provider_id,
             display_name: result.rows[0].display_name,
             picture: result.rows[0].picture,
         }

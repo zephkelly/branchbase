@@ -2,7 +2,7 @@ export enum Provider {
     Google = 'google',
     GitHub = 'github',
     Credentials = 'credentials'
-  }
+}
 
 export enum VerificationStatus {
     Pending = 'pending',
@@ -18,15 +18,17 @@ export interface BaseUser {
 }
   
 export interface RegisteredUser extends BaseUser {
-    id: string;
+    id: number;
     display_name: string;
-    email: string;
+    email?: string;
+    provider_id?: number;
 }
 
 export interface UnregisteredUser extends BaseUser {
     id: null;
-    display_name: null;
-    email: string;
+    display_name: string | null;
+    email: string | null;
+    provider_id?: number;
 }
 
 export type BackendUser = RegisteredUser | UnregisteredUser;
@@ -36,7 +38,6 @@ export interface UserSessionData {
     user: BackendUser;
     secure: Record<string, unknown>;
 }
-
 
 export interface SecureSessionDataType {
     expires_in: number;

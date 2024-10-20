@@ -33,12 +33,13 @@ export default defineNitroPlugin(async (nitroApp) => {
             await client.query(`
                 CREATE TABLE IF NOT EXISTS users (
                     id BIGSERIAL PRIMARY KEY,
-                    email VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) DEFAULT NULL,
                     password VARCHAR(255) DEFAULT NULL,
-                    provider VARCHAR(255),
+                    provider VARCHAR(255) NOT NULL,
+                    provider_id VARCHAR(255) NOT NULL,
                     verified BOOLEAN DEFAULT FALSE,
                     display_name VARCHAR(255) NOT NULL,
-                    picture VARCHAR(255) DEFAULT NULL,
+                    picture VARCHAR(255) NOT NULL,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                 );
