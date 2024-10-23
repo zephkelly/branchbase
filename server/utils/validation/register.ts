@@ -1,11 +1,8 @@
-import { UnregisteredUser } from '@/types/auth';
 import { 
     isValidEmail, 
     sanitizeEmail, 
     isValidLength, 
     stripHtmlTags, 
-    escapeHtml,
-    isValidLengthNumber
 } from '~/utils/inputSanitisation';
 
 interface ValidationResult {
@@ -53,28 +50,24 @@ export function sanitiseRegistrationInput(input: RegistrationInput): ValidationR
         provider_verified: input.provider_verified
     };
 
-    // Sanitize and validate username
     const usernameValidation = sanitiseUsername(input.username);
     if (!usernameValidation.isValid) {
         return usernameValidation;
     }
     sanitizedData.username = usernameValidation.sanitizedData;
 
-    // Sanitize and validate email
     const emailValidation = sanitiseAndValidateEmail(input.primary_email);
     if (!emailValidation.isValid) {
         return emailValidation;
     }
     sanitizedData.primary_email = emailValidation.sanitizedData;
 
-    // Sanitize and validate picture URL
     const pictureValidation = sanitisePictureUrl(input.picture);
     if (!pictureValidation.isValid) {
         return pictureValidation;
     }
     sanitizedData.picture = pictureValidation.sanitizedData;
 
-    // If provider information is present, sanitize and validate it
     if (input.provider !== undefined) {
         const providerValidation = sanitiseProvider(input.provider);
         if (!providerValidation.isValid) {
@@ -91,7 +84,6 @@ export function sanitiseRegistrationInput(input: RegistrationInput): ValidationR
         sanitizedData.provider_id = providerIdValidation.sanitizedData;
     }
 
-    // Validate provider_verified is boolean
     if (input.provider_verified !== undefined && typeof input.provider_verified !== 'boolean') {
         return {
             isValid: false,
@@ -110,10 +102,8 @@ export function sanitiseUsername(username: string): ValidationResult {
         return { isValid: false, message: 'Username is required' };
     }
 
-    // Remove HTML tags and trim
     let sanitized = stripHtmlTags(username).trim();
 
-    // Check length after basic sanitization
     if (!isValidLength(sanitized, SANITISATION_CONSTRAINTS.USERNAME.MIN_LENGTH, SANITISATION_CONSTRAINTS.USERNAME.MAX_LENGTH)) {
         return {
             isValid: false,
@@ -121,7 +111,6 @@ export function sanitiseUsername(username: string): ValidationResult {
         };
     }
 
-    // Check pattern
     if (!SANITISATION_CONSTRAINTS.USERNAME.PATTERN.test(sanitized)) {
         return {
             isValid: false,
@@ -160,10 +149,8 @@ export function sanitisePictureUrl(url: string): ValidationResult {
         return { isValid: false, message: 'Profile picture URL is required' };
     }
 
-    // Remove HTML tags and trim
     let sanitized = stripHtmlTags(url).trim();
 
-    // Check length
     if (!isValidLength(sanitized, 1, SANITISATION_CONSTRAINTS.PICTURE_URL.MAX_LENGTH)) {
         return {
             isValid: false,
@@ -171,7 +158,6 @@ export function sanitisePictureUrl(url: string): ValidationResult {
         };
     }
 
-    // Validate URL format and allowed protocols
     if (!SANITISATION_CONSTRAINTS.PICTURE_URL.PATTERN.test(sanitized)) {
         return {
             isValid: false,
@@ -190,10 +176,8 @@ export function sanitiseProvider(provider: string): ValidationResult {
         return { isValid: false, message: 'Provider is required' };
     }
 
-    // Remove HTML tags and trim
     let sanitized = stripHtmlTags(provider).trim();
 
-    // Check length
     if (!isValidLength(sanitized, 1, SANITISATION_CONSTRAINTS.PROVIDER.MAX_LENGTH)) {
         return {
             isValid: false,
@@ -201,7 +185,6 @@ export function sanitiseProvider(provider: string): ValidationResult {
         };
     }
 
-    // Check pattern
     if (!SANITISATION_CONSTRAINTS.PROVIDER.PATTERN.test(sanitized)) {
         return {
             isValid: false,
@@ -215,7 +198,6 @@ export function sanitiseProvider(provider: string): ValidationResult {
     };
 }
 
-//return a number
 export function sanitiseProviderId(providerId: string | null): ValidationResult {
     if (providerId === null) {
         return {
