@@ -28,7 +28,17 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
     }
 
     try {
-        const query = 'SELECT id, username, picture, provider_verified FROM users WHERE provider = $1 AND provider_id = $2'
+        const query =
+            `SELECT 
+                u.id,
+                u.username,
+                u.picture
+            FROM private.users u
+            LEFT JOIN private.user_providers up 
+                ON u.id = up.user_id 
+                AND up.provider_verified = true
+            WHERE up.provider = $1 
+                AND up.provider_id = $2;`
         const result = await pool.query(query, [provider, provider_id])
 
         if (result.rows.length === 0) {
@@ -58,18 +68,24 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
 export async function getCredentialUserExists(event: H3Event, email: string): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
+    
+    if (!email) {
+        setResponseStatus(event, 400)
+        return false
+    }
 
     try {
-        const query = 'SELECT id FROM users WHERE email = $1 AND provider = $2'
+        const query = `
+            SELECT EXISTS (
+                SELECT 1 
+                FROM private.users u
+                INNER JOIN private.user_providers up ON u.id = up.user_id
+                WHERE up.provider_email = $1 
+                AND up.provider = $2
+            );`
         const values = [email, Provider.Credentials]
-
         const result = await pool.query(query, values)
-
-        if (result.rows.length === 0) {
-            return false
-        }
-
-        return true
+        return result.rows[0].exists
     }
     catch (error) {
         console.error('Error in getCredentialUserExists', error)
@@ -81,18 +97,33 @@ export async function getCredentialUserExists(event: H3Event, email: string): Pr
 export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: number): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
+    
+    if (!provider || !provider_id) {
+        setResponseStatus(event, 400)
+        return false
+    }
+    
+    if (!VALID_PROVIDERS.includes(provider)) {
+        setResponseStatus(event, 400)
+        return false
+    }
+    
+    if (typeof provider_id !== 'number') {
+        setResponseStatus(event, 400)
+        return false
+    }
 
     try {
-        const query = 'SELECT id FROM users WHERE provider = $1 AND provider_id = $2'
+        const query = `
+            SELECT EXISTS (
+                SELECT 1 
+                FROM private.user_providers 
+                WHERE provider = $1 
+                AND provider_id = $2
+            );`
         const values = [provider, provider_id]
-
         const result = await pool.query(query, values)
-
-        if (result.rows.length === 0) {
-            return false
-        }
-
-        return true
+        return result.rows[0].exists
     }
     catch (error) {
         console.error('Error in getProviderUserExists', error)

@@ -31,7 +31,7 @@ export default defineNitroPlugin(async (nitroApp) => {
         const client = await pool.connect()
         try {
             await client.query(`
-                CREATE TABLE IF NOT EXISTS users (
+                CREATE TABLE IF NOT EXISTS private.users (
                     id BIGSERIAL PRIMARY KEY,
                     primary_email VARCHAR(255) NOT NULL,
                     password VARCHAR(255),
@@ -42,7 +42,7 @@ export default defineNitroPlugin(async (nitroApp) => {
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                 );
 
-                CREATE TABLE IF NOT EXISTS user_providers (
+                CREATE TABLE IF NOT EXISTS private.user_providers (
                     id BIGSERIAL PRIMARY KEY,
                     user_id BIGINT NOT NULL,
                     provider VARCHAR(255) NOT NULL,
@@ -54,10 +54,6 @@ export default defineNitroPlugin(async (nitroApp) => {
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                     UNIQUE (provider, provider_id)
                 );
-
-                CREATE INDEX IF NOT EXISTS idx_users_email ON users(primary_email);
-                CREATE INDEX IF NOT EXISTS idx_user_providers_user_id ON user_providers(user_id);
-                CREATE INDEX IF NOT EXISTS idx_user_providers_provider_email ON user_providers(provider_email);
             `)
 
             console.log('Tables created or already exist')
