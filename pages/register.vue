@@ -17,7 +17,7 @@
                         <div v-else class="oauth-registration">
                             <div class="field">
                                 <p>{{ user.provider === 'google' ? 'Google' : 'GitHub' }} Logo</p>
-                                <p>{{ user.email }}</p>
+                                <p>{{ user.primary_email }}</p>
                             </div>
                         </div>
                     </div>
@@ -70,7 +70,7 @@ const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
 
 const userEmail = computed(() => {
     if (user && user.value && isUnregisteredUser(user.value)) {
-        return (user.value as UnregisteredUser).email
+        return (user.value as UnregisteredUser).primary_email
     }
     else {
         return ''

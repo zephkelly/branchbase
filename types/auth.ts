@@ -1,4 +1,4 @@
-import { type User } from '#auth-utils';
+import { type User } from '#auth-utils'
 
 export enum Provider {
     Google = 'google',
@@ -23,7 +23,6 @@ export interface BaseUser {
 export interface RegisteredUser extends BaseUser {
     id: number;
     username: string;
-    // email?: string;
     provider_id?: number;
     verification_status: VerificationStatus;
 }

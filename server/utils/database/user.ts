@@ -1,8 +1,10 @@
-import { User } from '#auth-utils'
-import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
-import { BackendUser, RegisteredUser, UnregisteredUser, Provider } from '~/types/auth';
-// import { ValidationError } from '@/server/utils/database/validationError';
 import { H3Event } from 'h3';
+
+import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
+
+import { type RegisteredUser, Provider, VerificationStatus } from '~/types/auth';
+import { type ValidationError, ErrorType, PostgresError } from '@/server/types/error'
+import type { UnregisteredUserInput, UserCreationResponse } from '@/server/types/user'
 
 const VALID_PROVIDERS = Object.values(Provider);
 const MAX_DISPLAY_NAME_LENGTH = 36;
@@ -132,91 +134,165 @@ export async function getProviderUserExists(event: H3Event, provider: Provider, 
     }
 }
 
+export async function createUser(event: H3Event, unregisteredUserData: UnregisteredUserInput): Promise<UserCreationResponse> {
+    const nitroApp = useNitroApp()
+    const pool = nitroApp.database
 
-// type UserInput = Omit<UnregisteredUser, 'id'>
+    let { username, primary_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
+  
+    const client = await pool.connect()
 
-// export async function createUser(userInput: UserInput, sanitize: boolean = true): Promise<RegisteredUser> {
-//     const nitroApp = useNitroApp()
-//     const pool = nitroApp.database
+    try {
+        if (!username || !primary_email || !provider || !provider_id || provider_verified === null || provider_verified === undefined || !picture) {
+            setResponseStatus(event, 400)
+            return createValidationError('general', 'Please provide all required fields')
+        }
 
-//     let { email, display_name, provider, provider_id, picture } = userInput;
+        if (primary_email) {
+            primary_email = sanitizeEmail(primary_email)
 
-//     try {
-//         if (!display_name || !provider || !picture || (!email && !provider_id)) {
-//             throw new ValidationError('Required fields are missing. Please provide email or provider_id, display_name, provider and picture', 400);
-//         }
+            if (!isValidEmail(primary_email)) {
+                setResponseStatus(event, 400)
+                return createValidationError('email', 'Invalid email format')
+            }
+        }
 
-//         if (sanitize) {
-//             if (email && email !== null && email !== undefined) {
-//                 email = sanitizeEmail(email)
+        username = stripHtmlTags(username);
+        username = escapeHtml(username);
+        if (!isValidLength(username, 1, MAX_DISPLAY_NAME_LENGTH)) {
+            setResponseStatus(event, 400)
+            return createValidationError('username', `Username must be between 1 and ${MAX_DISPLAY_NAME_LENGTH} characters`);
+        }
+        username = truncateInput(username, MAX_DISPLAY_NAME_LENGTH);
 
-//                 if (!isValidEmail(email)) {
-//                     throw new ValidationError('Invalid email format', 400);
-//                 }
-//             }
+        if (!VALID_PROVIDERS.includes(provider)) {
+            setResponseStatus(event, 400)
+            return createValidationError('provider', 'Invalid provider');
+        }
 
-//             display_name = stripHtmlTags(display_name);
-//             display_name = escapeHtml(display_name);
-//             if (!isValidLength(display_name, 1, MAX_DISPLAY_NAME_LENGTH)) {
-//                 throw new ValidationError(`Display name must be between 1 and ${MAX_DISPLAY_NAME_LENGTH} characters`, 400);
-//             }
-//             display_name = truncateInput(display_name, MAX_DISPLAY_NAME_LENGTH);
+        picture = stripHtmlTags(picture);
+        picture = escapeHtml(picture);
+        if (!isValidLength(picture, 1, MAX_PICTURE_URL_LENGTH)) {
+            setResponseStatus(event, 400)
+            return createValidationError('picture', `Picture URL must be between 1 and ${MAX_PICTURE_URL_LENGTH} characters`);
+        }
+        picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
 
-//             if (!VALID_PROVIDERS.includes(provider)) {
-//                 throw new ValidationError('Invalid provider', 400);
-//             }
+        if (typeof provider_id !== 'number') {
+            setResponseStatus(event, 400)
+            return createValidationError('provider_id', 'Provider ID must be a number');
+        }
 
-//             if (picture) {
-//                 picture = stripHtmlTags(picture);
-//                 picture = escapeHtml(picture);
-//                 if (!isValidLength(picture, 1, MAX_PICTURE_URL_LENGTH)) {
-//                     throw new ValidationError(`Picture URL must be between 1 and ${MAX_PICTURE_URL_LENGTH} characters`, 400);
-//                 }
-//                 picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
-//             }
+        await client.query('BEGIN')
 
-//             if (provider_id && typeof provider_id !== 'number' ) {
-//                 provider_id = parseInt(provider_id);
-//             }
-//         }
+        // Insert user
+        const userQuery = `
+            INSERT INTO private.users (
+                primary_email,
+                username,
+                picture,
+                verification_status
+            )
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, primary_email, username, picture, verification_status
+        `
+        const verificationStatus = provider_verified === true 
+            ? VerificationStatus.VerifiedBasic 
+            : VerificationStatus.Unverified;
 
-//         let userAlreadyExists = false;
+        const userValues = [
+            primary_email,
+            username,
+            picture,
+            verificationStatus
+        ]
 
-//         if (email) {
-//             userAlreadyExists = await userExistsByEmail(email)
-//         }
-//         else if (provider_id) {
-//             userAlreadyExists = await userExistsByProviderId(provider, provider_id)
-//         }
+        const userResult = await client.query(userQuery, userValues)
+        const userId = userResult.rows[0].id
 
-//         if (userAlreadyExists) {
-//             throw new ValidationError('User already exists', 409);
-//         }
+        // Insert provider information
+        const providerQuery = `
+            INSERT INTO private.user_providers (
+                user_id,
+                provider,
+                provider_id,
+                provider_email,
+                provider_verified
+            )
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id
+        `
+        const providerValues = [
+            userId,
+            provider,
+            provider_id,
+            primary_email,  // Using primary_email as provider_email initially
+            provider_verified
+        ]
 
-//         const query = `
-//             INSERT INTO users (email, display_name, provider, provider_id, picture)
-//             VALUES ($1, $2, $3, $4, $5)
-//             RETURNING id, email, display_name, provider, provider_id, verification_status picture
-//         `
-//         const values = [email, display_name, provider, provider_id, picture]
-//         const result = await pool.query(query, values)
+        await client.query(providerQuery, providerValues)
 
-//         const newUser: RegisteredUser = {
-//             id: parseInt(result.rows[0].id),
-//             email: result.rows[0].email,
-//             provider: result.rows[0].provider,
-//             provider_id: provider_id as number,
-//             display_name: result.rows[0].display_name,
-//             picture: result.rows[0].picture,
-//         }
+        // Commit transaction
+        await client.query('COMMIT')
 
-//         return newUser
-//     }
-//     catch (error) {
-//         if (error instanceof ValidationError) {
-//             throw error;
-//         }
-//         throw new Error('An unexpected error occurred while creating the user');
-//     }
-// }
+        const newUser: RegisteredUser = {
+            id: parseInt(userId),
+            username: userResult.rows[0].username,
+            picture: userResult.rows[0].picture,
+            provider,
+            provider_id,
+            verification_status: verificationStatus
+        }
 
+        return {
+            type: 'SUCCESS',
+            data: newUser
+        };
+    }
+    catch (error: any) {
+        await client.query('ROLLBACK')
+        console.error('Error in createUser', error)
+        
+        if (error && typeof error === 'object' && 'code' in error) {
+            const pgError = error as PostgresError;
+            
+            // PostgreSQL unique violation code
+            if (pgError.code === '23505') { 
+                if (pgError.constraint === 'user_providers_provider_provider_id_key') {
+                    setResponseStatus(event, 409)
+                    return {
+                        type: ErrorType.VALIDATION_ERROR,
+                        field: 'provider_id',
+                        message: 'This account is already registered',
+                        statusCode: 409
+                    }
+                }
+                if (pgError.constraint === 'users_primary_email_key') {
+                    setResponseStatus(event, 409)
+                    return {
+                        type: ErrorType.VALIDATION_ERROR,
+                        field: 'email',
+                        message: 'This email is already registered',
+                        statusCode: 409
+                    }
+                }
+            }
+        }
+
+        setResponseStatus(event, 500)
+        return {
+            type: ErrorType.DATABASE_ERROR,
+            message: 'Failed to create user',
+            statusCode: 500
+        }
+    }
+}
+
+function createValidationError(field: string, message: string): ValidationError {
+    return {
+        type: ErrorType.VALIDATION_ERROR,
+        field,
+        message,
+        statusCode: 400
+    };
+}

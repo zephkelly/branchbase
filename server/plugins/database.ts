@@ -51,8 +51,14 @@ export default defineNitroPlugin(async (nitroApp) => {
                     provider_verified BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                    UNIQUE (provider, provider_id)
+                    -- Foreign key constraint with cascade delete
+                    CONSTRAINT fk_user
+                        FOREIGN KEY (user_id)
+                        REFERENCES private.users(id)
+                        ON DELETE CASCADE,
+                    -- Unique constraint on provider and provider_id combination
+                    CONSTRAINT user_providers_provider_provider_id_key
+                        UNIQUE (provider, provider_id)
                 );
             `)
 

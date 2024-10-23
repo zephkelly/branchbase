@@ -1,33 +1,27 @@
-import { isRegisteredUser, UnregisteredUser } from '@/types/auth'
+import { isRegisteredUser, UnregisteredUser, RegisteredUser } from '@/types/auth'
 import { isValidLength } from '~/utils/inputSanitisation'
-import { getCredentialUserExists, getProviderUserExists } from '@/server/utils/database/user'
+import { getCredentialUserExists, getProviderUserExists, createUser } from '@/server/utils/database/user'
 
 import { UserSession } from '#auth-utils'
 
-const USERNAME_MAX_LENGTH = 20
-const USERNAME_MIN_LENGTH = 1
+import type { DatabaseError, ValidationError } from '@/server/types/error'
+import type { UserCreationResponse } from '@/server/types/user'
+
+// const USERNAME_MAX_LENGTH = 20
+// const USERNAME_MIN_LENGTH = 1
 
 export default defineEventHandler(async (event) => {
-    // Have we been given a username?
     const body = await readBody(event)
     const { username } = body
 
-    if (!username) {
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.isValid) {
         return createError({
             statusCode: 422,
-            message: 'Username is required for registration'
-        })
+            message: usernameValidation.message
+        });
     }
 
-    // Is the username valid?
-    if (!isValidLength(username, USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH)) {
-        return createError({
-            statusCode: 422,
-            message: `Username must be between ${USERNAME_MIN_LENGTH} and ${USERNAME_MAX_LENGTH} characters`
-        })
-    }
-
-    // Has the user properly initiated the registration process via sessions?
     const session: UserSession = await getUserSession(event)
 
     if (!session || !session.user) {
@@ -37,16 +31,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // Is the user session indicating they are already registered?
-    const userRegistered = isRegisteredUser(session.user)
-    if (userRegistered) {
+    if (isRegisteredUser(session.user)) {
         return createError({
             statusCode: 409,
             message: 'User session indicates that you are already registered'
         })
     }
-    // Check that the temporary session fields are valid
-    const userSessionData = session.user as UnregisteredUser
+    const userSessionData = session.user as UnregisteredUser;
+
     const { primary_email, picture, provider, provider_id, provider_verified } = userSessionData
 
     if (!primary_email || !picture || !provider || !provider_id || !provider_verified) {
@@ -56,14 +48,25 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // We cant trust that the user has not tampered with the session data, so check database
-
-    // If there is no provider_id, then the user might be a credentials-only user
     if (userSessionData.provider_id === null || userSessionData.provider_id === undefined) {
         const credentialsUser = await getCredentialUserExists(event, primary_email)
+
+        if (credentialsUser) {
+            return createError({
+                statusCode: 409,
+                message: 'A user with this email already exists'
+            })
+        }
     }
     else if (userSessionData.provider_id) {
         const providerUser = await getProviderUserExists(event, provider, provider_id)
+
+        if (providerUser) {
+            return createError({
+                statusCode: 409,
+                message: 'A user with this provider ID already exists'
+            })
+        }
     }
     else {
         return createError({
@@ -73,22 +76,43 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-        // const newUser: RegisteredUser = await createUser();
+        const newUser: UserCreationResponse = await createUser(event, {
+            primary_email,
+            username,
+            picture,
+            provider,
+            provider_id,
+            provider_verified
+        });
 
+        if (isDatabaseError(newUser) || isValidationError(newUser)) {
+            return createError({
+                statusCode: newUser.statusCode,
+                message: newUser.message
+            });
+        }
 
-        // await replaceUserSession(event, {
-        //     user: {
-        //         id: newUser.id,
-        //         display_name,
-        //         picture,
-        //     },
-        //     loggedInAt: Date.now(),
-        // })
+        const registeredUser: RegisteredUser = newUser.data
 
-        // setResponseStatus(event, 201)
-        // return {
-        //     message: 'User registered successfully',
-        // }
+        await replaceUserSession(event, {
+            user: {
+                id: registeredUser.id,
+                username: registeredUser.username,
+                provider: registeredUser.provider,
+                provider_id: registeredUser.provider_id,
+                picture: registeredUser.picture,
+            },
+            secure: {
+                verification_status: registeredUser.verification_status
+            },
+            loggedInAt: Date.now()
+        })
+
+        setResponseStatus(event, 201)
+        return {
+            statusCode: 201,
+            message: 'User registered successfully'
+        }
     }
     catch (error) {
         console.error('Error registering user:', error)
@@ -98,3 +122,52 @@ export default defineEventHandler(async (event) => {
         })
     }
 })
+
+export function isDatabaseError(error: UserCreationResponse): error is DatabaseError {
+    return (error as DatabaseError).type === 'DATABASE_ERROR';
+}
+
+export function isValidationError(error: UserCreationResponse): error is ValidationError {
+    return (error as ValidationError).type === 'VALIDATION_ERROR';
+}
+
+const USERNAME_CONSTRAINTS = {
+    MIN_LENGTH: 1,
+    MAX_LENGTH: 20,
+    PATTERN: /^[a-zA-Z0-9_-]+$/
+} as const;
+
+function validateUsername(username: string): { isValid: boolean; message?: string } {
+    if (!username) {
+        return { isValid: false, message: 'Username is required for registration' };
+    }
+
+    if (!isValidLength(username, USERNAME_CONSTRAINTS.MIN_LENGTH, USERNAME_CONSTRAINTS.MAX_LENGTH)) {
+        return { 
+            isValid: false, 
+            message: `Username must be between ${USERNAME_CONSTRAINTS.MIN_LENGTH} and ${USERNAME_CONSTRAINTS.MAX_LENGTH} characters`
+        };
+    }
+
+    if (!USERNAME_CONSTRAINTS.PATTERN.test(username)) {
+        return {
+            isValid: false,
+            message: 'Username can only contain letters, numbers, underscores, and hyphens'
+        };
+    }
+
+    return { isValid: true };
+}
+
+function validateSessionData(sessionData: UnregisteredUser): { isValid: boolean; message?: string } {
+    const { primary_email, picture, provider, provider_id, provider_verified } = sessionData;
+
+    if (!primary_email || !picture || !provider || provider_id === undefined || provider_verified === undefined) {
+        return {
+            isValid: false,
+            message: 'Invalid temporary user session data'
+        };
+    }
+
+    return { isValid: true };
+}

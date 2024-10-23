@@ -6,4 +6,4 @@ declare module '#auth-utils' {
     interface SecureSessionData extends SecureSessionDataType {}
 }
 
-export { }
+export { };
