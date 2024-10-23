@@ -21,19 +21,19 @@ export default defineOAuthGoogleEventHandler({
             const temporaryUser: UnregisteredUser = {
                 id: null,
                 username: null,
-                primary_email: provider_email,
                 provider: provider,
                 provider_id: provider_id,
                 picture: picture,
-                provider_verified: provider_verified
             }
-
+            
             await setUserSession(event, {
                 user: temporaryUser,
                 secure: {
-                    expires_in: tokens.expires_in,
-                    access_token: tokens.access_token,
-                    refresh_token: tokens.refresh_token,
+                    primary_email: provider_email,
+                    provider_verified: provider_verified,
+                    // expires_in: tokens.expires_in,
+                    // access_token: tokens.access_token,
+                    // refresh_token: tokens.refresh_token,
                     verification_status: VerificationStatus.Pending,
                 },
                 loggedInAt: Date.now(),
@@ -50,8 +50,7 @@ export default defineOAuthGoogleEventHandler({
             username: existingUser.username,
             provider: existingUser.provider,
             provider_id: existingUser.provider_id,
-            picture: existingUser.picture,
-            verification_status: existingUser.verification_status
+            picture: existingUser.picture
         }
 
         await setUserSession(event, {

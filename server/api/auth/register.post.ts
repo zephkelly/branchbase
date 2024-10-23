@@ -1,4 +1,4 @@
-import { isRegisteredUser, UnregisteredUser, RegisteredUser } from '@/types/auth'
+import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType } from '@/types/auth'
 import { isValidLength } from '~/utils/inputSanitisation'
 import { getCredentialUserExists, getProviderUserExists, createUser } from '@/server/utils/database/user'
 
@@ -27,15 +27,16 @@ export default defineEventHandler(async (event) => {
     }
 
     const userSessionData = session.user as UnregisteredUser
+    const userSecureSessionData = session.secure as SecureSessionDataType
     
     // Validate and sanitize all input data (including session data)
     const sanitisationResult = sanitiseRegistrationInput({
         username: body.username,
-        primary_email: userSessionData.primary_email,
+        primary_email: userSecureSessionData.primary_email as string,
         picture: userSessionData.picture,
         provider: userSessionData.provider,
         provider_id: userSessionData.provider_id,
-        provider_verified: userSessionData.provider_verified
+        provider_verified: userSecureSessionData.provider_verified as boolean
     });
 
     if (!sanitisationResult.isValid) {
@@ -117,45 +118,4 @@ export function isDatabaseError(error: UserCreationResponse): error is DatabaseE
 
 export function isValidationError(error: UserCreationResponse): error is ValidationError {
     return (error as ValidationError).type === 'VALIDATION_ERROR';
-}
-
-const USERNAME_CONSTRAINTS = {
-    MIN_LENGTH: 1,
-    MAX_LENGTH: 20,
-    PATTERN: /^[a-zA-Z0-9_-]+$/
-} as const;
-
-function validateUsername(username: string): { isValid: boolean; message?: string } {
-    if (!username) {
-        return { isValid: false, message: 'Username is required for registration' };
-    }
-
-    if (!isValidLength(username, USERNAME_CONSTRAINTS.MIN_LENGTH, USERNAME_CONSTRAINTS.MAX_LENGTH)) {
-        return { 
-            isValid: false, 
-            message: `Username must be between ${USERNAME_CONSTRAINTS.MIN_LENGTH} and ${USERNAME_CONSTRAINTS.MAX_LENGTH} characters`
-        };
-    }
-
-    if (!USERNAME_CONSTRAINTS.PATTERN.test(username)) {
-        return {
-            isValid: false,
-            message: 'Username can only contain letters, numbers, underscores, and hyphens'
-        };
-    }
-
-    return { isValid: true };
-}
-
-function validateSessionData(sessionData: UnregisteredUser): { isValid: boolean; message?: string } {
-    const { primary_email, picture, provider, provider_id, provider_verified } = sessionData;
-
-    if (!primary_email || !picture || !provider || provider_id === undefined || provider_verified === undefined) {
-        return {
-            isValid: false,
-            message: 'Invalid temporary user session data'
-        };
-    }
-
-    return { isValid: true };
 }

@@ -171,12 +171,12 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
         }
 
         picture = stripHtmlTags(picture);
-        picture = escapeHtml(picture);
+        // picture = escapeHtml(picture);
         if (!isValidLength(picture, 1, MAX_PICTURE_URL_LENGTH)) {
             setResponseStatus(event, 400)
             return createValidationError('picture', `Picture URL must be between 1 and ${MAX_PICTURE_URL_LENGTH} characters`);
         }
-        picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
+        // picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
 
         if (typeof provider_id !== 'string') {
             setResponseStatus(event, 400)

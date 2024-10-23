@@ -24,15 +24,17 @@ export interface RegisteredUser extends BaseUser {
     id: number;
     username: string;
     provider_id?: string;
-    verification_status: VerificationStatus;
+    // Secure session data
+    verification_status?: VerificationStatus;
 }
 
 export interface UnregisteredUser extends BaseUser {
     id: null;
     username: string | null;
-    primary_email: string;
     provider_id: string | null;
-    provider_verified: boolean;
+    //Secure session data
+    provider_verified?: boolean;
+    primary_email?: string;
 }
 
 export type BackendUser = RegisteredUser | UnregisteredUser;
@@ -44,9 +46,11 @@ export interface UserSessionData {
 }
 
 export interface SecureSessionDataType {
-    expires_in: number;
-    access_token: string;
-    refresh_token: string;
+    expires_in?: number;
+    access_token?: string;
+    refresh_token?: string;
+    provider_verified?: boolean;
+    primary_email?: string;
     verification_status: VerificationStatus;
 }
 

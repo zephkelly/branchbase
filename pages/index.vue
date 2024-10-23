@@ -35,6 +35,8 @@ import { type RegisteredUser, type UnregisteredUser, isRegisteredUser} from '~/t
 
 const { user, session, clear } = useUserSession()
 
+console.log(user.value, session.value)
+
 const signInWithGoogle = async () => {
     await clear();
     window.location.href = '/api/auth/google'
