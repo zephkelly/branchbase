@@ -10,7 +10,7 @@ const VALID_PROVIDERS = Object.values(Provider);
 const MAX_DISPLAY_NAME_LENGTH = 36;
 const MAX_PICTURE_URL_LENGTH = 255;
 
-export async function getProviderUser(event: H3Event, provider: Provider, provider_id: number): Promise<RegisteredUser | null> {
+export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<RegisteredUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -24,7 +24,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
         return null
     }
 
-    if (typeof provider_id !== 'number') {
+    if (typeof provider_id !== 'string') {
         setResponseStatus(event, 400)
         return null
     }
@@ -178,9 +178,9 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
         }
         picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
 
-        if (typeof provider_id !== 'number') {
+        if (typeof provider_id !== 'string') {
             setResponseStatus(event, 400)
-            return createValidationError('provider_id', 'Provider ID must be a number');
+            return createValidationError('provider_id', 'Provider ID must be a string');
         }
 
         await client.query('BEGIN')

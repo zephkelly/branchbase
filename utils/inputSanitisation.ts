@@ -30,6 +30,10 @@ export function isValidLength(input: string, minLength: number, maxLength: numbe
     return length >= minLength && length <= maxLength;
 }
 
+export function isValidLengthNumber(input: number, minLength: number, maxLength: number): boolean {
+    return input >= minLength && input <= maxLength;
+}
+
 /**
  * Truncates the input to the specified maximum length.
  * @param input The input string to truncate.

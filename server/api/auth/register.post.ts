@@ -2,29 +2,20 @@ import { isRegisteredUser, UnregisteredUser, RegisteredUser } from '@/types/auth
 import { isValidLength } from '~/utils/inputSanitisation'
 import { getCredentialUserExists, getProviderUserExists, createUser } from '@/server/utils/database/user'
 
-import { UserSession } from '#auth-utils'
-
 import type { DatabaseError, ValidationError } from '@/server/types/error'
 import type { UserCreationResponse } from '@/server/types/user'
+
+import { sanitiseRegistrationInput } from '~/server/utils/validation/register'
 
 // const USERNAME_MAX_LENGTH = 20
 // const USERNAME_MIN_LENGTH = 1
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
-    const { username } = body
-
-    const usernameValidation = validateUsername(username);
-    if (!usernameValidation.isValid) {
-        return createError({
-            statusCode: 422,
-            message: usernameValidation.message
-        });
-    }
-
-    const session: UserSession = await getUserSession(event)
-
-    if (!session || !session.user) {
+    
+    // Get and validate session first
+    const session = await getUserSession(event)
+    if (!session?.user) {
         return createError({
             statusCode: 403,
             message: 'You have not initiated the registration process properly'
@@ -37,30 +28,43 @@ export default defineEventHandler(async (event) => {
             message: 'User session indicates that you are already registered'
         })
     }
-    const userSessionData = session.user as UnregisteredUser;
 
-    const { primary_email, picture, provider, provider_id, provider_verified } = userSessionData
+    const userSessionData = session.user as UnregisteredUser
+    
+    // Validate and sanitize all input data (including session data)
+    const sanitizationResult = sanitiseRegistrationInput({
+        username: body.username,
+        primary_email: userSessionData.primary_email,
+        picture: userSessionData.picture,
+        provider: userSessionData.provider,
+        provider_id: userSessionData.provider_id,
+        provider_verified: userSessionData.provider_verified
+    });
 
-    if (!primary_email || !picture || !provider || !provider_id || !provider_verified) {
+    if (!sanitizationResult.isValid) {
         return createError({
-            statusCode: 400,
-            message: 'Invalid temporary user session data, did you tamper with the request?'
-        })
+            statusCode: 422,
+            message: sanitizationResult.message
+        });
     }
 
-    if (userSessionData.provider_id === null || userSessionData.provider_id === undefined) {
-        const credentialsUser = await getCredentialUserExists(event, primary_email)
+    const sanitizedData = sanitizationResult.sanitizedData;
 
+    // Check for existing users
+    if (sanitizedData.provider_id === null || sanitizedData.provider_id === undefined) {
+        const credentialsUser = await getCredentialUserExists(event, sanitizedData.primary_email)
         if (credentialsUser) {
             return createError({
                 statusCode: 409,
                 message: 'A user with this email already exists'
             })
         }
-    }
-    else if (userSessionData.provider_id) {
-        const providerUser = await getProviderUserExists(event, provider, provider_id)
-
+    } else {
+        const providerUser = await getProviderUserExists(
+            event, 
+            sanitizedData.provider!, 
+            sanitizedData.provider_id
+        )
         if (providerUser) {
             return createError({
                 statusCode: 409,
@@ -68,22 +72,10 @@ export default defineEventHandler(async (event) => {
             })
         }
     }
-    else {
-        return createError({
-            statusCode: 400,
-            message: 'Invalid temporary user session data, did you tamper with the request?'
-        })
-    }
 
     try {
-        const newUser: UserCreationResponse = await createUser(event, {
-            primary_email,
-            username,
-            picture,
-            provider,
-            provider_id,
-            provider_verified
-        });
+        // Create user with sanitized data
+        const newUser: UserCreationResponse = await createUser(event, sanitizedData);
 
         if (isDatabaseError(newUser) || isValidationError(newUser)) {
             return createError({
@@ -113,8 +105,7 @@ export default defineEventHandler(async (event) => {
             statusCode: 201,
             message: 'User registered successfully'
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error registering user:', error)
         return createError({
             statusCode: 500,

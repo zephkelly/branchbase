@@ -9,7 +9,7 @@ export default defineOAuthGoogleEventHandler({
     },
     async onSuccess(event, { user, tokens }) {
         const provider: Provider = Provider.Google
-        const provider_id: number = parseInt(user.sub)
+        const provider_id: string = user.sub
         const provider_email: string = user.email
         const provider_verified: boolean = user.email_verified
         const picture: string = user.picture
