@@ -33,11 +33,11 @@ export default defineNitroPlugin(async (nitroApp) => {
             await client.query(`
                 CREATE TABLE IF NOT EXISTS private.users (
                     id BIGSERIAL PRIMARY KEY,
-                    primary_email VARCHAR(255) NOT NULL,
-                    password VARCHAR(255),
-                    verification_status VARCHAR(255) DEFAULT 'unverified',
-                    username VARCHAR(255) NOT NULL,
-                    picture VARCHAR(255),
+                    primary_email TEXT NOT NULL,
+                    password TEXT,
+                    verification_status TEXT DEFAULT 'unverified',
+                    username TEXT NOT NULL,
+                    picture TEXT,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                 );
@@ -45,18 +45,16 @@ export default defineNitroPlugin(async (nitroApp) => {
                 CREATE TABLE IF NOT EXISTS private.user_providers (
                     id BIGSERIAL PRIMARY KEY,
                     user_id BIGINT NOT NULL,
-                    provider VARCHAR(255) NOT NULL,
+                    provider TEXT NOT NULL,
                     provider_id NUMERIC NOT NULL,
-                    provider_email VARCHAR(255) NOT NULL,
+                    provider_email TEXT NOT NULL,
                     provider_verified BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    -- Foreign key constraint with cascade delete
                     CONSTRAINT fk_user
                         FOREIGN KEY (user_id)
                         REFERENCES private.users(id)
                         ON DELETE CASCADE,
-                    -- Unique constraint on provider and provider_id combination
                     CONSTRAINT user_providers_provider_provider_id_key
                         UNIQUE (provider, provider_id)
                 );
