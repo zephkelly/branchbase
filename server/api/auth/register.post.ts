@@ -7,9 +7,6 @@ import type { UserCreationResponse } from '@/server/types/user'
 
 import { sanitiseRegistrationInput } from '~/server/utils/validation/register'
 
-// const USERNAME_MAX_LENGTH = 20
-// const USERNAME_MIN_LENGTH = 1
-
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     
@@ -32,7 +29,7 @@ export default defineEventHandler(async (event) => {
     const userSessionData = session.user as UnregisteredUser
     
     // Validate and sanitize all input data (including session data)
-    const sanitizationResult = sanitiseRegistrationInput({
+    const sanitisationResult = sanitiseRegistrationInput({
         username: body.username,
         primary_email: userSessionData.primary_email,
         picture: userSessionData.picture,
@@ -41,18 +38,18 @@ export default defineEventHandler(async (event) => {
         provider_verified: userSessionData.provider_verified
     });
 
-    if (!sanitizationResult.isValid) {
+    if (!sanitisationResult.isValid) {
         return createError({
             statusCode: 422,
-            message: sanitizationResult.message
+            message: sanitisationResult.message
         });
     }
 
-    const sanitizedData = sanitizationResult.sanitizedData;
+    const sanitisedData = sanitisationResult.sanitisedData;
 
     // Check for existing users
-    if (sanitizedData.provider_id === null || sanitizedData.provider_id === undefined) {
-        const credentialsUser = await getCredentialUserExists(event, sanitizedData.primary_email)
+    if (sanitisedData.provider_id === null || sanitisedData.provider_id === undefined) {
+        const credentialsUser = await getCredentialUserExists(event, sanitisedData.primary_email)
         if (credentialsUser) {
             return createError({
                 statusCode: 409,
@@ -62,8 +59,8 @@ export default defineEventHandler(async (event) => {
     } else {
         const providerUser = await getProviderUserExists(
             event, 
-            sanitizedData.provider!, 
-            sanitizedData.provider_id
+            sanitisedData.provider!, 
+            sanitisedData.provider_id
         )
         if (providerUser) {
             return createError({
@@ -75,7 +72,7 @@ export default defineEventHandler(async (event) => {
 
     try {
         // Create user with sanitized data
-        const newUser: UserCreationResponse = await createUser(event, sanitizedData);
+        const newUser: UserCreationResponse = await createUser(event, sanitisedData);
 
         if (isDatabaseError(newUser) || isValidationError(newUser)) {
             return createError({

@@ -7,7 +7,7 @@ import {
 
 interface ValidationResult {
     isValid: boolean;
-    sanitizedData?: any;
+    sanitisedData?: any;
     message?: string;
 }
 
@@ -41,7 +41,7 @@ const SANITISATION_CONSTRAINTS = {
 } as const;
 
 export function sanitiseRegistrationInput(input: RegistrationInput): ValidationResult {
-    const sanitizedData: RegistrationInput = {
+    const sanitisedData: RegistrationInput = {
         username: '',
         primary_email: '',
         picture: '',
@@ -54,26 +54,26 @@ export function sanitiseRegistrationInput(input: RegistrationInput): ValidationR
     if (!usernameValidation.isValid) {
         return usernameValidation;
     }
-    sanitizedData.username = usernameValidation.sanitizedData;
+    sanitisedData.username = usernameValidation.sanitisedData;
 
     const emailValidation = sanitiseAndValidateEmail(input.primary_email);
     if (!emailValidation.isValid) {
         return emailValidation;
     }
-    sanitizedData.primary_email = emailValidation.sanitizedData;
+    sanitisedData.primary_email = emailValidation.sanitisedData;
 
     const pictureValidation = sanitisePictureUrl(input.picture);
     if (!pictureValidation.isValid) {
         return pictureValidation;
     }
-    sanitizedData.picture = pictureValidation.sanitizedData;
+    sanitisedData.picture = pictureValidation.sanitisedData;
 
     if (input.provider !== undefined) {
         const providerValidation = sanitiseProvider(input.provider);
         if (!providerValidation.isValid) {
             return providerValidation;
         }
-        sanitizedData.provider = providerValidation.sanitizedData;
+        sanitisedData.provider = providerValidation.sanitisedData;
     }
 
     if (input.provider_id !== undefined) {
@@ -81,7 +81,7 @@ export function sanitiseRegistrationInput(input: RegistrationInput): ValidationR
         if (!providerIdValidation.isValid) {
             return providerIdValidation;
         }
-        sanitizedData.provider_id = providerIdValidation.sanitizedData;
+        sanitisedData.provider_id = providerIdValidation.sanitisedData;
     }
 
     if (input.provider_verified !== undefined && typeof input.provider_verified !== 'boolean') {
@@ -93,7 +93,7 @@ export function sanitiseRegistrationInput(input: RegistrationInput): ValidationR
 
     return {
         isValid: true,
-        sanitizedData
+        sanitisedData
     };
 }
 
@@ -120,7 +120,7 @@ export function sanitiseUsername(username: string): ValidationResult {
 
     return {
         isValid: true,
-        sanitizedData: sanitized
+        sanitisedData: sanitized
     };
 }
 
@@ -140,7 +140,7 @@ export function sanitiseAndValidateEmail(email: string): ValidationResult {
 
     return {
         isValid: true,
-        sanitizedData: sanitized
+        sanitisedData: sanitized
     };
 }
 
@@ -167,7 +167,7 @@ export function sanitisePictureUrl(url: string): ValidationResult {
 
     return {
         isValid: true,
-        sanitizedData: sanitized
+        sanitisedData: sanitized
     };
 }
 
@@ -194,7 +194,7 @@ export function sanitiseProvider(provider: string): ValidationResult {
 
     return {
         isValid: true,
-        sanitizedData: sanitized
+        sanitisedData: sanitized
     };
 }
 
@@ -202,7 +202,7 @@ export function sanitiseProviderId(providerId: string | null): ValidationResult 
     if (providerId === null) {
         return {
             isValid: true,
-            sanitizedData: null
+            sanitisedData: null
         };
     }
 
@@ -223,6 +223,6 @@ export function sanitiseProviderId(providerId: string | null): ValidationResult 
 
     return {
         isValid: true,
-        sanitizedData: sanitized
+        sanitisedData: sanitized
     }
 }
