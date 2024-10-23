@@ -69,7 +69,6 @@
 </template>
 
 <script setup lang="ts">
-// import { useFormValidation } from '~/composables/useFormValidation';
 import { isUnregisteredUser, isRegisteredUser, type UnregisteredUser, type RegisteredUser } from '~/types/auth';
 
 const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
@@ -82,8 +81,6 @@ const userEmail = computed(() => {
         return ''
     }
 })
-
-// const password = ref('')
 
 const username = ref<string>('')
 const router = useRouter()
@@ -163,10 +160,11 @@ const handleInput = (fieldName: keyof RegistrationForm, event: Event) => {
     updateField(fieldName, input.value)
 }
 console.log("User is already registered: ", alreadyRegistered.value);
-// Handle form submission
+
 const register = async () => {
     if (!validateForm()) {
-        return // Stop if validation fails
+        console.log('Form is invalid')
+        return
     }
 
     try {

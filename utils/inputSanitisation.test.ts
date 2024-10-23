@@ -22,7 +22,7 @@ describe('String Utility Functions', () => {
         })
     })
 
-    describe('sanitizeEmail', () => {
+    describe('sanitiseEmail', () => {
         it('should trim whitespace and convert to lowercase', () => {
             expect(sanitizeEmail(' Test@Example.com ')).toBe('test@example.com')
             expect(sanitizeEmail('USER@DOMAIN.COM')).toBe('user@domain.com')

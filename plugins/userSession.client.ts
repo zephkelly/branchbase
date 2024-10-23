@@ -7,7 +7,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     const user = userSession.user.value
 
     if (user && isRegisteredUser(user as User)) {
-        console.log('User is logged in and fully registered. Skipping registration checks.')
+        console.log('User logged in, not importing userRegistration')
         return
     }
 
