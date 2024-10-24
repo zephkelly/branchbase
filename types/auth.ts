@@ -39,11 +39,11 @@ export interface UnregisteredUser extends BaseUser {
     primary_email?: string;
 }
 
-export type BackendUser = RegisteredUser | UnregisteredUser;
+// export type BackendUser = RegisteredUser | UnregisteredUser;
 
 export interface UserSessionData {
     loggedInAt: number;
-    user: BackendUser;
+    user: RegisteredUser | UnregisteredUser;
     secure: Record<string, unknown>;
 }
 
