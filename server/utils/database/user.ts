@@ -1,9 +1,7 @@
 import { H3Event } from 'h3';
 
-import { isValidEmail, sanitizeEmail, isValidLength, truncateInput, stripHtmlTags, escapeHtml } from '@/utils/inputSanitisation'
-
 import { type RegisteredUser, type UnregisteredUser, Provider, VerificationStatus } from '~/types/auth';
-import { type ValidationError, ErrorType, PostgresError } from '@/server/types/error'
+import { ErrorType, PostgresError } from '@/server/types/error'
 import type { UserCreationResponse } from '@/server/types/user'
 
 const VALID_PROVIDERS = Object.values(Provider);
