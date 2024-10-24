@@ -143,7 +143,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
     const client = await pool.connect()
 
     try {
-        if (!username || !primary_email || !provider || !provider_id || provider_verified === null || provider_verified === undefined || !picture) {
+        if (!username || !primary_email || !provider || !provider_id || !provider_verified || !picture) {
             setResponseStatus(event, 400)
             return createValidationError('general', 'Please provide all required fields')
         }
@@ -171,12 +171,10 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
         }
 
         picture = stripHtmlTags(picture);
-        // picture = escapeHtml(picture);
         if (!isValidLength(picture, 1, MAX_PICTURE_URL_LENGTH)) {
             setResponseStatus(event, 400)
             return createValidationError('picture', `Picture URL must be between 1 and ${MAX_PICTURE_URL_LENGTH} characters`);
         }
-        // picture = truncateInput(picture, MAX_PICTURE_URL_LENGTH);
 
         if (typeof provider_id !== 'string') {
             setResponseStatus(event, 400)
@@ -226,7 +224,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
             userId,
             provider,
             provider_id,
-            primary_email,  // Using primary_email as provider_email initially
+            primary_email,
             provider_verified
         ]
 

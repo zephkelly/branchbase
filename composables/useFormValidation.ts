@@ -21,10 +21,8 @@ export type ValidationRules<T> = {
 }
   
 export const useFormValidation = <T extends Record<string, any>>(initialValues: T) => {
-    // Create the form state
     const formState = ref<FormState<T>>({} as FormState<T>)
   
-    // Initialise form state for each field
     for (const [key, value] of Object.entries(initialValues)) {
         formState.value[key as keyof T] = {
             value,
@@ -34,10 +32,8 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
         }
     }
   
-    // Store validation rules for each field
     const validationRules = ref<ValidationRules<T>>({})
   
-    // Validation rules
     const rules = {
         required: (message = 'This field is required'): ValidationRule => ({
             validate: (value: any) => {

@@ -1,3 +1,4 @@
+import { Provider } from '~/types/auth';
 import { 
     isValidEmail, 
     sanitizeEmail, 
@@ -40,7 +41,16 @@ const SANITISATION_CONSTRAINTS = {
     }
 } as const;
 
-export function sanitiseRegistrationInput(input: RegistrationInput): ValidationResult {
+interface OAuthRegistrationInput {
+    username: string;
+    primary_email: string;
+    picture: string;
+    provider: Provider;
+    provider_id: string | null;
+    provider_verified: boolean;
+}
+
+export function sanitiseOAuthRegistrationInput(input: OAuthRegistrationInput): ValidationResult {
     const sanitisedData: RegistrationInput = {
         username: '',
         primary_email: '',
@@ -88,6 +98,48 @@ export function sanitiseRegistrationInput(input: RegistrationInput): ValidationR
         return {
             isValid: false,
             message: 'Provider verification status must be a boolean value'
+        };
+    }
+
+    return {
+        isValid: true,
+        sanitisedData
+    };
+}
+
+interface CredentialsRegistrationInput {
+    username: string;
+    primary_email: string;
+    password: string;
+    confirmPassword: string;
+    provider: Provider.Credentials;
+}
+
+export function sanitiseCredentialsRegistrationInput(input: CredentialsRegistrationInput): ValidationResult {
+    const sanitisedData: RegistrationInput = {
+        username: '',
+        primary_email: '',
+        picture: '',
+        provider: Provider.Credentials,
+        provider_id: null
+    };
+
+    const usernameValidation = sanitiseUsername(input.username);
+    if (!usernameValidation.isValid) {
+        return usernameValidation;
+    }
+    sanitisedData.username = usernameValidation.sanitisedData;
+
+    const emailValidation = sanitiseAndValidateEmail(input.primary_email);
+    if (!emailValidation.isValid) {
+        return emailValidation;
+    }
+    sanitisedData.primary_email = emailValidation.sanitisedData;
+
+    if (input.password !== input.confirmPassword) {
+        return {
+            isValid: false,
+            message: 'Passwords do not match'
         };
     }
 

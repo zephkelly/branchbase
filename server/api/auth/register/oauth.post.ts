@@ -5,7 +5,7 @@ import { getCredentialUserExists, getProviderUserExists, createUser } from '@/se
 import type { DatabaseError, ValidationError } from '@/server/types/error'
 import type { UserCreationResponse } from '@/server/types/user'
 
-import { sanitiseRegistrationInput } from '~/server/utils/validation/register'
+import { sanitiseOAuthRegistrationInput } from '~/server/utils/validation/register'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
     const userSecureSessionData = session.secure as SecureSessionDataType
     
     // Validate and sanitize all input data (including session data)
-    const sanitisationResult = sanitiseRegistrationInput({
+    const sanitisationResult = sanitiseOAuthRegistrationInput({
         username: body.username,
         primary_email: userSecureSessionData.primary_email as string,
         picture: userSessionData.picture,

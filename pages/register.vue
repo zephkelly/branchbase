@@ -3,7 +3,7 @@
         <h1>Register</h1>
         <AuthState>
             <template #default="{ user, loggedIn, clear }">
-                <form v-if="loggedIn" @submit.prevent="register">
+                <form v-if="loggedIn" @submit.prevent="registerOAuth">
                     <div v-if="isUnregisteredUser(user)" class="unregistered">
                         <p>You are signing up through {{ user.provider }}</p>
                         <p v-if="user.provider === 'github'">User {{ user.username }}</p>
@@ -161,14 +161,14 @@ const handleInput = (fieldName: keyof RegistrationForm, event: Event) => {
 }
 console.log("User is already registered: ", alreadyRegistered.value);
 
-const register = async () => {
+const registerOAuth = async () => {
     if (!validateForm()) {
         console.log('Form is invalid')
         return
     }
 
     try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/api/auth/register/oauth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -186,7 +186,6 @@ const register = async () => {
     }
     catch (error) {
         console.error('Error during registration:', error)
-        // Handle error (e.g., show error message to user)
     }
 }
 
