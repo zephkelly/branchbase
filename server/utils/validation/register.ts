@@ -34,7 +34,7 @@ const SANITISATION_CONSTRAINTS = {
 
 interface OAuthRegistrationInput {
     username: string;
-    primary_email: string;
+    provider_email: string;
     picture: string;
     provider: Provider;
     provider_id: string | null;
@@ -50,11 +50,11 @@ export function sanitiseOAuthRegistrationInput(input: OAuthRegistrationInput): V
     }
     sanitisedData.username = usernameValidation.sanitisedData;
 
-    const emailValidation = sanitiseAndValidateEmail(input.primary_email);
+    const emailValidation = sanitiseAndValidateEmail(input.provider_email);
     if (!emailValidation.isValid) {
         return emailValidation;
     }
-    sanitisedData.primary_email = emailValidation.sanitisedData;
+    sanitisedData.provider_email = emailValidation.sanitisedData;
 
     const pictureValidation = sanitisePictureUrl(input.picture);
     if (!pictureValidation.isValid) {

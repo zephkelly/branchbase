@@ -1,4 +1,4 @@
-import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType } from '@/types/auth'
+import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType, Provider } from '@/types/auth'
 import { isValidLength } from '~/utils/inputSanitisation'
 import { getCredentialUserExists, getProviderUserExists, createUser } from '@/server/utils/database/user'
 
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     // Validate and sanitize all input data (including session data)
     const sanitisationResult = sanitiseOAuthRegistrationInput({
         username: body.username,
-        primary_email: userSecureSessionData.primary_email as string,
+        provider_email: userSecureSessionData.provider_email as string,
         picture: userSessionData.picture,
         provider: userSessionData.provider,
         provider_id: userSessionData.provider_id,
@@ -93,7 +93,8 @@ export default defineEventHandler(async (event) => {
                 picture: registeredUser.picture,
             },
             secure: {
-                verification_status: registeredUser.verification_status
+                provider_verified: registeredUser.provider_verified,
+                provider_email: sanitisedData.provider_email
             },
             loggedInAt: Date.now()
         })

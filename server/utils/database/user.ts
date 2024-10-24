@@ -32,13 +32,13 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
             `SELECT 
                 u.id,
                 u.username,
-                u.picture
+                u.picture,
+                up.provider_email,
+                up.provider_verified
             FROM private.users u
-            LEFT JOIN private.user_providers up 
-                ON u.id = up.user_id 
-                AND up.provider_verified = true
+            INNER JOIN private.user_providers up ON u.id = up.user_id
             WHERE up.provider = $1 
-                AND up.provider_id = $2;`
+            AND up.provider_id = $2;`
         const result = await pool.query(query, [provider, provider_id])
 
         if (result.rows.length === 0) {
@@ -51,8 +51,9 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
             username: result.rows[0].username,
             provider: provider,
             provider_id: provider_id,
+            provider_email: result.rows[0].provider_email,
             picture: result.rows[0].picture,
-            verification_status: result.rows[0].provider_verified
+            provider_verified: result.rows[0].provider_verified
         }
 
         return retrievedUser;
@@ -71,17 +72,18 @@ export async function getCredentialUserExists(event: H3Event, email: string): Pr
 export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: number): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
-    
+   
+    // Input validation
     if (!provider || !provider_id) {
         setResponseStatus(event, 400)
         return false
     }
-    
+   
     if (!VALID_PROVIDERS.includes(provider)) {
         setResponseStatus(event, 400)
         return false
     }
-    
+   
     if (typeof provider_id !== 'number') {
         setResponseStatus(event, 400)
         return false
@@ -90,17 +92,19 @@ export async function getProviderUserExists(event: H3Event, provider: Provider, 
     try {
         const query = `
             SELECT EXISTS (
-                SELECT 1 
-                FROM private.user_providers 
-                WHERE provider = $1 
-                AND provider_id = $2
+                SELECT 1
+                FROM private.user_providers up
+                INNER JOIN private.users u ON u.id = up.user_id
+                WHERE up.provider = $1
+                AND up.provider_id = $2
             );`
+        
         const values = [provider, provider_id]
         const result = await pool.query(query, values)
         return result.rows[0].exists
     }
     catch (error) {
-        console.error('Error in getProviderUserExists', error)
+        console.error('Error in getProviderUserExists:', error)
         setResponseStatus(event, 500)
         return false
     }
@@ -117,7 +121,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
-    let { username, primary_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
+    let { username, provider_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
   
     const client = await pool.connect()
 
@@ -127,23 +131,16 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
         // Insert user
         const userQuery = `
             INSERT INTO private.users (
-                primary_email,
                 username,
-                picture,
-                verification_status
+                picture
             )
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, primary_email, username, picture, verification_status
+            VALUES ($1, $2)
+            RETURNING id
         `
-        const verificationStatus = provider_verified === true 
-            ? VerificationStatus.VerifiedBasic 
-            : VerificationStatus.Unverified;
 
         const userValues = [
-            primary_email,
             username,
-            picture,
-            verificationStatus
+            picture
         ]
 
         const userResult = await client.query(userQuery, userValues)
@@ -165,7 +162,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
             userId,
             provider,
             provider_id,
-            primary_email,
+            provider_email,
             provider_verified
         ]
 
@@ -176,11 +173,12 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
 
         const newUser: RegisteredUser = {
             id: parseInt(userId),
-            username: userResult.rows[0].username,
+            username: username,
             picture: userResult.rows[0].picture,
             provider,
             provider_id,
-            verification_status: verificationStatus
+            provider_verified: provider_verified,
+            provider_email
         }
 
         return {
