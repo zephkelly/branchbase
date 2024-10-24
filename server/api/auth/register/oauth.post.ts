@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
         picture: userSessionData.picture,
         provider: userSessionData.provider,
         provider_id: userSessionData.provider_id,
-        provider_verified: userSecureSessionData.provider_verified as boolean
+        provider_verified: userSecureSessionData.provider_verified
     });
 
     if (!sanitisationResult.isValid) {

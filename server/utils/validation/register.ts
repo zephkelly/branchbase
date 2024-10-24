@@ -12,15 +12,6 @@ interface ValidationResult {
     message?: string;
 }
 
-interface RegistrationInput {
-    username: string;
-    primary_email: string;
-    picture: string;
-    provider?: string;
-    provider_id: string | null;
-    provider_verified?: boolean;
-}
-
 const SANITISATION_CONSTRAINTS = {
     USERNAME: {
         MIN_LENGTH: 1,
@@ -32,12 +23,12 @@ const SANITISATION_CONSTRAINTS = {
         PATTERN: /^[a-zA-Z0-9_-]+$/,
     },
     PICTURE_URL: {
-        MAX_LENGTH: 2083, // Standard maximum URL length
+        MAX_LENGTH: 2083,
         PATTERN: /^https?:\/\/[^\s<>\"]+$/,
     },
     PROVIDER_ID: {
-        PATTERN: /^\d+$/,  // Only digits
-        MAX_LENGTH: 255    // Keep max length constraint for the string
+        PATTERN: /^\d+$/,
+        MAX_LENGTH: 255
     }
 } as const;
 
@@ -47,18 +38,11 @@ interface OAuthRegistrationInput {
     picture: string;
     provider: Provider;
     provider_id: string | null;
-    provider_verified: boolean;
+    provider_verified: boolean | null;
 }
 
 export function sanitiseOAuthRegistrationInput(input: OAuthRegistrationInput): ValidationResult {
-    const sanitisedData: RegistrationInput = {
-        username: '',
-        primary_email: '',
-        picture: '',
-        provider: input.provider,
-        provider_id: input.provider_id,
-        provider_verified: input.provider_verified
-    };
+    const sanitisedData: OAuthRegistrationInput = input;
 
     const usernameValidation = sanitiseUsername(input.username);
     if (!usernameValidation.isValid) {
@@ -109,6 +93,7 @@ export function sanitiseOAuthRegistrationInput(input: OAuthRegistrationInput): V
 
 interface CredentialsRegistrationInput {
     username: string;
+    picture: string;
     primary_email: string;
     password: string;
     confirmPassword: string;
@@ -116,13 +101,7 @@ interface CredentialsRegistrationInput {
 }
 
 export function sanitiseCredentialsRegistrationInput(input: CredentialsRegistrationInput): ValidationResult {
-    const sanitisedData: RegistrationInput = {
-        username: '',
-        primary_email: '',
-        picture: '',
-        provider: Provider.Credentials,
-        provider_id: null
-    };
+    const sanitisedData: CredentialsRegistrationInput = input;
 
     const usernameValidation = sanitiseUsername(input.username);
     if (!usernameValidation.isValid) {
