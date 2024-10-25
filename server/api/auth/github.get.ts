@@ -1,5 +1,5 @@
 import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/auth'
-import { getProviderUser } from './../../utils/database/user'
+import { getProviderUser, getUsersByProviderEmail } from './../../utils/database/user'
 import { ref } from 'vue'
 
 export type GitHubEmailVisibility = 'public' | 'private' | null;
@@ -47,49 +47,120 @@ export default defineOAuthGitHubEventHandler({
 
         const existingUser: RegisteredUser | null = await getProviderUser(event, provider, provider_id)
 
-        // Send the user through the register flow if they are new
-        if (existingUser === null) {
-            const temporaryUser: UnregisteredUser = {
+        if (existingUser) {
+            const registeredUser: RegisteredUser = {
+                id: existingUser.id,
+                username: existingUser.username,
+                provider: existingUser.provider,
+                provider_id: existingUser.provider_id,
+                picture: existingUser.picture
+            }
+
+            await setUserSession(event, {
+                user: registeredUser,
+                secure: {
+                    provider_verified: existingUser.provider_verified,
+                    provider_email: existingUser.provider_email,
+                },
+                loggedInAt: Date.now(),
+            })
+
+            return sendRedirect(event, '/')
+        }
+
+        const existingUsers = await getUsersByProviderEmail(event, provider_email.value)
+
+        if (existingUsers) {
+            const temporaryLinkableUser: UnregisteredUser = {
                 id: null,
                 username: null,
                 provider: provider,
                 provider_id: provider_id,
                 picture: picture,
             }
-            
+
             await setUserSession(event, {
-                user: temporaryUser,
+                user: temporaryLinkableUser,
+                linkable_data: {
+                    provider_email: provider_email.value,
+                    existing_accounts_number: existingUsers.length,
+                },
                 secure: {
                     provider_email: provider_email.value,
                     provider_verified: provider_verified.value,
+                    secure_linkable_data: {
+                        users: existingUsers,
+                    },
                 },
                 loggedInAt: Date.now(),
             }, {
-                maxAge: 60 * 60 // 1 hour 
+                maxAge: 60 * 60 // 1 hour
             })
-            
+
             return sendRedirect(event, '/register')
         }
 
-        // Otherwise, log the user in
-        const registeredUser: RegisteredUser = {
-            id: existingUser.id,
-            username: existingUser.username,
-            provider: existingUser.provider,
-            provider_id: existingUser.provider_id,
-            picture: existingUser.picture
+        const temporaryUser: UnregisteredUser = {
+            id: null,
+            username: null,
+            provider: provider,
+            provider_id: provider_id,
+            picture: picture,
         }
 
         await setUserSession(event, {
-            user: registeredUser,
+            user: temporaryUser,
             secure: {
-                provider_verified: existingUser.provider_verified,
-                provider_email: existingUser.provider_email,
+                provider_email: provider_email.value,
+                provider_verified: provider_verified.value,
             },
             loggedInAt: Date.now(),
+        }, {
+            maxAge: 60 * 60 // 1 hour 
         })
+        // Send the user through the register flow if they are new
+        // if (existingUser === null) {
+        //     const temporaryUser: UnregisteredUser = {
+        //         id: null,
+        //         username: null,
+        //         provider: provider,
+        //         provider_id: provider_id,
+        //         picture: picture,
+        //     }
+            
+        //     await setUserSession(event, {
+        //         user: temporaryUser,
+        //         secure: {
+        //             provider_email: provider_email.value,
+        //             provider_verified: provider_verified.value,
+        //         },
+        //         loggedInAt: Date.now(),
+        //     }, {
+        //         maxAge: 60 * 60 // 1 hour 
+        //     })
+            
+        //     return sendRedirect(event, '/register')
+        // }
 
-        return sendRedirect(event, '/')
+        // // Otherwise, log the user in
+        // const registeredUser: RegisteredUser = {
+        //     id: existingUser.id,
+        //     username: existingUser.username,
+        //     provider: existingUser.provider,
+        //     provider_id: existingUser.provider_id,
+        //     picture: existingUser.picture
+        // }
+
+        // await setUserSession(event, {
+        //     user: registeredUser,
+        //     secure: {
+        //         provider_verified: existingUser.provider_verified,
+        //         provider_email: existingUser.provider_email,
+        //     },
+        //     loggedInAt: Date.now(),
+        // })
+
+        return sendRedirect(event, '/register')
     },
     onError(event, error) {
         console.error('Error logging in with GitHub:', error)

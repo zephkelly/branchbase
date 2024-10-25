@@ -1,6 +1,6 @@
 import { H3Event } from 'h3';
 
-import { type RegisteredUser, type UnregisteredUser, Provider } from './../../../types/auth';
+import { type RegisteredUser, type UnregisteredUser, type UserProviderInfo, Provider } from './../../../types/auth';
 import { ErrorType, PostgresError } from './../../types/error';
 import type { UserCreationResponse } from './../../types/user'
 
@@ -61,6 +61,47 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
         console.error('Error in getProvider', error)
         setResponseStatus(event, 500)
         return null
+    }
+}
+
+// export interface UserProviderInfo {
+//     user_id: number;
+//     providers: Array<{
+//         provider: Provider;
+//         provider_id: string;
+//     }>;
+// }
+export async function getUsersByProviderEmail(event: H3Event, email: string): Promise<UserProviderInfo[] | null> {
+    const nitroApp = useNitroApp()
+    const pool = nitroApp.database
+   
+    const query = `
+        SELECT 
+            u.id as user_id,
+            array_agg(jsonb_build_object(
+                'provider', up.provider,
+                'provider_id', up.provider_id
+            )) as providers
+        FROM private.users u
+        JOIN private.user_providers up ON u.id = up.user_id
+        WHERE up.provider_email = $1
+        GROUP BY u.id
+    `
+    
+    try {
+        const result = await pool.query(query, [email])
+        if (result.rows.length === 0) return null
+        
+        return result.rows.map(row => ({
+            user_id: row.user_id,
+            providers: row.providers.map((p: any) => ({
+                provider: p.provider as Provider,
+                provider_id: p.provider_id
+            }))
+        }))
+    } catch (error) {
+        console.error('Error in getUsersByProviderEmail:', error)
+        throw error
     }
 }
 

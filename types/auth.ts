@@ -50,6 +50,19 @@ export interface SecureSessionDataType {
     provider_email: string | null;
 }
 
+export interface UserProviderInfo {
+    user_id: number;
+    providers: Array<{
+        provider: Provider;
+        provider_id: string;
+    }>;
+}
+
+export interface LinkableUsersInfo {
+    provider_email: string;
+    users: UserProviderInfo;
+}
+
 // Type guard functions
 export function isRegisteredUser(user: User | null | undefined): user is RegisteredUser {
     if (user === null || user === undefined) {
