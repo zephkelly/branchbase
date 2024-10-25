@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { type LinkableUsersInfo } from '~~/types/auth';
+import { type LinkableUsersInfo } from '~~/types/user';
 
 const { session } = useAuthState()
 const linkableUsersData = await session.value.linkable_data as LinkableUsersInfo;

@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { type LinkableUsersInfo } from '~~/types/auth';
+import { type LinkableUsersInfo } from '~~/types/user';
 
 const router = useRouter()
 const route = useRoute()

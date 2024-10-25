@@ -1,5 +1,5 @@
 import { type User } from '#auth-utils';
-import { isRegisteredUser } from '@@/types/auth';
+import { isRegisteredUser } from '~~/types/user';
 
 export default defineNuxtPlugin(async (nuxtApp) => {
     const userSession = await useUserSession()

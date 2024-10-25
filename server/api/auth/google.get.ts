@@ -1,4 +1,4 @@
-import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/auth'
+import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/user'
 import { getProviderUser } from './../../utils/database/user'
 
 export default defineOAuthGoogleEventHandler({
@@ -25,7 +25,7 @@ export default defineOAuthGoogleEventHandler({
                 provider_id: provider_id,
                 picture: picture,
             }
-            
+
             await setUserSession(event, {
                 user: temporaryUser,
                 secure: {
@@ -36,7 +36,7 @@ export default defineOAuthGoogleEventHandler({
             }, {
                 maxAge: 60 * 60 // 1 hour 
             })
-            
+
             return sendRedirect(event, '/register')
         }
 

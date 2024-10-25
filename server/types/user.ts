@@ -1,4 +1,4 @@
-import type { RegisteredUser } from './../../types/auth';
+import type { RegisteredUser } from '../../types/user';
 import type { DatabaseError, ValidationError } from './error'
 
 export type UserCreationError = DatabaseError | ValidationError;

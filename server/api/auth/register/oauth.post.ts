@@ -1,4 +1,4 @@
-import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType, Provider } from './../../../../types/auth'
+import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType, Provider } from '../../../../types/user'
 import { getCredentialUserExists, getProviderUserExists, createUser } from './../../../utils/database/user'
 
 import type { DatabaseError, ValidationError } from './../../../types/error'
@@ -8,7 +8,7 @@ import { sanitiseOAuthRegistrationInput } from './../../../utils/validation/regi
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
-    
+
     // Get and validate session first
     const session = await getUserSession(event)
     if (!session?.user) {
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
     const userSessionData = session.user as UnregisteredUser
     const userSecureSessionData = session.secure as SecureSessionDataType
-    
+
     // Validate and sanitize all input data (including session data)
     const sanitisationResult = sanitiseOAuthRegistrationInput({
         username: body.username,
@@ -58,8 +58,8 @@ export default defineEventHandler(async (event) => {
         }
     } else {
         const providerUser = await getProviderUserExists(
-            event, 
-            sanitisedData.provider!, 
+            event,
+            sanitisedData.provider!,
             sanitisedData.provider_id
         )
         if (providerUser) {

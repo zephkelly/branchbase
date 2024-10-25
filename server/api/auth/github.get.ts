@@ -1,4 +1,4 @@
-import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/auth'
+import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/user'
 import { getProviderUser, getUsersByProviderEmail } from './../../utils/database/user'
 import { ref } from 'vue'
 
@@ -127,7 +127,7 @@ export default defineOAuthGitHubEventHandler({
         //         provider_id: provider_id,
         //         picture: picture,
         //     }
-            
+
         //     await setUserSession(event, {
         //         user: temporaryUser,
         //         secure: {
@@ -138,7 +138,7 @@ export default defineOAuthGitHubEventHandler({
         //     }, {
         //         maxAge: 60 * 60 // 1 hour 
         //     })
-            
+
         //     return sendRedirect(event, '/register')
         // }
 

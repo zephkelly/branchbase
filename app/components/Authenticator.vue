@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { type RegisteredUser, type UnregisteredUser, isRegisteredUser } from '@@/types/auth'
+import { type RegisteredUser, type UnregisteredUser, isRegisteredUser } from '~~/types/user'
 
 // Base state without user
 interface BaseState {

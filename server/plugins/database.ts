@@ -8,7 +8,7 @@ declare module 'nitropack' {
 
 export default defineNitroPlugin(async (nitroApp) => {
     const config = useRuntimeConfig()
-    
+
     const pool = new pg.Pool({
         connectionString: config.databaseConnectionString,
         ssl: {
@@ -57,6 +57,36 @@ export default defineNitroPlugin(async (nitroApp) => {
                         ON DELETE CASCADE,
                     CONSTRAINT user_providers_provider_provider_id_key
                         UNIQUE (provider, provider_id)
+                );
+
+                CREATE TABLE IF NOT EXISTS private.auth_tokens (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    token_type TEXT NOT NULL,
+                    token TEXT NOT NULL,
+                    purpose TEXT NOT NULL,
+                    provider TEXT,
+                    provider_email TEXT,
+                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    used_at TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    
+                    CONSTRAINT fk_user
+                        FOREIGN KEY (user_id)
+                        REFERENCES private.users(id)
+                        ON DELETE CASCADE,
+                        
+                    -- Ensure token uniqueness
+                    CONSTRAINT auth_tokens_token_key
+                        UNIQUE (token),
+                        
+                    -- Token type validation
+                    CONSTRAINT valid_token_type
+                        CHECK (token_type IN ('otp', 'access_token', 'verification_link')),
+                        
+                    -- Ensure tokens haven't expired
+                    CONSTRAINT not_expired
+                        CHECK (expires_at > created_at)
                 );
             `)
 

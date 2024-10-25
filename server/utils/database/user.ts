@@ -1,6 +1,6 @@
 import { H3Event } from 'h3';
 
-import { type RegisteredUser, type UnregisteredUser, type UserProviderInfo, Provider } from './../../../types/auth';
+import { type RegisteredUser, type UnregisteredUser, type UserProviderInfo, Provider } from '../../../types/user';
 import { ErrorType, PostgresError } from './../../types/error';
 import type { UserCreationResponse } from './../../types/user'
 
@@ -74,7 +74,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
 export async function getUsersByProviderEmail(event: H3Event, email: string): Promise<UserProviderInfo[] | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
-   
+
     const query = `
         SELECT 
             u.id as user_id,
@@ -87,11 +87,11 @@ export async function getUsersByProviderEmail(event: H3Event, email: string): Pr
         WHERE up.provider_email = $1
         GROUP BY u.id
     `
-    
+
     try {
         const result = await pool.query(query, [email])
         if (result.rows.length === 0) return null
-        
+
         return result.rows.map(row => ({
             user_id: row.user_id,
             providers: row.providers.map((p: any) => ({
@@ -112,18 +112,18 @@ export async function getCredentialUserExists(event: H3Event, email: string): Pr
 export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: number): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
-   
+
     // Input validation
     if (!provider || !provider_id) {
         setResponseStatus(event, 400)
         return false
     }
-   
+
     if (!VALID_PROVIDERS.includes(provider)) {
         setResponseStatus(event, 400)
         return false
     }
-   
+
     if (typeof provider_id !== 'number') {
         setResponseStatus(event, 400)
         return false
@@ -138,7 +138,7 @@ export async function getProviderUserExists(event: H3Event, provider: Provider, 
                 WHERE up.provider = $1
                 AND up.provider_id = $2
             );`
-        
+
         const values = [provider, provider_id]
         const result = await pool.query(query, values)
         return result.rows[0].exists
@@ -162,7 +162,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
     const pool = nitroApp.database
 
     let { username, provider_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
-  
+
     const client = await pool.connect()
 
     try {
@@ -229,12 +229,12 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
     catch (error: any) {
         await client.query('ROLLBACK')
         console.error('Error in createUser', error)
-        
+
         if (error && typeof error === 'object' && 'code' in error) {
             const pgError = error as PostgresError;
-            
+
             // PostgreSQL unique violation code
-            if (pgError.code === '23505') { 
+            if (pgError.code === '23505') {
                 if (pgError.constraint === 'user_providers_provider_provider_id_key') {
                     setResponseStatus(event, 409)
                     return {

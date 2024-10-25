@@ -1,10 +1,10 @@
-import { Provider } from './../../../types/auth';
+import { Provider } from '../../../types/user';
 
-import { 
-    isValidEmail, 
-    sanitizeEmail, 
-    isValidLength, 
-    stripHtmlTags, 
+import {
+    isValidEmail,
+    sanitizeEmail,
+    isValidLength,
+    stripHtmlTags,
 } from './../../../utils/inputSanitisation';
 
 interface ValidationResult {
@@ -260,7 +260,7 @@ export function sanitiseProviderId(providerId: string | number | null): Validati
     let sanitized = stripHtmlTags(providerId).trim();
 
     // Check pattern
-    if (!SANITISATION_CONSTRAINTS.PROVIDER_ID.PATTERN.test(sanitized)  && providerId.length <= SANITISATION_CONSTRAINTS.PROVIDER_ID.MAX_LENGTH) {
+    if (!SANITISATION_CONSTRAINTS.PROVIDER_ID.PATTERN.test(sanitized) && providerId.length <= SANITISATION_CONSTRAINTS.PROVIDER_ID.MAX_LENGTH) {
         return {
             isValid: false,
             message: 'Invalid provider ID format'
