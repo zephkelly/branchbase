@@ -9,8 +9,8 @@ export function useAuthState() {
     const typedUser = computed(() => {
         if (!user.value) return null
         return isRegisteredUser(user.value) 
-        ? user.value as RegisteredUser 
-        : user.value as UnregisteredUser
+            ? user.value as RegisteredUser 
+            : user.value as UnregisteredUser
     })
 
     // Check if user is registered
@@ -18,12 +18,17 @@ export function useAuthState() {
         loggedIn.value && isRegisteredUser(user.value)
     )
 
+    const error = computed(() =>
+        loggedIn.value && !user.value || loggedIn.value && !session.value
+    )
+        
     return {
         loggedIn,
         user: typedUser,
         clear,
         ready,
         session,
-        registered
+        registered,
+        error
     }
 }

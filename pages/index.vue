@@ -3,27 +3,18 @@
         <h1>Welcome to Upbranched</h1>
         <Authenticator>
             <template #default="{ user }">
-                <div v-if="user">
-                    <h2>Welcome, {{ user.username }}!</h2>
-                    <img :src="user.picture" alt="User Picture" />
-                    <p>Provider: {{ user.provider }}</p>
-                    <button @click="signOut">Sign Out</button>
-                </div>
-                <div v-else>
-                    <h2>Sign In</h2>
-                    <button @click="signInWithGoogle" class="auth-button google">Sign in with Google</button>
-                    <button @click="signInWithGitHub" class="auth-button github">Sign in with GitHub</button>
-                    <button @click="signInWithDiscord" class="auth-button discord">Sign in with Discord</button>
-                    <NuxtLink to="/register" class="button">Register with Email</NuxtLink>
-                </div>
+                <h2>Welcome, {{ user.username }}!</h2>
+                <img :src="user.picture" alt="User Picture" />
+                <p>Provider: {{ user.provider }}</p>
+                <button @click="signOut">Sign Out</button>
             </template>
             <template #unregistered="{ user }">
                 <h2>Complete Your Registration</h2>
-                <p>You've started the signup process through {{ user?.provider }}</p>
+                <p>You've started the signup process through {{ user.provider }}</p>
                 <NuxtLink to="/register" class="button">Finish Signing Up</NuxtLink>
                 <button @click="cancelRegistration">Cancel Registration</button>
             </template>
-            <template #public="{ user }">
+            <template #public>
                 <h2>Sign In</h2>
                 <button @click="signInWithGoogle" class="auth-button google">Sign in with Google</button>
                 <button @click="signInWithGitHub" class="auth-button github">Sign in with GitHub</button>
@@ -40,8 +31,7 @@
 <script setup lang="ts">
 import Authenticator from '~/components/Authenticator.vue';
 
-// import { type RegisteredUser, type UnregisteredUser, isRegisteredUser} from '~/types/auth';
-const { user, session, clear } = useUserSession()
+const { clear } = useUserSession()
 
 const signInWithGoogle = async () => {
     await clear();
