@@ -1,5 +1,5 @@
-import type { UnregisteredUser, RegisteredUser } from '@/types/auth'
-import type { DatabaseError, ValidationError } from '@/server/types/error'
+import type { RegisteredUser } from './../../types/auth';
+import type { DatabaseError, ValidationError } from './error'
 
 export type UserCreationError = DatabaseError | ValidationError;
 

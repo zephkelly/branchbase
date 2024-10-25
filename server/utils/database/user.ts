@@ -1,8 +1,8 @@
 import { H3Event } from 'h3';
 
-import { type RegisteredUser, type UnregisteredUser, Provider, VerificationStatus } from '~/types/auth';
-import { ErrorType, PostgresError } from '@/server/types/error'
-import type { UserCreationResponse } from '@/server/types/user'
+import { type RegisteredUser, type UnregisteredUser, Provider } from './../../../types/auth';
+import { ErrorType, PostgresError } from './../../types/error';
+import type { UserCreationResponse } from './../../types/user'
 
 const VALID_PROVIDERS = Object.values(Provider);
 

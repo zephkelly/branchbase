@@ -6,7 +6,7 @@ import {
   truncateInput,
   stripHtmlTags,
   escapeHtml
-} from '@/utils/inputSanitisation'
+} from '@@/utils/inputSanitisation'
 
 describe('String Utility Functions', () => {
     describe('isValidEmail', () => {

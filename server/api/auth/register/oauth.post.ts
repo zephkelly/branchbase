@@ -1,11 +1,10 @@
-import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType, Provider } from '@/types/auth'
-import { isValidLength } from '~/utils/inputSanitisation'
-import { getCredentialUserExists, getProviderUserExists, createUser } from '@/server/utils/database/user'
+import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType, Provider } from './../../../../types/auth'
+import { getCredentialUserExists, getProviderUserExists, createUser } from './../../../utils/database/user'
 
-import type { DatabaseError, ValidationError } from '@/server/types/error'
-import type { UserCreationResponse } from '@/server/types/user'
+import type { DatabaseError, ValidationError } from './../../../types/error'
+import type { UserCreationResponse } from './../../../types/user'
 
-import { sanitiseOAuthRegistrationInput } from '~/server/utils/validation/register'
+import { sanitiseOAuthRegistrationInput } from './../../../utils/validation/register'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)

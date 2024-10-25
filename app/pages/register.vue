@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { isUnregisteredUser, isRegisteredUser, type UnregisteredUser, type RegisteredUser } from '~/types/auth';
+import { isUnregisteredUser, isRegisteredUser, type UnregisteredUser, type RegisteredUser } from '@@/types/auth';
 
 const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
 

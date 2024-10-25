@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import Authenticator from '~/components/Authenticator.vue';
+import Authenticator from '@/components/Authenticator.vue';
 
 const { clear } = useUserSession()
 

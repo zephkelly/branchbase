@@ -1,10 +1,11 @@
-import { Provider } from '~/types/auth';
+import { Provider } from './../../../types/auth';
+
 import { 
     isValidEmail, 
     sanitizeEmail, 
     isValidLength, 
     stripHtmlTags, 
-} from '~/utils/inputSanitisation';
+} from './../../../utils/inputSanitisation';
 
 interface ValidationResult {
     isValid: boolean;

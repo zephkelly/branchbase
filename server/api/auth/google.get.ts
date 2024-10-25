@@ -1,5 +1,5 @@
-import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '@/types/auth'
-import { getProviderUser } from '@/server/utils/database/user'
+import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/auth'
+import { getProviderUser } from './../../utils/database/user'
 
 export default defineOAuthGoogleEventHandler({
     config: {
