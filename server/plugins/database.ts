@@ -67,26 +67,48 @@ export default defineNitroPlugin(async (nitroApp) => {
                     purpose TEXT NOT NULL,
                     provider TEXT,
                     provider_email TEXT,
+                    verification_attempts INT DEFAULT 0,      -- For tracking wrong guesses for THIS specific token
+                    last_verification_attempt TIMESTAMP WITH TIME ZONE,
                     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
                     used_at TIMESTAMP WITH TIME ZONE,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    
+                
                     CONSTRAINT fk_user
                         FOREIGN KEY (user_id)
                         REFERENCES private.users(id)
                         ON DELETE CASCADE,
-                        
-                    -- Ensure token uniqueness
+                    
                     CONSTRAINT auth_tokens_token_key
                         UNIQUE (token),
-                        
-                    -- Token type validation
+                    
                     CONSTRAINT valid_token_type
                         CHECK (token_type IN ('otp', 'access_token', 'verification_link')),
-                        
-                    -- Ensure tokens haven't expired
+                    
                     CONSTRAINT not_expired
-                        CHECK (expires_at > created_at)
+                        CHECK (expires_at > created_at),
+
+                    -- Ensure only one active token per user/purpose
+                    CONSTRAINT one_active_token_per_purpose
+                        UNIQUE (user_id, purpose) 
+                );
+
+                CREATE TABLE IF NOT EXISTS private.rate_limits (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL,
+                    limit_type TEXT NOT NULL,  -- e.g., 'OTP_CREATION'
+                    attempt_count INT DEFAULT 0,
+                    window_start TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    cooldown_until TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                
+                    CONSTRAINT fk_user
+                        FOREIGN KEY (user_id)
+                        REFERENCES private.users(id)
+                        ON DELETE CASCADE,
+                    
+                    CONSTRAINT unique_user_rate_limit
+                        UNIQUE (user_id, limit_type)
                 );
             `)
 
