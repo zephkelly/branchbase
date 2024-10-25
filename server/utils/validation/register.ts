@@ -28,7 +28,7 @@ const SANITISATION_CONSTRAINTS = {
         PATTERN: /^https?:\/\/[^\s<>\"]+$/,
     },
     PROVIDER_ID: {
-        PATTERN: /^\d+$/,
+        PATTERN: /^(?:\d+|[1-9]\d*|\d+\.\d+)$/,
         MAX_LENGTH: 255
     }
 } as const;
@@ -38,7 +38,7 @@ interface OAuthRegistrationInput {
     provider_email: string;
     picture: string;
     provider: Provider;
-    provider_id: string | null;
+    provider_id: string | number | null;
     provider_verified: boolean | null;
 }
 
@@ -230,7 +230,7 @@ export function sanitiseProvider(provider: string): ValidationResult {
     };
 }
 
-export function sanitiseProviderId(providerId: string | null): ValidationResult {
+export function sanitiseProviderId(providerId: string | number | null): ValidationResult {
     if (providerId === null) {
         return {
             isValid: true,
@@ -242,11 +242,25 @@ export function sanitiseProviderId(providerId: string | null): ValidationResult 
         return { isValid: false, message: 'Provider ID is required' };
     }
 
+    if (typeof providerId === 'number') {
+        if (providerId <= 0 || providerId > Number.MAX_SAFE_INTEGER) {
+            return {
+                isValid: false,
+                message: 'Invalid provider ID value'
+            };
+        }
+
+        return {
+            isValid: true,
+            sanitisedData: providerId
+        };
+    }
+
     // Remove HTML tags and trim
     let sanitized = stripHtmlTags(providerId).trim();
 
     // Check pattern
-    if (!SANITISATION_CONSTRAINTS.PROVIDER_ID.PATTERN.test(sanitized)) {
+    if (!SANITISATION_CONSTRAINTS.PROVIDER_ID.PATTERN.test(sanitized)  && providerId.length <= SANITISATION_CONSTRAINTS.PROVIDER_ID.MAX_LENGTH) {
         return {
             isValid: false,
             message: 'Invalid provider ID format'

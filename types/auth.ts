@@ -36,8 +36,6 @@ export interface UnregisteredUser extends BaseUser {
     provider_id: string | null;
 }
 
-// export type BackendUser = RegisteredUser | UnregisteredUser;
-
 export interface UserSessionData {
     loggedInAt: number;
     user: RegisteredUser | UnregisteredUser;

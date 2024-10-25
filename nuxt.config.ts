@@ -24,17 +24,17 @@ export default defineNuxtConfig({
                 clientId: process.env.NUXT_OAUTH_GOOGLE_CLIENT_ID,
                 clientSecret: process.env.NUXT_OAUTH_GOOGLE_CLIENT_SECRET,
                 redirectURL: process.env.NUXT_OAUTH_GOOGLE_REDIRECT_URL
+            },
+            github: {
+                clientId: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID,
+                clientSecret: process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET,
+                redirectURL: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL
+            },
+            discord: {
+                clientId: process.env.NUXT_OAUTH_DISCORD_CLIENT_ID,
+                clientSecret: process.env.NUXT_OAUTH_DISCORD_CLIENT_SECRET,
+                redirectURL: process.env.NUXT_OAUTH_DISCORD_REDIRECT_URL
             }
-            // github: {
-            //     clientId: process.env.NUXT_OAUTH_GITHUB_CLIENT_ID,
-            //     clientSecret: process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET,
-            //     redirectURL: process.env.NUXT_OAUTH_GITHUB_REDIRECT_URL
-            // },
-            // discord: {
-            //     clientId: process.env.NUXT_OAUTH_DISCORD_CLIENT_ID,
-            //     clientSecret: process.env.NUXT_OAUTH_DISCORD_CLIENT_SECRET,
-            //     redirectURL: process.env.NUXT_OAUTH_DISCORD_REDIRECT_URL
-            // }
         }
     },
 

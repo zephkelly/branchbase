@@ -20,8 +20,9 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
         return null
     }
 
-    if (typeof provider_id !== 'string') {
+    if ((typeof provider_id !== 'string' && typeof provider_id !== 'number') || provider_id === '') {
         setResponseStatus(event, 400)
+        console.log('Invalid provider_id:', provider_id)
         return null
     }
 
