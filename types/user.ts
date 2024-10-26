@@ -15,25 +15,27 @@ export enum VerificationStatus {
     Rejected = 'rejected'
 }
 
-export interface BaseUser {
+export interface UserData {
+    id: number | null;
+    provider_id: string | null;
+    username: string | null;
     picture: string;
     provider: Provider;
-    
-    //Secure session data
-    provider_email?: string;
-    provider_verified?: boolean;
-}
-  
-export interface RegisteredUser extends BaseUser {
-    id: number;
-    username: string;
-    provider_id?: string | null;
 }
 
-export interface UnregisteredUser extends BaseUser {
+export interface RegisteredUser extends UserData {
+    id: number;
+    username: string;
+}
+
+export interface SecureRegisteredUser extends RegisteredUser {
+    provider_verified: boolean;
+    provider_email: string;
+}
+
+export interface UnregisteredUser extends UserData {
     id: null;
-    username: string | null;
-    provider_id: string | null;
+    username: null;
 }
 
 export interface UserSessionData {
@@ -43,14 +45,14 @@ export interface UserSessionData {
 }
 
 export interface SecureSessionDataType {
-    expires_in?: number;
-    access_token?: string;
-    refresh_token?: string;
+    // expires_in?: number;
+    // access_token?: string;
+    // refresh_token?: string;
     provider_verified: boolean | null;
     provider_email: string | null;
 }
 
-export interface UserProviderInfo {
+export interface SecureUserProviderData {
     user_id: number;
     providers: Array<{
         provider: Provider;
@@ -58,9 +60,13 @@ export interface UserProviderInfo {
     }>;
 }
 
-export interface LinkableUsersInfo {
+export interface LinkableData {
     provider_email: string;
-    users: UserProviderInfo;
+    existing_accounts_number: number;
+}
+
+export interface SecureLinkableData {
+    linkable_providers: SecureUserProviderData[];
 }
 
 // Type guard functions

@@ -1,12 +1,12 @@
 import { H3Event } from 'h3';
 
-import { type RegisteredUser, type UnregisteredUser, type UserProviderInfo, Provider } from '../../../types/user';
+import { type SecureRegisteredUser, type UnregisteredUser, Provider, SecureUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from './../../types/error';
 import type { UserCreationResponse } from './../../types/user'
 
 const VALID_PROVIDERS = Object.values(Provider);
 
-export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<RegisteredUser | null> {
+export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<SecureRegisteredUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -45,7 +45,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
             return null
         }
 
-        const retrievedUser: RegisteredUser = {
+        const retrievedUser: SecureRegisteredUser = {
             id: result.rows[0].id,
             username: result.rows[0].username,
             provider: provider,
@@ -64,14 +64,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
     }
 }
 
-// export interface UserProviderInfo {
-//     user_id: number;
-//     providers: Array<{
-//         provider: Provider;
-//         provider_id: string;
-//     }>;
-// }
-export async function getUsersByProviderEmail(event: H3Event, email: string): Promise<UserProviderInfo[] | null> {
+export async function getUsersByProviderEmail(event: H3Event, email: string): Promise<SecureUserProviderData[] | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -211,7 +204,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
         // Commit transaction
         await client.query('COMMIT')
 
-        const newUser: RegisteredUser = {
+        const newUser: SecureRegisteredUser = {
             id: parseInt(userId),
             username: username,
             picture: userResult.rows[0].picture,

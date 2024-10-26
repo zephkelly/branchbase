@@ -1,4 +1,4 @@
-import { isRegisteredUser, UnregisteredUser, RegisteredUser, SecureSessionDataType, Provider } from '../../../../types/user'
+import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '../../../../types/user'
 import { getCredentialUserExists, getProviderUserExists, createUser } from './../../../utils/database/user'
 
 import type { DatabaseError, ValidationError } from './../../../types/error'
@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
             });
         }
 
-        const registeredUser: RegisteredUser = newUser.data
+        const registeredUser: SecureRegisteredUser = newUser.data
 
         await replaceUserSession(event, {
             user: {
