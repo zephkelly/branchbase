@@ -1,23 +1,16 @@
-import { Provider, LinkableData, SecureLinkableData, RegisteredUser, SecureRegisteredUser, UnregisteredUser } from '~~/types/user'
-import { getProviderUser, getUsersByProviderEmail } from './../../utils/database/user'
-import { ref } from 'vue'
+import { Provider, SecureLinkableData, SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
 
-export default defineOAuthGoogleEventHandler({
-    config: {
-        authorizationParams: {
-            access_type: 'offline'
-        },
-    },
+export default defineOAuthDiscordEventHandler({
     async onSuccess(event, { user, tokens }) {
-        const provider: Provider = Provider.Google
-        const provider_id: string = user.sub
-        const provider_email = user.email;
-        const provider_verified = user.email_verified;
-        const picture: string = user.picture
-        
+        const provider: Provider = Provider.Discord
+        const provider_id: string = user.id
+        const provider_email = user.email
+        const provider_verified = user.verified
+        const picture = user.avatar
+
         try {
             const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
-
+        
             if (existingUser) {
                 if (existingUser.provider_email !== provider_email.value) {
                     await updateProviderEmail(event, existingUser.provider, existingUser.provider_id as string, provider_email.value, provider_verified.value)
@@ -45,6 +38,7 @@ export default defineOAuthGoogleEventHandler({
 
             const existingUsers = await getUsersByProviderEmail(event, provider_email)
 
+
             if (existingUsers) {
                 const temporaryLinkableUser: UnregisteredUser = {
                     id: null,
@@ -63,6 +57,8 @@ export default defineOAuthGoogleEventHandler({
                 const secureLinkableData: SecureLinkableData = {
                     linkable_providers: existingUsers[0]
                 }
+
+                console.log('secureLinkableData:', secureLinkableData)
 
                 await setUserSession(event, {
                     user: temporaryLinkableUser,
@@ -95,20 +91,19 @@ export default defineOAuthGoogleEventHandler({
                     provider_email: provider_email,
                     provider_verified: provider_verified,
                 },
-                loggedInAt: Date.now(),
+                loggedInAt: Date.now()
             }, {
-                maxAge: 60 * 60 // 1 hour 
+                maxAge: 60 * 60 // 1 hour
             })
 
             return sendRedirect(event, '/register')
         }
         catch (error) {
-            console.error('Error logging in with Google:', error)
-            return sendRedirect(event, '/login')
+            console.error('Error:', error)
+            return sendRedirect(event, '/error')
         }
     },
     onError(event, error) {
-        console.error('Error logging in with Google:', error)
-        return sendRedirect(event, '/login')
+
     }
 })
