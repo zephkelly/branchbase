@@ -1,4 +1,5 @@
 import { Provider, SecureLinkableData, SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
+import { getUserProvidersByEmail } from '~~/server/utils/database/user'
 
 export default defineOAuthDiscordEventHandler({
     async onSuccess(event, { user, tokens }) {
@@ -6,7 +7,7 @@ export default defineOAuthDiscordEventHandler({
         const provider_id: string = user.id
         const provider_email = user.email
         const provider_verified = user.verified
-        const picture = user.avatar
+        const picture = 'https://exampleimage.com'
 
         try {
             const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
@@ -36,10 +37,10 @@ export default defineOAuthDiscordEventHandler({
                 return sendRedirect(event, '/')
             }
 
-            const existingUsers = await getUsersByProviderEmail(event, provider_email)
+            //This returns actual users, I need to return the user id, and then al
+            const existingUserProviders = await getUserProvidersByEmail(event, provider_email)
 
-
-            if (existingUsers) {
+            if (existingUserProviders) {
                 const temporaryLinkableUser: UnregisteredUser = {
                     id: null,
                     username: null,
@@ -51,14 +52,12 @@ export default defineOAuthDiscordEventHandler({
 
                 const linkableData: LinkableData = {
                     provider_email: provider_email,
-                    existing_accounts_number: existingUsers.length
+                    existing_providers_number: existingUserProviders.providers.length
                 }
 
                 const secureLinkableData: SecureLinkableData = {
-                    linkable_providers: existingUsers[0]
+                    linkable_providers: existingUserProviders
                 }
-
-                console.log('secureLinkableData:', secureLinkableData)
 
                 await setUserSession(event, {
                     user: temporaryLinkableUser,
@@ -104,6 +103,7 @@ export default defineOAuthDiscordEventHandler({
         }
     },
     onError(event, error) {
-
+        console.error('Error logging in with Discord:', error)
+        return sendRedirect(event, '/login')
     }
 })

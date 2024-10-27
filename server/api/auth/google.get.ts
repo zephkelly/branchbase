@@ -1,5 +1,5 @@
 import { Provider, LinkableData, SecureLinkableData, RegisteredUser, SecureRegisteredUser, UnregisteredUser } from '~~/types/user'
-import { getProviderUser, getUsersByProviderEmail } from './../../utils/database/user'
+import { getProviderUser, getUserProvidersByEmail } from './../../utils/database/user'
 import { ref } from 'vue'
 
 export default defineOAuthGoogleEventHandler({
@@ -43,9 +43,9 @@ export default defineOAuthGoogleEventHandler({
                 return sendRedirect(event, '/')
             }
 
-            const existingUsers = await getUsersByProviderEmail(event, provider_email)
+            const existingUserProviders = await getUserProvidersByEmail(event, provider_email)
 
-            if (existingUsers) {
+            if (existingUserProviders) {
                 const temporaryLinkableUser: UnregisteredUser = {
                     id: null,
                     username: null,
@@ -57,11 +57,11 @@ export default defineOAuthGoogleEventHandler({
 
                 const linkableData: LinkableData = {
                     provider_email: provider_email,
-                    existing_accounts_number: existingUsers.length
+                    existing_providers_number: existingUserProviders.providers.length
                 }
 
                 const secureLinkableData: SecureLinkableData = {
-                    linkable_providers: existingUsers[0]
+                    linkable_providers: existingUserProviders
                 }
 
                 await setUserSession(event, {

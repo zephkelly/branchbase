@@ -1,5 +1,5 @@
 import { Provider, SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData, SecureLinkableData } from '~~/types/user'
-import { getProviderUser, getUsersByProviderEmail, updateProviderEmail } from './../../utils/database/user'
+import { getProviderUser, getUserProvidersByEmail, updateProviderEmail } from './../../utils/database/user'
 import { ref } from 'vue'
 import { H3Event } from 'h3'
 
@@ -78,11 +78,11 @@ export default defineOAuthGitHubEventHandler({
 
             // If the user is not registered with this provider,
             // check if they have other accounts with the same email
-            const existingUsers = await getUsersByProviderEmail(event, provider_email.value)
+            const existingUserProviders = await getUserProvidersByEmail(event, provider_email.value)
 
             // Create a temporary 'Linkable' user session,
             // redirect to the register page with linkable data
-            if (existingUsers) {
+            if (existingUserProviders) {
                 const temporaryLinkableUser: UnregisteredUser = {
                     id: null,
                     username: null,
@@ -94,11 +94,11 @@ export default defineOAuthGitHubEventHandler({
 
                 const linkableData: LinkableData = {
                     provider_email: provider_email.value,
-                    existing_accounts_number: existingUsers.length,
+                    existing_providers_number: existingUserProviders.providers.length,
                 }
 
                 const secureLinkableData: SecureLinkableData = {
-                    linkable_providers: existingUsers[0],
+                    linkable_providers: existingUserProviders,
                 }
 
                 await setUserSession(event, {

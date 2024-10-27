@@ -66,35 +66,44 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
     }
 }
 
-export async function getUsersByProviderEmail(event: H3Event, email: string): Promise<SecureUserProviderData[] | null> {
+export async function getUserProvidersByEmail(event: H3Event, email: string): Promise<SecureUserProviderData | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
-
-    const query = `
-        SELECT 
-            u.id as user_id,
-            array_agg(jsonb_build_object(
-                'provider', up.provider,
-                'provider_id', up.provider_id
-            )) as providers
-        FROM private.users u
-        JOIN private.user_providers up ON u.id = up.user_id
-        WHERE up.provider_email = $1
-        GROUP BY u.id
-    `
-
+    
     try {
-        const result = await pool.query(query, [email])
+        const findUserQuery = `
+            SELECT DISTINCT user_id
+            FROM private.user_providers
+            WHERE provider_email = $1
+        `
+        const userResult = await pool.query(findUserQuery, [email])
+        if (userResult.rows.length === 0) return null
+
+        const providersQuery = `
+            SELECT
+                up.user_id,
+                array_agg(jsonb_build_object(
+                    'provider', up.provider,
+                    'provider_id', up.provider_id
+                )) as providers
+            FROM private.user_providers up
+            WHERE up.user_id = ANY($1)
+            GROUP BY up.user_id
+        `
+        const userIds = userResult.rows.map(row => row.user_id)
+        const result = await pool.query(providersQuery, [userIds])
+
         if (result.rows.length === 0) return null
 
-        return result.rows.map(row => ({
-            user_id: row.user_id,
-            providers: row.providers.map((p: any) => ({
+        return {
+            user_id: result.rows[0].user_id,
+            providers: result.rows[0].providers.map((p: any) => ({
                 provider: p.provider as Provider,
                 provider_id: p.provider_id
             }))
-        }))
-    } catch (error) {
+        } as SecureUserProviderData
+    }
+    catch (error) {
         console.error('Error in getUsersByProviderEmail:', error)
         throw error
     }

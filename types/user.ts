@@ -85,7 +85,7 @@ export interface SecureUserProviderData {
 
 export interface LinkableData {
     provider_email: string;
-    existing_accounts_number: number;
+    existing_providers_number: number;
 }
 
 export interface SecureLinkableData {

@@ -40,14 +40,14 @@ export default defineEventHandler(async (event) => {
     }
 
 
-    if (linkableData.existing_accounts_number < 1 || !secureLinkableData.linkable_providers.user_id) {
+    if (linkableData.existing_providers_number < 1 || !secureLinkableData.linkable_providers.user_id) {
         return createError({
             statusCode: 403,
             message: 'Session indicated no accounts to link with'
         })
     }
 
-    if (linkableData.existing_accounts_number >= 2) {
+    if (linkableData.existing_providers_number >= 2) {
         return createError({
             statusCode: 403,
             message: 'You have reached the maximum number of linked accounts'
