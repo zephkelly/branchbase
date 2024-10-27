@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { type UserSession } from '#auth-utils';
 import { computed } from 'vue'
 import { type RegisteredUser, type UnregisteredUser, isRegisteredUser } from '~~/types/user'
 
@@ -43,6 +44,7 @@ interface BaseState {
     ready: ComputedRef<boolean>
     registered: ComputedRef<boolean>
     loggedIn: ComputedRef<boolean>
+    session: Ref<UserSession | null>
     error: ComputedRef<boolean>
     clear: () => void
 }
@@ -50,6 +52,7 @@ interface BaseState {
 // Auth state includes user
 interface AuthState extends BaseState {
     user: ComputedRef<RegisteredUser | UnregisteredUser | null>
+    
 }
 
 // Slot prop types
@@ -65,6 +68,7 @@ const {
     ready,
     registered,
     loggedIn,
+    session,
     error,
     clear,
     user
@@ -76,6 +80,7 @@ const baseBindings: BaseState = {
     registered,
     loggedIn,
     error,
+    session,
     clear
 }
 

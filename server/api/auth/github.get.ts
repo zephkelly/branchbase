@@ -1,5 +1,5 @@
 import { Provider, SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData, SecureLinkableData } from '~~/types/user'
-import { getProviderUser, getUsersByProviderEmail } from './../../utils/database/user'
+import { getProviderUser, getUsersByProviderEmail, updateProviderEmail } from './../../utils/database/user'
 import { ref } from 'vue'
 import { H3Event } from 'h3'
 
@@ -46,111 +46,105 @@ export default defineOAuthGitHubEventHandler({
                 return sendRedirect(event, '/login')
             }
         }
-        
-        const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
 
-        // We have an existing user provide connected to a user account
-        if (existingUser) {
-            const registeredUser: RegisteredUser = {
-                id: existingUser.id,
-                username: existingUser.username,
-                provider: existingUser.provider,
-                provider_id: existingUser.provider_id,
-                picture: existingUser.picture
+        try { 
+            const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
+
+            // We have an existing user provider connected to a user account
+            if (existingUser) {
+                if (existingUser.provider_email !== provider_email.value) {
+                    await updateProviderEmail(event, existingUser.provider, existingUser.provider_id as string, provider_email.value)
+                }
+
+                const registeredUser: RegisteredUser = {
+                    id: existingUser.id,
+                    username: existingUser.username,
+                    provider: existingUser.provider,
+                    provider_id: existingUser.provider_id,
+                    picture: existingUser.picture
+                }
+
+                await setUserSession(event, {
+                    user: registeredUser,
+                    secure: {
+                        provider_verified: provider_email.value !== null ? provider_email.value: null,
+                        provider_email: existingUser.provider_email !== undefined ? existingUser.provider_email : null,
+                    },
+                    loggedInAt: Date.now(),
+                })
+
+                return sendRedirect(event, '/')
             }
 
-            await setUserSession(event, {
-                user: registeredUser,
-                secure: {
-                    provider_verified: existingUser.provider_verified !== undefined ? existingUser.provider_verified : null,
-                    provider_email: existingUser.provider_email !== undefined ? existingUser.provider_email : null,
-                },
-                loggedInAt: Date.now(),
-            })
+            // If the user is not registered with this provider,
+            // check if they have other accounts with the same email
+            const existingUsers = await getUsersByProviderEmail(event, provider_email.value)
 
-            return sendRedirect(event, '/')
-        }
+            // Create a temporary 'Linkable' user session,
+            // redirect to the register page with linkable data
+            if (existingUsers) {
+                const temporaryLinkableUser: UnregisteredUser = {
+                    id: null,
+                    username: null,
+                    provider: provider,
+                    provider_id: provider_id,
+                    provider_email: provider_email.value,
+                    picture: picture,
+                }
 
-        // If the user is not registered with this provider,
-        // check if they have other accounts with the same email
-        const existingUsers = await getUsersByProviderEmail(event, provider_email.value)
+                const linkableData: LinkableData = {
+                    provider_email: provider_email.value,
+                    existing_accounts_number: existingUsers.length,
+                }
 
-        // Create a temporary 'Linkable' user session,
-        // redirect to the register page with the linkable data
-        if (existingUsers) {
-            const temporaryLinkableUser: UnregisteredUser = {
+                const secureLinkableData: SecureLinkableData = {
+                    linkable_providers: existingUsers[0],
+                }
+
+                await setUserSession(event, {
+                    user: temporaryLinkableUser,
+                    linkable_data: linkableData,
+                    secure: {
+                        provider_email: provider_email.value,
+                        provider_verified: provider_verified.value,
+                        linkable_data: secureLinkableData,
+                    },
+                    loggedInAt: Date.now(),
+                }, {
+                    maxAge: 60 * 60 // 1 hour
+                })
+
+                return sendRedirect(event, '/register')
+            }
+
+            const temporaryUser: UnregisteredUser = {
                 id: null,
                 username: null,
                 provider: provider,
                 provider_id: provider_id,
+                provider_email: provider_email.value,
                 picture: picture,
             }
 
-            const linkableData: LinkableData = {
-                provider_email: provider_email.value,
-                existing_accounts_number: existingUsers.length,
-            }
-
-            const secureLinkableData: SecureLinkableData = {
-                linkable_providers: existingUsers,
-            }
-    
-            createTemporaryLinkableUserSession(event, 
-                temporaryLinkableUser, 
-                linkableData, 
-                secureLinkableData, 
-                provider_email.value, 
-                provider_verified.value
-            );
+            await setUserSession(event, {
+                user: temporaryUser,
+                secure: {
+                    provider_email: provider_email.value,
+                    provider_verified: provider_verified.value,
+                },
+                loggedInAt: Date.now(),
+            }, {
+                maxAge: 60 * 60 // 1 hour
+            })
 
             return sendRedirect(event, '/register')
+        } catch (error) {
+            console.error('Error logging in with GitHub:', error)
+            return sendRedirect(event, '/login')
         }
-
-        // Create a temp user session if the user has never registered
-        // And has no linkable accounts
-        const temporaryUser: UnregisteredUser = {
-            id: null,
-            username: null,
-            provider: provider,
-            provider_id: provider_id,
-            picture: picture,
-        }
-
-        createTemporaryUserSession(event, temporaryUser, provider_email.value, provider_verified.value);
-
-        return sendRedirect(event, '/register')
     },
     onError(event, error) {
         console.error('Error logging in with GitHub:', error)
         return sendRedirect(event, '/login')
     }
 })
-
-async function createTemporaryUserSession(event: H3Event, user: UnregisteredUser, provider_email: string, provider_verified: boolean) {
-    await setUserSession(event, {
-        user: user,
-        secure: {
-            provider_email: provider_email,
-            provider_verified: provider_verified,
-        },
-        loggedInAt: Date.now(),
-    }, {
-        maxAge: 60 * 60 // 1 hour
-    })
-}
-
-
-async function createTemporaryLinkableUserSession(event: H3Event, user: UnregisteredUser, linkableData: LinkableData, secureLinkableData: SecureLinkableData, provider_email: string, provider_verified: boolean) {
-    await setUserSession(event, {
-        user: user,
-        linkable_data: linkableData,
-        secure: {
-            provider_email: provider_email,
-            provider_verified: provider_verified,
-            linkable_data: secureLinkableData,
-        },
-        loggedInAt: Date.now(),
-    }, {
-        maxAge: 60 * 60 // 1 hour
-    })
-}

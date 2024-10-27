@@ -1,8 +1,8 @@
 import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '../../../../types/user'
 import { getCredentialUserExists, getProviderUserExists, createUser } from './../../../utils/database/user'
 
-import type { DatabaseError, ValidationError } from './../../../types/error'
-import type { UserCreationResponse } from './../../../types/user'
+import { isDatabaseError, isValidationError } from '~~/server/types/error'
+import type { UserCreationResponse } from '~~/server/types/user'
 
 import { sanitiseOAuthRegistrationInput } from './../../../utils/validation/register'
 
@@ -111,11 +111,3 @@ export default defineEventHandler(async (event) => {
         })
     }
 })
-
-export function isDatabaseError(error: UserCreationResponse): error is DatabaseError {
-    return (error as DatabaseError).type === 'DATABASE_ERROR';
-}
-
-export function isValidationError(error: UserCreationResponse): error is ValidationError {
-    return (error as ValidationError).type === 'VALIDATION_ERROR';
-}

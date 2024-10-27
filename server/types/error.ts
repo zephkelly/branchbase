@@ -24,3 +24,11 @@ export interface PostgresError extends Error {
     table?: string;
     column?: string;
 }
+
+export function isDatabaseError(error: any): error is DatabaseError {
+    return (error as DatabaseError).type === 'DATABASE_ERROR';
+}
+
+export function isValidationError(error: any): error is ValidationError {
+    return (error as ValidationError).type === 'VALIDATION_ERROR';
+}

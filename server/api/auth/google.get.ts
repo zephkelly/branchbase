@@ -1,4 +1,4 @@
-import { Provider, VerificationStatus, RegisteredUser, UnregisteredUser } from '~~/types/user'
+import { Provider, VerificationStatus, RegisteredUser, SecureRegisteredUser, UnregisteredUser } from '~~/types/user'
 import { getProviderUser } from './../../utils/database/user'
 
 export default defineOAuthGoogleEventHandler({
@@ -14,7 +14,7 @@ export default defineOAuthGoogleEventHandler({
         const provider_verified: boolean = user.email_verified
         const picture: string = user.picture
 
-        const existingUser: RegisteredUser | null = await getProviderUser(event, provider, provider_id)
+        const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
 
         // Send the user through the register flow if they are new
         if (existingUser === null) {
@@ -23,6 +23,7 @@ export default defineOAuthGoogleEventHandler({
                 username: null,
                 provider: provider,
                 provider_id: provider_id,
+                provider_email: provider_email,
                 picture: picture,
             }
 
