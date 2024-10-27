@@ -53,7 +53,7 @@ export default defineOAuthGitHubEventHandler({
             // We have an existing user provider connected to a user account
             if (existingUser) {
                 if (existingUser.provider_email !== provider_email.value) {
-                    await updateProviderEmail(event, existingUser.provider, existingUser.provider_id as string, provider_email.value)
+                    await updateProviderEmail(event, existingUser.provider, existingUser.provider_id as string, provider_email.value, provider_verified.value)
                 }
 
                 const registeredUser: RegisteredUser = {

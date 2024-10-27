@@ -145,7 +145,7 @@ export async function getProviderUserExists(event: H3Event, provider: Provider, 
     }
 }
 
-export async function updateProviderEmail(event: H3Event, provider: Provider, provider_id: string, new_email: string): Promise<boolean> {
+export async function updateProviderEmail(event: H3Event, provider: Provider, provider_id: string, new_email: string, new_provider_verified_status: boolean): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -167,12 +167,13 @@ export async function updateProviderEmail(event: H3Event, provider: Provider, pr
     try {
         const query = `
             UPDATE private.user_providers
-            SET provider_email = $1
-            WHERE provider = $2
-            AND provider_id = $3
+            SET provider_email = $1,
+                provider_verified = $2
+            WHERE provider = $3
+            AND provider_id = $4
         `
 
-        const values = [new_email, provider, provider_id]
+        const values = [new_email, new_provider_verified_status, provider, provider_id]
         await pool.query(query, values)
         return true
     }
