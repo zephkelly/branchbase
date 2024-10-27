@@ -138,7 +138,8 @@ export default defineOAuthGitHubEventHandler({
             })
 
             return sendRedirect(event, '/register')
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Error logging in with GitHub:', error)
             return sendRedirect(event, '/login')
         }
