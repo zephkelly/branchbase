@@ -59,8 +59,13 @@ export interface UserSessionData {
     linkable_data?: LinkableData;
 }
 
+export interface LinkableData {
+    provider_email: string;
+    existing_providers_number: number;
+}
+
 // Normal secure user session
-export interface SecureNormalSessionDataType {
+export interface SecureSession {
     // expires_in?: number;
     // access_token?: string;
     // refresh_token?: string;
@@ -68,12 +73,16 @@ export interface SecureNormalSessionDataType {
     provider_email: string | null;
 }
 
+export interface SecureLinkableData {
+    linkable_providers: SecureUserProviderData;
+}
+
 // Used for temporary user sessions that are in the process of linking accounts
-export interface SecureLinkableSessionDataType extends SecureNormalSessionDataType {
+export interface SecureLinkableSession extends SecureSession {
     linkable_data: SecureLinkableData;
 }
 
-export type SecureSessionDataType = SecureNormalSessionDataType | SecureLinkableSessionDataType;
+export type SecureSessionDataType = SecureSession | SecureLinkableSession;
 
 export interface SecureUserProviderData {
     user_id: number;
@@ -83,14 +92,7 @@ export interface SecureUserProviderData {
     }>;
 }
 
-export interface LinkableData {
-    provider_email: string;
-    existing_providers_number: number;
-}
 
-export interface SecureLinkableData {
-    linkable_providers: SecureUserProviderData;
-}
 
 // Type guard functions
 export function isRegisteredUser(user: User | null | undefined): user is RegisteredUser {

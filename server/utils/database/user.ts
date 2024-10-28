@@ -193,7 +193,10 @@ export async function updateProviderEmail(event: H3Event, provider: Provider, pr
     }
 }   
 
-type UnregisteredUserInput = Omit<UnregisteredUser, 'id'> & { username: string, provider_verified: boolean | null };
+type UnregisteredUserInput = Omit<UnregisteredUser, 'id'> & { 
+    username: string,
+     provider_verified: boolean | null 
+};
 
 
 /**
@@ -273,13 +276,23 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
     }
     catch (error: any) {
         await client.query('ROLLBACK')
-        console.error('Error in createUser', error)
+        console.log('error:', error.code)
 
-        if (error && typeof error === 'object' && 'code' in error) {
+        if (error && error.code) {
             const pgError = error as PostgresError;
 
             // PostgreSQL unique violation code
             if (pgError.code === '23505') {
+                if (pgError.constraint === 'users_username_key') {
+                    setResponseStatus(event, 409)
+                    return {
+                        type: ErrorType.VALIDATION_ERROR,
+                        field: 'username',
+                        message: 'This username is already taken',
+                        statusCode: 409
+                    }
+                }
+
                 if (pgError.constraint === 'user_providers_provider_provider_id_key') {
                     setResponseStatus(event, 409)
                     return {
@@ -346,8 +359,7 @@ export async function createUserProvider(event: H3Event, user_id: number, user: 
     try {
         await client.query('BEGIN')
 
-        const providerResult = await pool.query(providerQuery, values)
-        console.log('providerResult:', providerResult.rows[0])
+        // const providerResult = await pool.query(providerQuery, values)
 
         const userQuery = `
             SELECT u.id, u.username, u.picture
@@ -374,12 +386,12 @@ export async function createUserProvider(event: H3Event, user_id: number, user: 
             data: linkedUser
         }
     }
-    catch (error) {
+    catch (error: any) {
         await client.query('ROLLBACK')
 
         console.error('Error in createUserProvider:', error)
 
-        if (error && typeof error === 'object' && 'code' in error) {
+        if (error && typeof error.code) {
             const pgError = error as PostgresError
 
             // Handle specific PostgreSQL errors

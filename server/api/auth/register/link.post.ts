@@ -1,6 +1,6 @@
 import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
-import { SecureLinkableSessionDataType, UnregisteredUser, SecureUnregisteredUser, SecureSessionDataType, LinkableData, SecureLinkableData, SecureRegisteredUser, RegisteredUser } from '~~/types/user';
+import { SecureLinkableSession, UnregisteredUser, SecureUnregisteredUser, SecureSessionDataType, LinkableData, SecureLinkableData, SecureRegisteredUser, RegisteredUser } from '~~/types/user';
 
 export default defineEventHandler(async (event) => {
     const session = await getUserSession(event)
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const secureLinkableSession = session.secure as SecureLinkableSessionDataType
+    const secureLinkableSession = session.secure as SecureLinkableSession
 
     if (!session.linkable_data || !secureLinkableSession || !secureLinkableSession.linkable_data) {
         return createError({
