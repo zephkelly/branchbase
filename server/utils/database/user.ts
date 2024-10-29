@@ -383,7 +383,7 @@ export async function createUserProvider(event: H3Event, user_id: number, user: 
     try {
         await client.query('BEGIN')
 
-        // const providerResult = await pool.query(providerQuery, values)
+        await pool.query(providerQuery, values)
 
         const userQuery = `
             SELECT u.id, u.username, u.picture

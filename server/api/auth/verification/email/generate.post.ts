@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
                     END,
                 cooldown_until = 
                     CASE 
-                        WHEN otp_rate_limits.attempt_count >= 2
+                        WHEN otp_rate_limits.attempt_count >= 5
                         THEN NOW() + INTERVAL '1 hour'
                         ELSE NULL
                     END

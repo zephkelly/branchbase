@@ -4,7 +4,21 @@
             <template #unregistered="{ user, session }">
                 <h1>Register</h1>
                 <a href="/register?nolink=true">Actually i dont want to link</a>
-                <div class="linkable-users" v-if="isVerified === false">
+                <div class="linkable-users" v-if="isVerified">
+                    <h2>Linkable Users</h2>
+                    <!-- <p>{{ session.value?.linkable_data }}</p> -->
+                    <div style="display: flex; flex-direction: row;">
+                        <div 
+                            class="user"
+                            :key="index"
+                            v-for="(account, index) in (session.value?.linkable_data as VerifiedLinkableData).linkable_providers">
+                                <p>{{ account.username }}</p>
+                                <p>{{ account.providers[0]?.provider }}</p>
+                                <button @click.prevent="linkProvider(index)">Link {{ index }}</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="linkable-users" v-else>
                     <h2>Verify email</h2>
                     <p>{{ session.value?.linkable_data }}</p>
                     <form @submit.prevent="sendVerificationOTP">
@@ -16,13 +30,6 @@
                         <label for="otp">OTP</label>
                         <input type="text" id="otp" name="otp" required v-model="otpCode">
                         <button type="submit">Verify OTP</button>
-                    </form>
-                </div>
-                <div class="linkable-users" v-else>
-                    <h2>Linkable Users</h2>
-                    <p>{{ session.value?.linkable_data }}</p>
-                    <form @submit.prevent="">
-                        <button type="submit">Select account</button>
                     </form>
                 </div>
             </template>
@@ -38,9 +45,8 @@ const { session, getNewSession } = useAuthState()
 const linkableUsersData = ref(session.value.linkable_data as LinkableData);
 const verifiedLinkableData = ref(session.value.linkable_data as VerifiedLinkableData)
 
-const isVerified = computed(() => {
-    return verifiedLinkableData.value.linkable_providers !== undefined
-})
+const isVerified = ref(verifiedLinkableData.value.linkable_providers !== undefined)
+console.log(isVerified.value)
 
 const router = useRouter()
 
@@ -79,6 +85,7 @@ const sendVerificationOTP = async () => {
     }
 }
 
+const verifiedOTPId = ref('')
 const verifyOTP = async () => {
     try {
         const response = await fetch('/api/auth/verification/email/verify', {
@@ -96,6 +103,11 @@ const verifyOTP = async () => {
             throw new Error('Verification failed')
         }
 
+        const data = await response.json()
+        verifiedOTPId.value = data.otp_id
+
+        isVerified.value = true
+
         await getNewSession()
     }
     catch (error) {
@@ -103,27 +115,39 @@ const verifyOTP = async () => {
     }
 }
 
-// const linkProvider = async () => {
-//     try {
-//         const response = await fetch('/api/auth/register/link', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//         })
+const linkProvider = async (userIndex: number) => {
+    try {
+        const user = (session.value?.linkable_data as VerifiedLinkableData).linkable_providers[userIndex]
 
-//         if (!response.ok) {
-//             throw new Error('Linking failed')
-//         }
+        if (!user) {
+            throw new Error('User not found')
+        }
 
-//         await getNewSession()
+        console.log('Selected user:', user)
 
-//         router.push('/')
-//     }
-//     catch (error) {
-//         console.error('Error during registration:', error)
-//     }
-// }
+        const response = await fetch('/api/auth/register/link', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                otp_id: verifiedOTPId.value,
+                existing_user_index: userIndex
+            })
+        })
+
+        if (!response.ok) {
+            throw new Error('Linking failed')
+        }
+
+        await getNewSession()
+
+        router.push('/')
+    }
+    catch (error) {
+        console.error('Error during registration:', error)
+    }
+}
 
 onBeforeMount(() => {
     if (!session.value.user || !linkableUsersData) {

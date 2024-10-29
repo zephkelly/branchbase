@@ -1,5 +1,7 @@
 import { createVerifiedLinkableSession } from "~~/server/utils/auth/verifiedLinkableSession";
 
+const MAXIMUM_VERIFICATION_ATTEMPTS = 5
+
 export default defineEventHandler(async (event) => {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
@@ -50,10 +52,8 @@ export default defineEventHandler(async (event) => {
 
         const token = tokenResult.rows[0]
 
-        console.log('Token:', token)
-
         // Check if max attempts reached
-        if (token.verification_attempts >= 3) {
+        if (token.verification_attempts >= MAXIMUM_VERIFICATION_ATTEMPTS) {
             // Delete the token as max attempts reached
             const deleteTokenQuery = `
                 DELETE FROM private.otp_tokens 
@@ -115,6 +115,7 @@ export default defineEventHandler(async (event) => {
 
         return {
             statusText: 'Success',
+            otp_id: token.id
         }
     }
     catch (err) {
