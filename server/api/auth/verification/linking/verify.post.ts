@@ -1,6 +1,6 @@
 import { OTPPurpose } from "~~/server/types/otp";
 
-import { createVerifiedLinkableSession } from "~~/server/utils/auth/verifiedLinkableSession";
+import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/verifiedLinkableSession";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 

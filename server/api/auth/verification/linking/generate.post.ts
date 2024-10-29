@@ -102,11 +102,8 @@ export default defineEventHandler(async (event) => {
 
         await client.query('COMMIT')
         
-        console.log('OTP updated/created successfully')
-        
         return {
-            message: 'OTP created successfully',
-            id: otpResult.rows[0].id
+            message: 'OTP created successfully'
         }
     } catch (err) {
         await client.query('ROLLBACK')

@@ -78,7 +78,6 @@ const sendVerificationOTP = async () => {
             sentVerification.value = true
         }
 
-
     }
     catch (error) {
         console.error('Error during registration:', error)
