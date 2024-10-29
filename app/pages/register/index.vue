@@ -18,7 +18,7 @@
                         <button @click="showAccountLinkingOption = true">I changed my mind, I want to link my account</button>
                     </div>
                     <h2>Complete your registration</h2>
-                    <form @submit.prevent="registerOAuth">
+                    <form @submit.prevent="">
                         <p>You are signing up through {{ user.provider }} with email: {{ user.provider_email }}</p>
                         <div class="field-container email">
                             <div v-if="user.provider === 'credentials'" class="new-registration">
@@ -34,7 +34,7 @@
                             </div>
                         </div>
                         <div class="field-container">
-                            <div v-if="user.provider !== 'credentials'" class="oauth-registration">
+                            <!-- <div v-if="user.provider !== 'credentials'" class="oauth-registration">
                                 <div v-for="(field, name) in formState" :key="name">
                                     <label :for="name">{{ name }}</label>
                                     <input
@@ -51,7 +51,7 @@
                             </div>
                             <button type="submit" :disabled="!isValid">
                                 Submit
-                            </button>
+                            </button> -->
                         </div>
                     </form>
                 </div>
@@ -97,68 +97,68 @@ const userEmail = computed(() => {
 })
 
 // Form validation and sanitisation
-interface RegistrationForm {
-    username: string
-}
+// interface RegistrationForm {
+//     username: string
+// }
 
-const initialValues: RegistrationForm = {
-    username: '',
-}
+// const initialValues: RegistrationForm = {
+//     username: '',
+// }
 
-const {
-    formState,
-    rules,
-    setFieldRules,
-    validateForm,
-    updateField,
-    values,
-    isValid,
-    errors
-} = useFormValidation<RegistrationForm>(initialValues)
+// const {
+//     formState,
+//     rules,
+//     setFieldRules,
+//     validateForm,
+//     updateField,
+//     values,
+//     isValid,
+//     errors
+// } = useFormValidation<RegistrationForm>(initialValues)
 
-setFieldRules(
-    'username',
-    rules.required('Username is required'),
-    rules.minLength(1, 'Username must be at least 1 character'),
-    rules.maxLength(20, 'Username must be no more than 20 characters'),
-    rules.pattern(
-        /^[a-zA-Z0-9_-]+$/, 
-        'Username can only contain letters, numbers, underscores, and hyphens'
-    )
-)
+// setFieldRules(
+//     'username',
+//     rules.required('Username is required'),
+//     rules.minLength(1, 'Username must be at least 1 character'),
+//     rules.maxLength(20, 'Username must be no more than 20 characters'),
+//     rules.pattern(
+//         /^[a-zA-Z0-9_-]+$/, 
+//         'Username can only contain letters, numbers, underscores, and hyphens'
+//     )
+// )
 
-const handleInput = (fieldName: keyof RegistrationForm, event: Event) => {
-    const input = event.target as HTMLInputElement
-    updateField(fieldName, input.value)
-}
+// const handleInput = (fieldName: keyof RegistrationForm, event: Event) => {
+//     const input = event.target as HTMLInputElement
+//     updateField(fieldName, input.value)
+// }
 
-const registerOAuth = async () => {
-    if (!validateForm()) {
-        console.log('Form is invalid')
-        return
-    }
+// const registerOAuth = async () => {
+//     if (!validateForm()) {
+//         console.log('Form is invalid')
+//         return
+//     }
 
-    try {
-        const response = await fetch('/api/auth/register/oauth', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(values.value),
-        })
+//     try {
+//         const response = await fetch('/api/auth/register/oauth', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify(values.value),
+//         })
 
-        if (!response.ok) {
-            throw new Error('Registration failed')
-        }
+//         if (!response.ok) {
+//             throw new Error('Registration failed')
+//         }
 
-        await getNewSession()
+//         await getNewSession()
 
-        router.push('/')
-    }
-    catch (error) {
-        console.error('Error during registration:', error)
-    }
-}
+//         router.push('/')
+//     }
+//     catch (error) {
+//         console.error('Error during registration:', error)
+//     }
+// }
 
 // if (user && user.value) {
 //     if (alreadyRegistered.value) {

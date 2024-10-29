@@ -4,6 +4,7 @@
         "Nuxt",
         "sanitise",
         "sanitised",
+        "Sanitiser",
         "Upbranched"
     ]
 }
