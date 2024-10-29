@@ -56,35 +56,13 @@ export interface UserSessionData {
     loggedInAt: number;
     user: RegisteredUser | UnregisteredUser;
     secure: Record<string, unknown>;
-    linkable_data?: LinkableData;
+    linkable_data?: LinkableData | VerifiedLinkableData;
 }
 
-export interface LinkableData {
-    provider_email: string;
-    existing_providers_number: number;
-}
 
-// Normal secure user session
-export interface SecureSession {
-    // expires_in?: number;
-    // access_token?: string;
-    // refresh_token?: string;
-    provider_verified: boolean | null;
-    provider_email: string | null;
-}
-
-export interface SecureLinkableData {
-    linkable_providers: SecureUserProviderData;
-}
-
-// Used for temporary user sessions that are in the process of linking accounts
-export interface SecureLinkableSession extends SecureSession {
-    linkable_data: SecureLinkableData;
-}
-
-export type SecureSessionDataType = SecureSession | SecureLinkableSession;
-
-export interface SecureUserProviderData {
+export interface LinkableUserProviderData {
+    username: number;
+    picture: string;
     user_id: number;
     providers: Array<{
         provider: Provider;
@@ -92,7 +70,25 @@ export interface SecureUserProviderData {
     }>;
 }
 
+// This is initially sent to the client before verifying the OTP
+export interface LinkableData {
+    provider_email: string;
+    existing_users_count: number;
+}
 
+// We send extra information to the client after verifying OTP
+export interface VerifiedLinkableData extends LinkableData {
+    linkable_providers: LinkableUserProviderData[];
+}
+
+// Normal secure user session
+export interface SecureSession {
+    provider_verified: boolean | null;
+    provider_email: string | null;
+    linkable_data?: LinkableUserProviderData[];
+}
+
+export type SecureSessionDataType = SecureSession;
 
 // Type guard functions
 export function isRegisteredUser(user: User | null | undefined): user is RegisteredUser {

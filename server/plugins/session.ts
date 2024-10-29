@@ -6,6 +6,6 @@ export default defineNitroPlugin(() => {
     })
 
     sessionHooks.hook('clear', async (_session: UserSession) => {
-        console.log('User logged out')
+        
     })
 })

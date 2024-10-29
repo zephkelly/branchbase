@@ -3,7 +3,7 @@ import { useUserSession } from '#imports'
 import { isRegisteredUser, type RegisteredUser, type UnregisteredUser } from '~~/types/user'
 
 export function useAuthState() {
-    const { loggedIn, user, clear, ready, session } = useUserSession()
+    const { loggedIn, user, clear, ready, session, fetch } = useUserSession()
 
     // Strongly typed user
     const typedUser = computed(() => {
@@ -29,6 +29,7 @@ export function useAuthState() {
         ready,
         session,
         registered,
-        error
+        error,
+        getNewSession: fetch
     }
 }

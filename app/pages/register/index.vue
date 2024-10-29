@@ -68,7 +68,7 @@ const route = useRoute()
 const { session } = useAuthState()
 
 const linkableUsersData = await session.value.linkable_data as LinkableData;
-const hasLinkableUsers = (linkableUsersData && linkableUsersData.existing_providers_number === 1) 
+const hasLinkableUsers = (linkableUsersData && linkableUsersData.existing_users_count >= 1) 
     ? true 
     : false;
 

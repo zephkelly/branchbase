@@ -1,6 +1,6 @@
 import { H3Event } from 'h3'
-import { Provider, SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData, SecureLinkableData } from '~~/types/user'
-import { getProviderUser, getUserProvidersByEmail, updateProviderEmail } from '~~/server/utils/database/user'
+import { Provider, SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
+import { getProviderUser, getUsersProvidersByEmail, updateProviderEmail } from '~~/server/utils/database/user'
 
 interface ProviderData {
     provider: Provider
@@ -42,14 +42,15 @@ export async function handleOAuthLogin(
                 loggedInAt: Date.now(),
             })
 
+            console.log("returning registered user")
             return sendRedirect(event, '/')
         }
 
         // Check for existing accounts with same email
-        const existingUserProviders = await getUserProvidersByEmail(event, provider_email)
+        const linkableUsersAndProviders = await getUsersProvidersByEmail(event, provider_email)
 
         // Handle linkable accounts case
-        if (existingUserProviders) {
+        if (linkableUsersAndProviders) {
             const temporaryLinkableUser: UnregisteredUser = {
                 id: null,
                 username: null,
@@ -61,26 +62,23 @@ export async function handleOAuthLogin(
 
             const linkableData: LinkableData = {
                 provider_email,
-                existing_providers_number: existingUserProviders.providers.length
+                existing_users_count: linkableUsersAndProviders.length,
             }
-
-            const secureLinkableData: SecureLinkableData = {
-                linkable_providers: existingUserProviders
-            }
-
+            
             await setUserSession(event, {
                 user: temporaryLinkableUser,
                 linkable_data: linkableData,
                 secure: {
-                provider_email,
-                provider_verified,
-                linkable_data: secureLinkableData
+                    provider_email,
+                    provider_verified,
+                    linkable_data: linkableUsersAndProviders
                 },
                 loggedInAt: Date.now()
             }, {
                 maxAge: 60 * 60 // 1 hour
             })
 
+            console.log("returning linkable user")
             return sendRedirect(event, '/register')
         }
 
@@ -105,10 +103,11 @@ export async function handleOAuthLogin(
             maxAge: 60 * 60 // 1 hour
         })
 
+        console.log("returning temporary user")
         return sendRedirect(event, '/register')
     }
     catch (error) {
         console.error(`Error logging in with ${provider}:`, error)
-        return sendRedirect(event, '/login')
+        return sendRedirect(event, '/')
     }
 }

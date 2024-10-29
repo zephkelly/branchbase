@@ -1,6 +1,6 @@
 import { H3Event } from 'h3';
 
-import { type SecureRegisteredUser, type UnregisteredUser, Provider, SecureUnregisteredUser, SecureUserProviderData } from '../../../types/user';
+import { type SecureRegisteredUser, type UnregisteredUser, Provider, SecureUnregisteredUser, LinkableUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
@@ -66,42 +66,65 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
     }
 }
 
-export async function getUserProvidersByEmail(event: H3Event, email: string): Promise<SecureUserProviderData | null> {
+export async function getUsersProvidersByEmail(event: H3Event, email: string): Promise<LinkableUserProviderData[] | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
-    
+   
     try {
-        const findUserQuery = `
-            SELECT DISTINCT user_id
-            FROM private.user_providers
-            WHERE provider_email = $1
+        const query = `
+            WITH user_provider_counts AS (
+                SELECT 
+                    u.username,
+                    u.picture,
+                    up.user_id,
+                    COUNT(*) as provider_count,
+                    array_agg(jsonb_build_object(
+                        'provider', up.provider,
+                        'provider_id', up.provider_id
+                    )) as providers
+                FROM private.user_providers up
+                JOIN private.users u ON u.id = up.user_id
+                WHERE up.user_id IN (
+                    SELECT DISTINCT user_id
+                    FROM private.user_providers
+                    WHERE provider_email = $1
+                )
+                GROUP BY up.user_id, u.username, u.picture
+            )
+            SELECT 
+                username,
+                picture,
+                provider_count,
+                providers
+            FROM user_provider_counts
+            ORDER BY username
         `
-        const userResult = await pool.query(findUserQuery, [email])
-        if (userResult.rows.length === 0) return null
 
-        const providersQuery = `
-            SELECT
-                up.user_id,
-                array_agg(jsonb_build_object(
-                    'provider', up.provider,
-                    'provider_id', up.provider_id
-                )) as providers
-            FROM private.user_providers up
-            WHERE up.user_id = ANY($1)
-            GROUP BY up.user_id
-        `
-        const userIds = userResult.rows.map(row => row.user_id)
-        const result = await pool.query(providersQuery, [userIds])
-
+        const result = await pool.query(query, [email])
+        
         if (result.rows.length === 0) return null
 
-        return {
-            user_id: result.rows[0].user_id,
-            providers: result.rows[0].providers.map((p: any) => ({
-                provider: p.provider as Provider,
-                provider_id: p.provider_id
-            }))
-        } as SecureUserProviderData
+        const validUsers: LinkableUserProviderData[] = []
+        
+        for (const row of result.rows) {
+            if (row.provider_count === 1 || row.provider_count === '1') {
+                validUsers.push({
+                    username: row.username,
+                    picture: row.picture,
+                    user_id: row.user_id,
+                    providers: row.providers.map((p: any) => ({
+                        provider: p.provider as Provider,
+                        provider_id: p.provider_id
+                    }))
+                })
+            }
+            else if (row.provider_count === 0) {
+                // Add users with no providers to orphaned users file
+            }
+        }
+
+
+        return validUsers.length > 0 ? validUsers : null
     }
     catch (error) {
         console.error('Error in getUsersByProviderEmail:', error)
@@ -328,6 +351,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
 
 /**
  * Creates a new provider linking to an existing user in the database.
+ * Used when a user links a new provider to their existing account.
  * @warning This function does NOT sanitise or validate input data.
  */
 export async function createUserProvider(event: H3Event, user_id: number, user: SecureUnregisteredUser): Promise<UserProviderCreationResponse> {
