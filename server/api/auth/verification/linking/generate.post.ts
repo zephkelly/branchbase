@@ -64,42 +64,58 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // Delete any existing OTP for this email (both expired and non-expired)
-        const deleteExistingQuery = `
-            DELETE FROM private.otp_tokens
-            WHERE email = $1
-                AND purpose = $2
-        `
-        await client.query(deleteExistingQuery, [email, OTPPurpose.ACCOUNT_LINKING])
-
-        const optQuery = `
+        // Update existing OTP or create new one
+        const upsertOTPQuery = `
             INSERT INTO private.otp_tokens (
                 email,
                 otp,
                 purpose,
-                expires_at
+                expires_at,
+                verification_attempts,
+                last_verification_attempt,
+                used_at
             )
-            VALUES ($1, $2, $3, NOW() + INTERVAL '15 minutes')
+            VALUES (
+                $1, 
+                $2,
+                $3,
+                NOW() + INTERVAL '15 minutes',
+                0,
+                NULL,
+                NULL
+            )
+            ON CONFLICT (email, purpose) DO UPDATE SET
+                otp = EXCLUDED.otp,
+                expires_at = EXCLUDED.expires_at,
+                verification_attempts = 0,
+                last_verification_attempt = NULL,
+                used_at = NULL
             RETURNING id
         `
-        await client.query(optQuery, [email, generateOTP(), OTPPurpose.ACCOUNT_LINKING])
+
+        const newOTP = generateOTP()
+        const otpResult = await client.query(upsertOTPQuery, [
+            email,
+            newOTP,
+            OTPPurpose.ACCOUNT_LINKING
+        ])
 
         await client.query('COMMIT')
-
-        console.log('OTP created successfully')
-
+        
+        console.log('OTP updated/created successfully')
+        
         return {
-            message: 'OTP created successfully'
+            message: 'OTP created successfully',
+            id: otpResult.rows[0].id
         }
-    }
-    catch (err) {
+    } catch (err) {
+        await client.query('ROLLBACK')
         console.error(err)
         throw createError({
             statusCode: 500,
             message: 'Server error creating OTP'
         })
-    }
-    finally {
+    } finally {
         client.release()
     }
 })

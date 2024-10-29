@@ -38,7 +38,7 @@ export default defineNitroPlugin(async (nitroApp) => {
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     CONSTRAINT users_username_key
-                    UNIQUE (username)
+                        UNIQUE (username)
                 );
                     
                 CREATE TABLE IF NOT EXISTS private.user_providers (
@@ -75,6 +75,9 @@ export default defineNitroPlugin(async (nitroApp) => {
                     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
                     used_at TIMESTAMP WITH TIME ZONE,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+                    CONSTRAINT unique_email_purpose 
+                        UNIQUE (email, purpose),
                     
                     CONSTRAINT not_expired
                         CHECK (expires_at > created_at)
