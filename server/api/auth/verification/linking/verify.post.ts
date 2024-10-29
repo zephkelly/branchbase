@@ -1,3 +1,5 @@
+import { OTPPurpose } from "~~/server/types/otp";
+
 import { createVerifiedLinkableSession } from "~~/server/utils/auth/verifiedLinkableSession";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
@@ -34,14 +36,12 @@ export default defineEventHandler(async (event) => {
             SELECT id, verification_attempts, expires_at, used_at
             FROM private.otp_tokens
             WHERE email = $1 
-            AND purpose = 'email_verification'
+            AND purpose = $2
             AND expires_at > NOW()
             AND used_at IS NULL
         `
-        const tokenResult = await client.query(checkTokenQuery, [email])
+        const tokenResult = await client.query(checkTokenQuery, [email, OTPPurpose.ACCOUNT_LINKING])
 
-        console.log('Token result:', tokenResult.rows)
-        
         if (tokenResult.rows.length === 0) {
             await client.query('ROLLBACK')
             return createError({

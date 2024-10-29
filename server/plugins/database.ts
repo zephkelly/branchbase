@@ -76,9 +76,6 @@ export default defineNitroPlugin(async (nitroApp) => {
                     used_at TIMESTAMP WITH TIME ZONE,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                     
-                    CONSTRAINT valid_purpose
-                        CHECK (purpose IN ('email_verification')),
-                    
                     CONSTRAINT not_expired
                         CHECK (expires_at > created_at)
                 );

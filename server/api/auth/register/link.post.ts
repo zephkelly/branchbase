@@ -2,6 +2,8 @@ import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
 import { SecureSession, SecureUnregisteredUser, UnregisteredUser, SecureRegisteredUser } from '~~/types/user';
 
+import { getOTPUsed } from '~~/server/utils/database/token';
+
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
@@ -51,12 +53,21 @@ export default defineEventHandler(async (event) => {
             })
         }
 
+        //check if the otp code has been used
+        const otpVerificationResponse = await getOTPUsed(event, otp_id)
+
+        if (otpVerificationResponse.verified === false) {
+            return createError({
+                statusCode: 403,
+                message: 'OTP code has already been used. Please start the linking process again.'
+            })
+        }
+
         const existing_user_info = secureLinkableUserProviderData[existing_user_index]
         const { provider: existing_provider, provider_id: existing_provider_id } = existing_user_info.providers[0]
 
         const desired_user = await getProviderUser(event, existing_provider, existing_provider_id)
 
-        
         if (!desired_user || desired_user.id === null || desired_user.id === undefined) {
             return createError({
                 statusCode: 404,
@@ -98,7 +109,7 @@ export default defineEventHandler(async (event) => {
         })
 
         setResponseStatus(event, 201)
-        
+
         return {
             message: 'Linked successfully'
         }

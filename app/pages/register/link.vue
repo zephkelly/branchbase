@@ -62,7 +62,7 @@ const sendVerificationOTP = async () => {
     errorMessage.value = ''
 
     try {
-        const response = await fetch('/api/auth/verification/email/generate', {
+        const response = await fetch('/api/auth/verification/linking/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ const sendVerificationOTP = async () => {
 const verifiedOTPId = ref('')
 const verifyOTP = async () => {
     try {
-        const response = await fetch('/api/auth/verification/email/verify', {
+        const response = await fetch('/api/auth/verification/linking/verify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

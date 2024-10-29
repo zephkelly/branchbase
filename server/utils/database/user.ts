@@ -378,7 +378,6 @@ export async function createUserProvider(event: H3Event, user_id: number, user: 
         user.provider_email,
         user.provider_verified
     ]
-        
 
     try {
         await client.query('BEGIN')

@@ -1,4 +1,6 @@
 import { generateOTP } from "~~/server/utils/auth/tokens/otp"
+import { RateLimitType } from "~~/server/types/ratelimit"
+import { OTPPurpose } from "~~/server/types/otp"
 
 export default defineEventHandler(async (event) => {
     const nitroApp = useNitroApp()
@@ -24,7 +26,7 @@ export default defineEventHandler(async (event) => {
                 limit_type,
                 attempt_count
             )
-            VALUES ($1, 'OTP_CREATION', 1)
+            VALUES ($1, $2, 1)
             ON CONFLICT (email, limit_type) DO UPDATE SET
                 attempt_count = 
                     CASE 
@@ -47,7 +49,7 @@ export default defineEventHandler(async (event) => {
             RETURNING cooldown_until, attempt_count
         `
 
-        const rateLimitResult = await client.query(rateLimitQuery, [email])
+        const rateLimitResult = await client.query(rateLimitQuery, [email, RateLimitType.OTP_CREATION])
         const rateLimit = rateLimitResult.rows[0]
 
         if (rateLimit.cooldown_until) {
@@ -66,9 +68,9 @@ export default defineEventHandler(async (event) => {
         const deleteExistingQuery = `
             DELETE FROM private.otp_tokens
             WHERE email = $1
-                AND purpose = 'email_verification'
+                AND purpose = $2
         `
-        await client.query(deleteExistingQuery, [email])
+        await client.query(deleteExistingQuery, [email, OTPPurpose.ACCOUNT_LINKING])
 
         const optQuery = `
             INSERT INTO private.otp_tokens (
@@ -77,21 +79,14 @@ export default defineEventHandler(async (event) => {
                 purpose,
                 expires_at
             )
-            VALUES ($1, $2, 'email_verification', NOW() + INTERVAL '15 minutes')
+            VALUES ($1, $2, $3, NOW() + INTERVAL '15 minutes')
             RETURNING id
         `
-        await client.query(optQuery, [email, generateOTP()])
+        await client.query(optQuery, [email, generateOTP(), OTPPurpose.ACCOUNT_LINKING])
 
         await client.query('COMMIT')
 
         console.log('OTP created successfully')
-
-        // Cleanup expired tokens for all users
-        // const cleanupQuery = `
-        //     DELETE FROM private.otp_tokens
-        //     WHERE expires_at <= NOW()
-        // `
-        // await client.query(cleanupQuery)
 
         return {
             message: 'OTP created successfully'
