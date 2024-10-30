@@ -1,4 +1,12 @@
-import { ref, computed } from 'vue'
+import {
+    isString,
+    minLengthString,
+    maxLengthString,
+} from '~~/utils/validation/primitives'
+
+import {
+    isValidEmail,
+} from '~~/utils/validation/authentication'
 
 export interface ValidationRule {
     validate: (value: any) => boolean
@@ -39,19 +47,19 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     const rules = {
         required: (message = 'This field is required'): ValidationRule => ({
             validate: (value: any) => {
-                if (typeof value === 'string') return value.trim().length > 0
+                if (isString(value)) return value.trim().length > 0
                 return value !== null && value !== undefined
             },
             message
         }),
     
-        minLength: (min: number, message = `Must be at least ${min} characters`): ValidationRule => ({
-            validate: (value: string) => value.trim().length >= min,
+        minLengthString: (min: number, message = `Must be at least ${min} characters`): ValidationRule => ({
+            validate: (value: string) => minLengthString(value, min),
             message
         }),
     
-        maxLength: (max: number, message = `Must be no more than ${max} characters`): ValidationRule => ({
-            validate: (value: string) => value.trim().length <= max,
+        maxLengthString: (max: number, message = `Must be no more than ${max} characters`): ValidationRule => ({
+            validate: (value: string) => maxLengthString(value, max),
             message,
             transform: (value: string) => {
                 if (typeof value === 'string' && value.length > max+1) {
@@ -61,67 +69,15 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
             }
         }),
     
+        email: (message = 'Please enter a valid email address'): ValidationRule => ({
+            validate: (value: string) => isValidEmail(value).isValid,
+            message
+        }),
+
         pattern: (regex: RegExp, message: string): ValidationRule => ({
             validate: (value: string) => regex.test(value.trim()),
             message
-        }),
-    
-        email: (message = 'Please enter a valid email address'): ValidationRule => ({
-            validate: (value: string) => {
-                const pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/
-                return pattern.test(value.trim().toLowerCase())
-            },
-            message
-        }),
-    
-        url: (message = 'Please enter a valid URL'): ValidationRule => ({
-            validate: (value: string) => {
-                const pattern = /^https?:\/\/[^\s<>\"]+$/
-                return pattern.test(value.trim())
-            },
-            message
-        }),
-    
-        matches: (field: keyof T, message = 'Fields must match'): ValidationRule => ({
-            validate: (value: any) => value === formState.value[field]?.value,
-            message
-        }),
-
-        isString: (message = 'Must be a string'): ValidationRule => ({
-            validate: (value: any) => typeof value === 'string',
-            message,
-            transform: (value: any) => {
-                if (value === null || value === undefined) return ''
-                return String(value)
-            }
-        }),
-
-        isNumber: (message = 'Must be a number'): ValidationRule => ({
-            validate: (value: any) => {
-                if (typeof value === 'number') return !isNaN(value)
-                if (typeof value === 'string') {
-                    const num = Number(value.trim())
-                    return !isNaN(num)
-                }
-                return false
-            },
-            message,
-            transform: (value: any) => {
-                if (typeof value === 'string') {
-                    const num = Number(value.trim())
-                    return isNaN(num) ? value : num
-                }
-                return value
-            }
-        }),
-
-        isPositive: (message = 'Must be a positive number'): ValidationRule => ({
-            validate: (value: number) => {
-                const num = Number(value)
-                return !isNaN(num) && num > 0
-            },
-            message
-        }),
+        }),  
     
         custom: (validateFn: (value: any) => boolean, message: string): ValidationRule => ({
             validate: validateFn,

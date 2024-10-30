@@ -111,8 +111,8 @@ oauthForm.bindField('username', username)
 oauthForm.setFieldRules(
     'username',
     oauthForm.rules.required('Username is required'),
-    oauthForm.rules.minLength(1, 'Username must be at least 3 characters'),
-    oauthForm.rules.maxLength(20, 'Username must be no more than 20 characters'),
+    oauthForm.rules.minLengthString(1, 'Username must be at least 3 characters'),
+    oauthForm.rules.maxLengthString(20, 'Username must be no more than 20 characters'),
     oauthForm.rules.pattern(
         /^[a-zA-Z0-9_-]+$/, 
         'Username can only contain letters, numbers, underscores, and hyphens'
