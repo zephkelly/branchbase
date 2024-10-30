@@ -59,8 +59,8 @@ export const createUserRegistration = () => {
             if (isUnregisteredUser(user as User)) {
                 console.log('User is not registered. Showing registration modal...')
 
-                if (router.currentRoute.value.path === '/register') {
-                    console.log('User is already on the registration page. Skipping modal...')
+                if (/^\/register/.test(router.currentRoute.value.path)) {
+                    console.log('User is already on a registration-related page. Skipping modal...')
                     return
                 }
 

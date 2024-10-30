@@ -86,6 +86,42 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
             validate: (value: any) => value === formState.value[field]?.value,
             message
         }),
+
+        isString: (message = 'Must be a string'): ValidationRule => ({
+            validate: (value: any) => typeof value === 'string',
+            message,
+            transform: (value: any) => {
+                if (value === null || value === undefined) return ''
+                return String(value)
+            }
+        }),
+
+        isNumber: (message = 'Must be a number'): ValidationRule => ({
+            validate: (value: any) => {
+                if (typeof value === 'number') return !isNaN(value)
+                if (typeof value === 'string') {
+                    const num = Number(value.trim())
+                    return !isNaN(num)
+                }
+                return false
+            },
+            message,
+            transform: (value: any) => {
+                if (typeof value === 'string') {
+                    const num = Number(value.trim())
+                    return isNaN(num) ? value : num
+                }
+                return value
+            }
+        }),
+
+        isPositive: (message = 'Must be a positive number'): ValidationRule => ({
+            validate: (value: number) => {
+                const num = Number(value)
+                return !isNaN(num) && num > 0
+            },
+            message
+        }),
     
         custom: (validateFn: (value: any) => boolean, message: string): ValidationRule => ({
             validate: validateFn,

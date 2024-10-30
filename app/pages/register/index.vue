@@ -119,6 +119,7 @@ oauthForm.setFieldRules(
     )
 )
 
+// Form submission ----------------------------------------------
 const registerOAuth = async () => {
     if (!oauthForm.validateForm()) {
         console.log('Form is invalid')
