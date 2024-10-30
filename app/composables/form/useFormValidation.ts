@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 export interface ValidationRule {
     validate: (value: any) => boolean
     message: string
+    transform?: (value: any) => any
 }
 
 export interface FieldState {
@@ -22,6 +23,7 @@ export type ValidationRules<T> = {
   
 export const useFormValidation = <T extends Record<string, any>>(initialValues: T) => {
     const formState = ref<FormState<T>>({} as FormState<T>)
+    const externalRefs: Partial<Record<keyof T, Ref>> = {}
   
     for (const [key, value] of Object.entries(initialValues)) {
         formState.value[key as keyof T] = {
@@ -37,8 +39,8 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     const rules = {
         required: (message = 'This field is required'): ValidationRule => ({
             validate: (value: any) => {
-            if (typeof value === 'string') return value.trim().length > 0
-            return value !== null && value !== undefined
+                if (typeof value === 'string') return value.trim().length > 0
+                return value !== null && value !== undefined
             },
             message
         }),
@@ -50,7 +52,13 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     
         maxLength: (max: number, message = `Must be no more than ${max} characters`): ValidationRule => ({
             validate: (value: string) => value.trim().length <= max,
-            message
+            message,
+            transform: (value: string) => {
+                if (typeof value === 'string' && value.length > max+1) {
+                    return value.slice(0, max)
+                }
+                return value
+            }
         }),
     
         pattern: (regex: RegExp, message: string): ValidationRule => ({
@@ -60,16 +68,16 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     
         email: (message = 'Please enter a valid email address'): ValidationRule => ({
             validate: (value: string) => {
-            const pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/
-            return pattern.test(value.trim().toLowerCase())
+                const pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/
+                return pattern.test(value.trim().toLowerCase())
             },
             message
         }),
     
         url: (message = 'Please enter a valid URL'): ValidationRule => ({
             validate: (value: string) => {
-            const pattern = /^https?:\/\/[^\s<>\"]+$/
-            return pattern.test(value.trim())
+                const pattern = /^https?:\/\/[^\s<>\"]+$/
+                return pattern.test(value.trim())
             },
             message
         }),
@@ -84,6 +92,12 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
             message
         })
     }
+
+    // Method to bind external ref to a field
+    const bindField = (fieldName: keyof T, ref: Ref) => {
+        externalRefs[fieldName] = ref
+        ref.value = formState.value[fieldName].value
+    }
   
     // Method to add validation rules for a field
     const setFieldRules = (fieldName: keyof T, ...fieldRules: ValidationRule[]) => {
@@ -94,23 +108,37 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     const validateField = (fieldName: keyof T): boolean => {
         const field = formState.value[fieldName]
         const rules = validationRules.value[fieldName] || []
-    
+
         if (!field.isDirty) {
             return true
         }
-    
+
+        let transformedValue = field.value
         for (const rule of rules) {
-            if (!rule.validate(field.value)) {
-            field.error = rule.message
-            field.isValid = false
-            return false
+            // Apply transformation if available
+            if (rule.transform) {
+                transformedValue = rule.transform(transformedValue)
+                // Update both form state and external ref if value was transformed
+                if (transformedValue !== field.value) {
+                    field.value = transformedValue
+                    if (externalRefs[fieldName]) {
+                        externalRefs[fieldName]!.value = transformedValue
+                    }
+                }
+            }
+
+            if (!rule.validate(transformedValue)) {
+                field.error = rule.message
+                field.isValid = false
+                return false
             }
         }
-    
+
         field.error = null
         field.isValid = true
         return true
     }
+
   
     // Validate all fields
     const validateForm = (): boolean => {
@@ -119,7 +147,7 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
         for (const fieldName of Object.keys(formState.value) as Array<keyof T>) {
             formState.value[fieldName].isDirty = true
             if (!validateField(fieldName)) {
-            isValid = false
+                isValid = false
             }
         }
     
@@ -130,6 +158,12 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     const updateField = (fieldName: keyof T, value: any) => {
         formState.value[fieldName].value = value
         formState.value[fieldName].isDirty = true
+        
+        // Update external ref if it exists
+        if (externalRefs[fieldName]) {
+            externalRefs[fieldName]!.value = value
+        }
+        
         validateField(fieldName)
     }
   
@@ -159,10 +193,14 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
     const resetForm = () => {
         for (const [key, value] of Object.entries(initialValues)) {
             formState.value[key as keyof T] = {
-            value,
-            error: null,
-            isDirty: false,
-            isValid: true
+                value,
+                error: null,
+                isDirty: false,
+                isValid: true
+            }
+            // Reset external refs if they exist
+            if (externalRefs[key as keyof T]) {
+                externalRefs[key as keyof T]!.value = value
             }
         }
     }
@@ -177,6 +215,7 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
         values,
         isValid,
         errors,
-        resetForm
+        resetForm,
+        bindField
     }
 }

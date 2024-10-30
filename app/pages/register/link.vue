@@ -1,5 +1,5 @@
 <template>
-    <div class="page wrapper-container">
+    <div class="page wrapper-container" v-if="!pageLoading">
         <Authenticator>
             <template #unregistered="{ user, session }">
                 <h1>Register</h1>
@@ -35,6 +35,9 @@
             </template>
         </Authenticator>
     </div>
+    <div v-else>
+        <p>Loading...</p>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -42,20 +45,20 @@ import { type LinkableData, type VerifiedLinkableData } from '~~/types/user';
 
 const { session, getNewSession } = useAuthState()
 
-const linkableUsersData = ref(session.value.linkable_data as LinkableData);
-const verifiedLinkableData = ref(session.value.linkable_data as VerifiedLinkableData)
+const pageLoading = ref(true)
 
-const isVerified = ref(verifiedLinkableData.value.linkable_providers !== undefined)
-console.log(isVerified.value)
+// Pre-verified session data
+const linkableUsersData = ref(null as LinkableData | null);
+
+// Verified session data
+const verifiedLinkableData = ref(null as VerifiedLinkableData | null);
+const isVerified = ref(false)
 
 const router = useRouter()
 
 const sentVerification = ref(false)
 const errorSendingVerification = ref(false)
 const errorMessage = ref('')
-
-const otpCode = ref('')
-
 const sendVerificationOTP = async () => {
     sentVerification.value = false
     errorSendingVerification.value = false
@@ -84,6 +87,7 @@ const sendVerificationOTP = async () => {
     }
 }
 
+const otpCode = ref('')
 const verifiedOTPId = ref('')
 const verifyOTP = async () => {
     try {
@@ -149,8 +153,15 @@ const linkProvider = async (userIndex: number) => {
 }
 
 onBeforeMount(() => {
-    if (!session.value.user || !linkableUsersData) {
+    linkableUsersData.value = session.value.linkable_data as LinkableData
+    verifiedLinkableData.value = session.value.linkable_data as VerifiedLinkableData
+
+    if (!verifiedLinkableData.value) {
         navigateTo('/register');
+        return
     }
+
+    pageLoading.value = false
+    isVerified.value = verifiedLinkableData.value.linkable_providers !== undefined
 })
 </script>

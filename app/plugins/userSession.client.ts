@@ -12,7 +12,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
 
     console.log('Try to show complete registration / signup modals');
-    const { createUserRegistration } = await import('@/utils/useUserRegistration')
+    const { createUserRegistration } = await import('@/composables/modals/useUserRegistrationModal')
     const userRegistration = createUserRegistration()
 
     userRegistration.checkRegistrationStatus()

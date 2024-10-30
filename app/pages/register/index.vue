@@ -18,7 +18,7 @@
                         <button @click="showAccountLinkingOption = true">I changed my mind, I want to link my account</button>
                     </div>
                     <h2>Complete your registration</h2>
-                    <form @submit.prevent="">
+                    <form @submit.prevent="registerOAuth">
                         <p>You are signing up through {{ user.provider }} with email: {{ user.provider_email }}</p>
                         <div class="field-container email">
                             <div v-if="user.provider === 'credentials'" class="new-registration">
@@ -29,29 +29,27 @@
                             </div>
                             <div v-else class="oauth-registration">
                                 <div class="field">
-                                    <p>{{ user.provider === 'google' ? 'Google' : 'GitHub' }} Logo</p>
+                                    <p>{{ user.provider }} Logo</p>
                                 </div>
                             </div>
                         </div>
                         <div class="field-container">
-                            <!-- <div v-if="user.provider !== 'credentials'" class="oauth-registration">
-                                <div v-for="(field, name) in formState" :key="name">
-                                    <label :for="name">{{ name }}</label>
-                                    <input
-                                        :id="name"
-                                        :value="field.value"
-                                        @input="(e: Event) => handleInput(name, e)"
-                                        @blur="field.isDirty = true"
-                                        :class="{ 'error': errors[name] && field.isDirty }"
-                                    />
-                                    <span v-if="errors[name]" class="error">
-                                        {{ errors[name] }}
-                                    </span>
-                                </div>
+                            <div v-if="user.provider !== 'credentials'" class="oauth-registration">
+                                <label :for="username">{{ username }}</label>
+                                <input
+                                    v-model="username"
+                                    type="text"
+                                    id="username"
+                                    @input="oauthForm.updateField(
+                                        'username',
+                                        // @ts-ignore
+                                        $event.target.value)"
+                                />
+                                <span v-if="oauthForm.errors.value.username">{{ oauthForm.errors.value.username }}</span>
                             </div>
-                            <button type="submit" :disabled="!isValid">
+                            <button type="submit" :disabled="!oauthForm.isValid">
                                 Submit
-                            </button> -->
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -61,6 +59,7 @@
 </template>
 
 <script setup lang="ts">
+import { useFormValidation } from '~/composables/form/useFormValidation';
 import { isRegisteredUser, type UnregisteredUser, type LinkableData } from '~~/types/user';
 
 const router = useRouter()
@@ -84,94 +83,70 @@ if (doesNotWantToLink) {
     router.replace({ query: {} });
 }
 
+const { user, clearSession, getNewSession } = useAuthState()
 
-const { user, clear: clearSession, fetch: getNewSession } = useUserSession()
 
 const userEmail = computed(() => {
     if (user && user.value && !isRegisteredUser(user.value)) {
-        return (user.value as UnregisteredUser).provider_email
+        return user.value.provider_email
     }
     else {
         return ''
     }
 })
 
-// Form validation and sanitisation
-// interface RegistrationForm {
-//     username: string
-// }
+// OAuth Form Validator -----------------------------------------
+interface OAuthRegistrationForm {
+    username: string
+}
 
-// const initialValues: RegistrationForm = {
-//     username: '',
-// }
+const username = ref('')
 
-// const {
-//     formState,
-//     rules,
-//     setFieldRules,
-//     validateForm,
-//     updateField,
-//     values,
-//     isValid,
-//     errors
-// } = useFormValidation<RegistrationForm>(initialValues)
+const oauthForm = useFormValidation<OAuthRegistrationForm>({
+    username: username.value,
+})
 
-// setFieldRules(
-//     'username',
-//     rules.required('Username is required'),
-//     rules.minLength(1, 'Username must be at least 1 character'),
-//     rules.maxLength(20, 'Username must be no more than 20 characters'),
-//     rules.pattern(
-//         /^[a-zA-Z0-9_-]+$/, 
-//         'Username can only contain letters, numbers, underscores, and hyphens'
-//     )
-// )
+oauthForm.bindField('username', username)
 
-// const handleInput = (fieldName: keyof RegistrationForm, event: Event) => {
-//     const input = event.target as HTMLInputElement
-//     updateField(fieldName, input.value)
-// }
+oauthForm.setFieldRules(
+    'username',
+    oauthForm.rules.required('Username is required'),
+    oauthForm.rules.minLength(1, 'Username must be at least 3 characters'),
+    oauthForm.rules.maxLength(20, 'Username must be no more than 20 characters'),
+    oauthForm.rules.pattern(
+        /^[a-zA-Z0-9_-]+$/, 
+        'Username can only contain letters, numbers, underscores, and hyphens'
+    )
+)
 
-// const registerOAuth = async () => {
-//     if (!validateForm()) {
-//         console.log('Form is invalid')
-//         return
-//     }
+const registerOAuth = async () => {
+    if (!oauthForm.validateForm()) {
+        console.log('Form is invalid')
+        return
+    }
 
-//     try {
-//         const response = await fetch('/api/auth/register/oauth', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify(values.value),
-//         })
+    try {
+        const response = await fetch('/api/auth/register/oauth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(oauthForm.values.value),
+        })
 
-//         if (!response.ok) {
-//             throw new Error('Registration failed')
-//         }
+        if (!response.ok) {
+            throw new Error('Registration failed')
+        }
 
-//         await getNewSession()
+        await getNewSession()
 
-//         router.push('/')
-//     }
-//     catch (error) {
-//         console.error('Error during registration:', error)
-//     }
-// }
-
-// if (user && user.value) {
-//     if (alreadyRegistered.value) {
-//         console.log("User is already registered, maybe they want to make a new account?");
-//         wantsToReRegisterChoice.value = true;
-//     }
-//     else {
-//         console.log("User is not finished registering, continue with registration");
-//     }
-// }
-// else {
-//     console.log("New user is trying to signup");
-// }
+        router.push('/')
+    }
+    catch (error) {
+        console.error('Error during registration:', error)
+    }
+}
+// ----------------------------------------------------------------
 </script>
 
 <style scoped>

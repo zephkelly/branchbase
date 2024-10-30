@@ -25,11 +25,11 @@ export function useAuthState() {
     return {
         loggedIn,
         user: typedUser,
-        clear,
         ready,
         session,
         registered,
         error,
+        clearSession: clear,
         getNewSession: fetch
     }
 }
