@@ -1,15 +1,55 @@
+import { ref } from 'vue';
 import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
 import { SecureSession, SecureUnregisteredUser, UnregisteredUser, SecureRegisteredUser } from '~~/types/user';
 
+import { useFormValidation } from '~/composables/form/useFormValidation';
+
 import { getOTPUsed } from '~~/server/utils/database/token';
+
+
+interface LinkProviderData {
+    otp_id: number;
+    existing_user_index: number;
+}
+
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
     try {
-        const otp_id: string | undefined = body.otp_id
-        const existing_user_index: number | undefined = body.existing_user_index
+        const otp_id = ref(body.otp_id)
+        const existing_user_index = ref(body.existing_user_index)
+
+        const validator = useFormValidation<LinkProviderData>({
+            otp_id: Number(otp_id.value),
+            existing_user_index: existing_user_index.value
+        })
+
+        validator.bindField('otp_id', otp_id)
+        validator.bindField('existing_user_index', existing_user_index)
+
+        validator.setFieldRules(
+            'otp_id',
+            validator.rules.required('OTP code is required'),
+            validator.rules.isNumber('OTP code must be a number'),
+        )
+
+        validator.setFieldRules(
+            'existing_user_index',
+            validator.rules.required('Existing user index is required'),
+            validator.rules.isNumber('Existing user index must be a number')
+        )
+
+        const isValid = validator.validateForm()
+
+        if (!isValid) {
+            return createError({
+                statusCode: 400,
+                statusText: 'Invalid input data',
+                statusMessage: `Invalid input data: ${validator.errors.value.otp_id}`,
+            })
+        }
 
         const session = await getUserSession(event)
         const userSession: UnregisteredUser = session.user as UnregisteredUser
@@ -54,7 +94,7 @@ export default defineEventHandler(async (event) => {
         }
 
         //check if the otp code has been used
-        const otpVerificationResponse = await getOTPUsed(event, otp_id)
+        const otpVerificationResponse = await getOTPUsed(event, otp_id.value)
 
         if (otpVerificationResponse.verified === false) {
             return createError({
@@ -63,7 +103,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const existing_user_info = secureLinkableUserProviderData[existing_user_index]
+        const existing_user_info = secureLinkableUserProviderData[existing_user_index.value]
         const { provider: existing_provider, provider_id: existing_provider_id } = existing_user_info.providers[0]
 
         const desired_user = await getProviderUser(event, existing_provider, existing_provider_id)

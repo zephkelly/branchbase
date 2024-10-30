@@ -5,7 +5,7 @@ interface OTPVerificationResult {
     email?: string;
 }
 
-export async function getOTPUsed(event: H3Event, otp_id: string): Promise<OTPVerificationResult> {
+export async function getOTPUsed(event: H3Event, otp_id: number): Promise<OTPVerificationResult> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
@@ -15,7 +15,7 @@ export async function getOTPUsed(event: H3Event, otp_id: string): Promise<OTPVer
         setResponseStatus(event, 400)
         return { verified: false }
     }
-    if (typeof otp_id !== 'string') {
+    if (typeof otp_id !== 'number') {
         setResponseStatus(event, 400)
         return { verified: false }
     }
@@ -32,7 +32,7 @@ export async function getOTPUsed(event: H3Event, otp_id: string): Promise<OTPVer
         `
        
         const checkResult = await client.query(checkQuery, [otp_id])
-        
+
         if (checkResult.rows.length === 0) {
             await client.query('ROLLBACK')
             return { verified: false }
@@ -62,12 +62,14 @@ export async function getOTPUsed(event: H3Event, otp_id: string): Promise<OTPVer
             email 
         }
 
-    } catch (error) {
+    }
+    catch (error) {
         await client.query('ROLLBACK')
         console.error('Error in getOTPUsed:', error)
         setResponseStatus(event, 500)
         return { verified: false }
-    } finally {
+    }
+    finally {
         client.release()
     }
 }

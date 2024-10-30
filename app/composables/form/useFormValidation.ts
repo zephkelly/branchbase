@@ -2,11 +2,14 @@ import {
     isString,
     minLengthString,
     maxLengthString,
+    isNumber,
 } from '~~/utils/validation/primitives'
 
 import {
     isValidEmail,
 } from '~~/utils/validation/authentication'
+
+import { ref, computed } from 'vue'
 
 export interface ValidationRule {
     validate: (value: any) => boolean
@@ -52,6 +55,22 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
             },
             message
         }),
+
+        isNumber: (message = 'Please enter a valid number'): ValidationRule => ({
+            validate: (value: any) => isNumber(value),
+            message,
+            transform: (value: any) => {
+                if (typeof value === 'string' && value.length > 0) {
+                    return parseInt(value)
+                }
+                return value
+            }
+        }),
+
+        isString: (message = 'Please enter a valid string'): ValidationRule => ({
+            validate: (value: any) => isString(value),
+            message
+        }),
     
         minLengthString: (min: number, message = `Must be at least ${min} characters`): ValidationRule => ({
             validate: (value: string) => minLengthString(value, min),
@@ -67,11 +86,6 @@ export const useFormValidation = <T extends Record<string, any>>(initialValues: 
                 }
                 return value
             }
-        }),
-    
-        email: (message = 'Please enter a valid email address'): ValidationRule => ({
-            validate: (value: string) => isValidEmail(value).isValid,
-            message
         }),
 
         pattern: (regex: RegExp, message: string): ValidationRule => ({

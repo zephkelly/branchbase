@@ -1,6 +1,6 @@
 import { H3Event } from 'h3';
 
-import { type SecureRegisteredUser, type UnregisteredUser, Provider, SecureUnregisteredUser, LinkableUserProviderData } from '../../../types/user';
+import { type SecureRegisteredUser, UnregisteredUser, Provider, SecureUnregisteredUser, LinkableUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
@@ -136,7 +136,7 @@ export async function getCredentialUserExists(event: H3Event, email: string): Pr
     return false;
 }
 
-export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: number): Promise<boolean> {
+export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: string): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -216,21 +216,24 @@ export async function updateProviderEmail(event: H3Event, provider: Provider, pr
     }
 }   
 
-type UnregisteredUserInput = Omit<UnregisteredUser, 'id'> & { 
-    username: string,
-     provider_verified: boolean | null 
-};
-
-
+type UnregisteredUserInput = Omit<UnregisteredUser, 'id'> & { provider_verified: boolean }
 /**
  * Creates a new user in the database.
- * @warning This function does NOT sanitise or validate input data.
+ * @warning This function does NOT validate input data.
  */
-export async function createUser(event: H3Event, unregisteredUserData: UnregisteredUserInput): Promise<UserCreationResponse> {
+export async function createUser(
+    event: H3Event, 
+    username: string,
+    provider_email: string,
+    provider: Provider,
+    provider_id: string,
+    provider_verified: boolean,
+    picture: string
+): Promise<UserCreationResponse> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
-    let { username, provider_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
+    // let { username, provider_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
 
     const client = await pool.connect()
 
@@ -284,7 +287,7 @@ export async function createUser(event: H3Event, unregisteredUserData: Unregiste
 
         const newUser: SecureRegisteredUser = {
             id: parseInt(userId),
-            username: username,
+            username: username as string,
             picture: userResult.rows[0].picture,
             provider,
             provider_id,

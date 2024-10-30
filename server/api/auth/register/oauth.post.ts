@@ -1,10 +1,18 @@
+import { ref } from 'vue';
 import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '../../../../types/user'
 import { getCredentialUserExists, getProviderUserExists, createUser } from './../../../utils/database/user'
 
 import { isDatabaseError, isValidationError } from '~~/server/types/error'
 import type { UserCreationResponse } from '~~/server/types/user'
 
-import { sanitiseOAuthRegistrationInput } from './../../../utils/validation/register'
+import { 
+    isValidEmail,
+    isValidUsername,
+    isValidProvider,
+    isValidProviderId,
+    isValidPictureUrl,
+    isValidProviderVerified,
+} from '~~/utils/validation/authentication'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -28,28 +36,60 @@ export default defineEventHandler(async (event) => {
     const userSessionData = session.user as UnregisteredUser
     const userSecureSessionData = session.secure as SecureSessionDataType
 
-    // Validate and sanitize all input data (including session data)
-    const sanitisationResult = sanitiseOAuthRegistrationInput({
-        username: body.username,
-        provider_email: userSecureSessionData.provider_email as string,
-        picture: userSessionData.picture,
-        provider: userSessionData.provider,
-        provider_id: userSessionData.provider_id,
-        provider_verified: userSecureSessionData.provider_verified
-    });
+    // Input data
+    const username = isValidUsername(body.username as string)
+    const provider_email = isValidEmail(userSecureSessionData.provider_email as string)
+    const picture = isValidPictureUrl(userSessionData.picture as string)
+    const provider = isValidProvider(userSessionData.provider as Provider)
+    const provider_id = (userSessionData.provider_id as string).trim()
+    const provider_verified = isValidProviderVerified(userSecureSessionData.provider_verified as boolean)
 
-    if (!sanitisationResult.isValid) {
+    // Input validation and formatting
+    if (!username.isValid) {
         return createError({
-            statusCode: 422,
-            message: sanitisationResult.message
-        });
+            statusCode: 400,
+            statusText: 'Invalid input data',
+            statusMessage: username.message
+        })
     }
 
-    const sanitisedData = sanitisationResult.sanitisedData;
+    if (!provider_email.isValid) {
+        return createError({
+            statusCode: 400,
+            statusText: 'Invalid input data',
+            statusMessage: provider_email.message
+        })
+    }
+
+    if (!picture.isValid) {
+        return createError({
+            statusCode: 400,
+            statusText: 'Invalid input data',
+            statusMessage: picture.message
+        })
+    }
+
+    if (!provider.isValid) {
+        return createError({
+            statusCode: 400,
+            statusText: 'Invalid input data',
+            statusMessage: provider.message
+        })
+    }
+
+    if (!provider_verified.isValid) {
+        return createError({
+            statusCode: 400,
+            statusText: 'Invalid input data',
+            statusMessage: provider_verified.message
+        })
+    }
+
+    // We dont check provider_id, because that is null for credentials users
 
     // Check for existing users
-    if (sanitisedData.provider_id === null || sanitisedData.provider_id === undefined) {
-        const credentialsUser = await getCredentialUserExists(event, sanitisedData.primary_email)
+    if (provider_id === null || provider_id === undefined) {
+        const credentialsUser = await getCredentialUserExists(event, provider_email.sanitisedData)
         if (credentialsUser) {
             return createError({
                 statusCode: 409,
@@ -59,8 +99,8 @@ export default defineEventHandler(async (event) => {
     } else {
         const providerUser = await getProviderUserExists(
             event,
-            sanitisedData.provider!,
-            sanitisedData.provider_id
+            provider.sanitisedData as Provider,
+            provider_id
         )
         if (providerUser) {
             return createError({
@@ -72,7 +112,14 @@ export default defineEventHandler(async (event) => {
 
     try {
         // Create user with sanitized data
-        const newUser: UserCreationResponse = await createUser(event, sanitisedData);
+        const newUser: UserCreationResponse = await createUser(event, 
+            username.sanitisedData,
+            provider_email.sanitisedData,
+            provider.sanitisedData,
+            provider_id,
+            provider_verified.sanitisedData,
+            picture.sanitisedData
+        );
 
         if (isDatabaseError(newUser) || isValidationError(newUser)) {
             return createError({
@@ -93,7 +140,7 @@ export default defineEventHandler(async (event) => {
             },
             secure: {
                 provider_verified: registeredUser.provider_verified,
-                provider_email: sanitisedData.provider_email
+                provider_email: provider_email.sanitisedData,
             },
             loggedInAt: Date.now()
         })
