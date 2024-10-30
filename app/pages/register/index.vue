@@ -35,15 +35,14 @@
                         </div>
                         <div class="field-container">
                             <div v-if="user.provider !== 'credentials'" class="oauth-registration">
-                                <label :for="username">{{ username }}</label>
+                                <label for="username">{{ username }}</label>
                                 <input
                                     v-model="username"
                                     type="text"
                                     id="username"
-                                    @input="oauthForm.updateField(
+                                    @input="(e: Event) => oauthForm.updateField(
                                         'username',
-                                        // @ts-ignore
-                                        $event.target.value)"
+                                        (e.target as HTMLInputElement).value)"
                                 />
                                 <span v-if="oauthForm.errors.value.username">{{ oauthForm.errors.value.username }}</span>
                             </div>

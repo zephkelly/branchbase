@@ -22,14 +22,14 @@ export default defineEventHandler(async (event) => {
     if (!session?.user) {
         return createError({
             statusCode: 403,
-            message: 'You have not initiated the registration process properly'
+            statusMessage: 'You have not initiated the registration process properly'
         })
     }
 
     if (isRegisteredUser(session.user)) {
         return createError({
             statusCode: 409,
-            message: 'User session indicates that you are already registered'
+            statusMessage: 'User session indicates that you are already registered'
         })
     }
 
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     const provider_email = isValidEmail(userSecureSessionData.provider_email as string)
     const picture = isValidPictureUrl(userSessionData.picture as string)
     const provider = isValidProvider(userSessionData.provider as Provider)
-    const provider_id = (userSessionData.provider_id as string).trim()
+    const provider_id = isValidProviderId(userSessionData.provider_id as string)
     const provider_verified = isValidProviderVerified(userSecureSessionData.provider_verified as boolean)
 
     // Input validation and formatting
@@ -88,24 +88,24 @@ export default defineEventHandler(async (event) => {
     // We dont check provider_id, because that is null for credentials users
 
     // Check for existing users
-    if (provider_id === null || provider_id === undefined) {
+    if (!provider_id.isValid) {
         const credentialsUser = await getCredentialUserExists(event, provider_email.sanitisedData)
         if (credentialsUser) {
             return createError({
                 statusCode: 409,
-                message: 'A user with this email already exists'
+                statusMessage: 'A user with this email already exists'
             })
         }
     } else {
         const providerUser = await getProviderUserExists(
             event,
             provider.sanitisedData as Provider,
-            provider_id
+            provider_id.sanitisedData
         )
         if (providerUser) {
             return createError({
                 statusCode: 409,
-                message: 'A user with this provider ID already exists'
+                statusMessage: 'A user with this provider ID already exists'
             })
         }
     }
@@ -116,7 +116,7 @@ export default defineEventHandler(async (event) => {
             username.sanitisedData,
             provider_email.sanitisedData,
             provider.sanitisedData,
-            provider_id,
+            provider_id.sanitisedData,
             provider_verified.sanitisedData,
             picture.sanitisedData
         );
@@ -124,7 +124,7 @@ export default defineEventHandler(async (event) => {
         if (isDatabaseError(newUser) || isValidationError(newUser)) {
             return createError({
                 statusCode: newUser.statusCode,
-                message: newUser.message
+                statusMessage: newUser.message
             });
         }
 
@@ -148,13 +148,13 @@ export default defineEventHandler(async (event) => {
         setResponseStatus(event, 201)
         return {
             statusCode: 201,
-            message: 'User registered successfully'
+            statusMessage: 'User registered successfully'
         }
     } catch (error) {
         console.error('Error registering user:', error)
         return createError({
             statusCode: 500,
-            message: 'Unexpected error registering user, contact support'
+            statusMessage: 'Unexpected error registering user, contact support'
         })
     }
 })

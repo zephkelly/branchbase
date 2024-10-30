@@ -57,21 +57,21 @@ export default defineEventHandler(async (event) => {
         if (!session.user) {
             return createError({
                 statusCode: 403,
-                message: 'You have not initiated the linking process properly'
+                statusMessage: 'You have not initiated the linking process properly'
             })
         }
 
         if (!session.linkable_data) {
             return createError({
                 statusCode: 403,
-                message: 'No linkable account data found in session'
+                statusMessage: 'No linkable account data found in session'
             })
         }
 
         if (session.user.id !== null) {
             return createError({
                 statusCode: 403,
-                message: 'You are already logged in'
+                statusMessage: 'You are already logged in'
             })
         }
 
@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
             console.log(!otp_id, !existing_user_index)
             return createError({
                 statusCode: 400,
-                message: 'Missing required fields. otp_id and existing_user_index are required'
+                statusMessage: 'Missing required fields. otp_id and existing_user_index are required'
             })
         }
 
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event) => {
         if (!verifiedLinkableData || !secureLinkableUserProviderData) {
             return createError({
                 statusCode: 403,
-                message: 'No linkable account data found in session'
+                statusMessage: 'No linkable account data found in session'
             })
         }
 
@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
         if (otpVerificationResponse.verified === false) {
             return createError({
                 statusCode: 403,
-                message: 'OTP code has already been used. Please start the linking process again.'
+                statusMessage: 'OTP code has already been used. Please start the linking process again.'
             })
         }
 
@@ -111,7 +111,7 @@ export default defineEventHandler(async (event) => {
         if (!desired_user || desired_user.id === null || desired_user.id === undefined) {
             return createError({
                 statusCode: 404,
-                message: 'No accounts found to link with'
+                statusMessage: 'No accounts found to link with'
             })
         }
 
@@ -127,7 +127,7 @@ export default defineEventHandler(async (event) => {
         if (isDatabaseError(providerLinkResponse) || isValidationError(providerLinkResponse)) {
             return createError({
                 statusCode: providerLinkResponse.statusCode,
-                message: providerLinkResponse.message
+                statusMessage: providerLinkResponse.message
             })
         }
 
@@ -158,7 +158,7 @@ export default defineEventHandler(async (event) => {
         console.error('Error linking account:', error)
         return createError({
             statusCode: 500,
-            message: 'An error occurred while linking accounts'
+            statusMessage: 'An error occurred while linking accounts'
         })
     }
 });

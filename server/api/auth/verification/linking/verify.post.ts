@@ -19,14 +19,14 @@ export default defineEventHandler(async (event) => {
         if (!session || !email) {
             return createError({
                 statusCode: 401,
-                statusText: 'Unauthorized'
+                statusMessage: 'Unauthorized'
             })
         }
 
         if (!otp) {
             return createError({
                 statusCode: 400,
-                statusText: 'OTP is required'
+                statusMessage: 'OTP required'
             })
         }
 
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
             
             return createError({
                 statusCode: 429,
-                statusText: 'Maximum verification attempts reached. Please request a new OTP.'
+                statusMessage: 'Maximum verification attempts. Please request a new OTP.'
             })
         }
 
@@ -79,11 +79,9 @@ export default defineEventHandler(async (event) => {
         const updateResult = await client.query(updateAttemptsQuery, [token.id])
         const updatedToken = updateResult.rows[0]
 
-        console.log('Updated token:', updatedToken)
-
         // Verify OTP
         if (updatedToken.otp !== otp) {
-            const remainingAttempts = 3 - updatedToken.verification_attempts
+            const remainingAttempts = MAXIMUM_VERIFICATION_ATTEMPTS - updatedToken.verification_attempts
             await client.query('COMMIT')
 
             console.log('Invalid OTP. Remaining attempts:', remainingAttempts)
@@ -92,13 +90,13 @@ export default defineEventHandler(async (event) => {
             if (remainingAttempts === 0) {
                 return createError({
                     statusCode: 401,
-                    statusText: 'Maximum verification attempts reached. Please request a new OTP.'
+                    statusMessage: 'Maximum verification attempts reached. Request a new OTP.'
                 })
             }
             
             return createError({
                 statusCode: 401,
-                message: `Invalid OTP. ${remainingAttempts} attempts remaining.`
+                statusMessage: `Invalid OTP. ${remainingAttempts} attempts remaining.`
             })
         }
 
@@ -122,7 +120,7 @@ export default defineEventHandler(async (event) => {
         await client.query('ROLLBACK')
         return createError({
             statusCode: 500,
-            message: 'Server error verifying OTP'
+            statusMessage: 'Server error verifying OTP'
         })
     }
     finally {

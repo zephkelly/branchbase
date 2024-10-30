@@ -76,6 +76,10 @@ export const isValidProviderId = (providerId: unknown): ValidationResult => {
         return { isValid: false, message: 'Provider ID must be a string' };
     }
 
+    if (providerId.length === 0) {
+        return { isValid: false, message: 'Provider ID cannot be empty' };
+    }
+
     const trimmedProviderId = providerId.trim();
     if (trimmedProviderId.length < PROVIDER_ID_MIN_LENGTH || trimmedProviderId.length > PROVIDER_ID_MAX_LENGTH) {
         return { isValid: false, message: `Provider ID must be between ${PROVIDER_ID_MIN_LENGTH} and ${PROVIDER_ID_MAX_LENGTH} characters` };
