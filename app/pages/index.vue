@@ -31,28 +31,28 @@
 <script setup lang="ts">
 import Authenticator from '@/components/Authenticator.vue';
 
-const { clear, session } = useUserSession()
+const { clearSession, session, user } = useAuthState()
 
 const signInWithGoogle = async () => {
-    await clear();
+    await clearSession();
     window.location.href = '/api/auth/google'
 }
 
 const signInWithGitHub = async () => {
-    await clear();
+    await clearSession();
     window.location.href = '/api/auth/github'
 }
 
 const signInWithDiscord = async () => {
-    await clear();
+    await clearSession();
     window.location.href = '/api/auth/discord'
 }
 
 const signOut = () => {
-    clear();
+    clearSession();
 }
 
 const cancelRegistration = () => {
-  clear();
+    clearSession();
 };
 </script>

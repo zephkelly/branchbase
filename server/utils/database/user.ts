@@ -233,8 +233,6 @@ export async function createUser(
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
-    // let { username, provider_email, provider, provider_id, provider_verified, picture } = unregisteredUserData;
-
     const client = await pool.connect()
 
     try {
@@ -247,7 +245,7 @@ export async function createUser(
                 picture
             )
             VALUES ($1, $2)
-            RETURNING id
+            RETURNING id, picture
         `
 
         const userValues = [

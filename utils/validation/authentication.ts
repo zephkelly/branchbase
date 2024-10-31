@@ -91,7 +91,7 @@ export const isValidProviderId = (providerId: unknown): ValidationResult => {
     return { isValid: true, sanitisedData: trimmedProviderId };
 }
 
-export const PICTURE_URL_REGEX = /^https?:\/\/[^\s<>\"]+$/;
+// export const PICTURE_URL_REGEX = /^https?:\/\/[^\s<>\"]+$/;
 export const PICTURE_URL_MAX_LENGTH = 2083;
 export const isValidPictureUrl = (pictureUrl: unknown): ValidationResult => {
     if (!isString(pictureUrl)) {
@@ -102,9 +102,9 @@ export const isValidPictureUrl = (pictureUrl: unknown): ValidationResult => {
     if (trimmedPictureUrl.length > PICTURE_URL_MAX_LENGTH) {
         return { isValid: false, message: `Profile picture URL must be less than ${PICTURE_URL_MAX_LENGTH} characters` };
     }
-    if (!PICTURE_URL_REGEX.test(trimmedPictureUrl)) {
-        return { isValid: false, message: 'Invalid URL format' };
-    }
+    // if (!PICTURE_URL_REGEX.test(trimmedPictureUrl)) {
+    //     return { isValid: false, message: 'Invalid URL format' };
+    // }
 
     return { isValid: true, sanitisedData: trimmedPictureUrl };
 }

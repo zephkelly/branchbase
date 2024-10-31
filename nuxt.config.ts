@@ -13,6 +13,16 @@ export default defineNuxtConfig({
         strict: true,
     },
 
+    vite: {
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    api: 'modern-compiler',
+                },
+            },
+        },
+    },
+
     modules: ['nuxt-auth-utils'],
     runtimeConfig: {
         session: {
@@ -41,6 +51,20 @@ export default defineNuxtConfig({
     nitro: {
         routeRules: {
             '/api/**': { cors: true, headers: { 'access-control-allow-methods': 'GET,POST' } },
+
+            '/static/avatars/**': { 
+                cache: { 
+                    maxAge: 60 * 60 * 24 * 30,
+                    swr: true
+                },
+                headers: {
+                    'Cache-Control': 'public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=3600, immutable',
+                    'CDN-Cache-Control': 'public, max-age=2592000, s-maxage=2592000',
+                    'Surrogate-Control': 'public, max-age=2592000, s-maxage=2592000',
+                },
+            },
+
+            '/register/**': { static: true },
         },
     },
 })

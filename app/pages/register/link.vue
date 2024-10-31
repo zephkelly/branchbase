@@ -1,53 +1,53 @@
 <template>
-    <ClientOnly>
-        <div class="page wrapper-container" v-if="!pageLoading">
-            <Authenticator>
-                <template #unregistered="{ user, session }">
-                    <h1>Register</h1>
-                    <a href="/register?nolink=true">Actually i dont want to link</a>
-                    <div class="linkable-users" v-if="isVerified">
-                        <h2>Linkable Users</h2>
-                        <!-- <p>{{ session.value?.linkable_data }}</p> -->
-                        <div style="display: flex; flex-direction: row;">
-                            <div
-                                class="user"
-                                :key="index"
-                                v-for="(account, index) in (session.value?.linkable_data as VerifiedLinkableData).linkable_providers">
-                                    <p>{{ account.username }}</p>
-                                    <p>{{ account.providers[0]?.provider }}</p>
-                                    <button @click.prevent="linkProvider(index)">Link {{ index }}</button>
-                            </div>
+    <!-- <div class="page wrapper-container" v-if="!pageLoading"> -->
+        <Authenticator>
+            <template #unregistered="{ user, session }">
+                <h1>Register</h1>
+                <a href="/register?nolink=true">Actually i dont want to link</a>
+                <div class="linkable-users" v-if="isVerified">
+                    <h2>Linkable Users</h2>
+                    <!-- <p>{{ session.value?.linkable_data }}</p> -->
+                    <div class="users" style="display: flex; flex-direction: row;">
+                        <div
+                            class="user"
+                            :key="index"
+                            v-for="(account, index) in (session.value?.linkable_data as VerifiedLinkableData).linkable_providers">
+                                <p>{{ account.username }}</p>
+                                <img :src="account.picture" alt="User Picture" />
+                                <p>{{ account.providers[0]?.provider }}</p>
+                                <button @click.prevent="linkProvider(index)">Link {{ index }}</button>
                         </div>
                     </div>
-                    <div class="linkable-users" v-else>
-                        <h2>Verify email</h2>
-                        <p>{{ session.value?.linkable_data }}</p>
-                        <form @submit.prevent="sendVerificationOTP">
-                            <button type="submit">Verify Email</button>
-                            <p v-if="sentVerification"></p>
-                            <p v-if="errorSendingVerification" style="color: red;">Error sending verification. {{ errorMessage }}</p>
-                        </form>
-                        <form v-if="sentVerification" style="margin-top: 1rem;" @submit.prevent="verifyOTP">
-                            <label for="otp">OTP</label>
-                            <input type="text" id="otp" name="otp" required v-model="otpCode">
-                            <button type="submit">Verify OTP</button>
-                        </form>
-                    </div>
-                </template>
-            </Authenticator>
-        </div>
-        <div v-else>
-            <p>Loading...</p>
-        </div>
-    </ClientOnly>
+                </div>
+                <div class="linkable-users" v-else>
+                    <h2>Verify email</h2>
+                    <p>{{ session.value?.linkable_data }}</p>
+                    <form @submit.prevent="sendVerificationOTP">
+                        <button type="submit">Verify Email</button>
+                        <p v-if="sentVerification"></p>
+                        <p v-if="errorSendingVerification" style="color: red;">Error sending verification. {{ errorMessage }}</p>
+                    </form>
+                    <form v-if="sentVerification" style="margin-top: 1rem;" @submit.prevent="verifyOTP">
+                        <label for="otp">OTP</label>
+                        <input type="text" id="otp" name="otp" required v-model="otpCode">
+                        <button type="submit">Verify OTP</button>
+                    </form>
+                </div>
+            </template>
+            <template #loading>
+                <p>Loading authenticator...</p>
+            </template>
+        </Authenticator>
+    <!-- </div>
+    <div v-else>
+        <p>Loading...</p>
+    </div> -->
 </template>
 
 <script setup lang="ts">
 import { type LinkableData, type VerifiedLinkableData } from '~~/types/user';
 
 const { session, getNewSession } = useAuthState()
-
-const pageLoading = ref(true)
 
 // Pre-verified session data
 const linkableUsersData = ref(null as LinkableData | null);
@@ -154,7 +154,7 @@ const linkProvider = async (userIndex: number) => {
     }
 }
 
-onBeforeMount(() => {
+onMounted(() => {
     linkableUsersData.value = session.value.linkable_data as LinkableData
     verifiedLinkableData.value = session.value.linkable_data as VerifiedLinkableData
 
@@ -163,7 +163,14 @@ onBeforeMount(() => {
         return
     }
 
-    pageLoading.value = false
     isVerified.value = verifiedLinkableData.value.linkable_providers !== undefined
 })
 </script>
+
+<style lang="scss" scoped>
+.users {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+</style>

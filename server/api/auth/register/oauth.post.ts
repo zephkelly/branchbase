@@ -1,9 +1,18 @@
 import { ref } from 'vue';
-import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '../../../../types/user'
-import { getCredentialUserExists, getProviderUserExists, createUser } from './../../../utils/database/user'
 
+// Types
 import { isDatabaseError, isValidationError } from '~~/server/types/error'
-import type { UserCreationResponse } from '~~/server/types/user'
+import { UserCreationResponse } from '~~/server/types/user'
+import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '~~/types/user'
+
+// Utilities
+import { getRandomAvatar } from '~~/server/utils/avatarSelector';
+
+import { 
+    getCredentialUserExists,
+    getProviderUserExists,
+    createUser
+} from '~~/server/utils/database/user'
 
 import { 
     isValidEmail,
@@ -39,7 +48,7 @@ export default defineEventHandler(async (event) => {
     // Input data
     const username = isValidUsername(body.username as string)
     const provider_email = isValidEmail(userSecureSessionData.provider_email as string)
-    const picture = isValidPictureUrl(userSessionData.picture as string)
+    const picture = isValidPictureUrl(getRandomAvatar())
     const provider = isValidProvider(userSessionData.provider as Provider)
     const provider_id = isValidProviderId(userSessionData.provider_id as string)
     const provider_verified = isValidProviderVerified(userSecureSessionData.provider_verified as boolean)
@@ -84,8 +93,6 @@ export default defineEventHandler(async (event) => {
             statusMessage: provider_verified.message
         })
     }
-
-    // We dont check provider_id, because that is null for credentials users
 
     // Check for existing users
     if (!provider_id.isValid) {
@@ -150,8 +157,10 @@ export default defineEventHandler(async (event) => {
             statusCode: 201,
             statusMessage: 'User registered successfully'
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error registering user:', error)
+
         return createError({
             statusCode: 500,
             statusMessage: 'Unexpected error registering user, contact support'
