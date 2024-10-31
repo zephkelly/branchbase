@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
-import { SecureSession, SecureUnregisteredUser, UnregisteredUser, SecureRegisteredUser } from '~~/types/user';
+import { SecureSession, UnregisteredUser, SecureRegisteredUser } from '~~/types/user';
 
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
@@ -117,12 +117,12 @@ export default defineEventHandler(async (event) => {
 
         const desired_user_id = desired_user.id
 
-        const secureUnregisteredUser: SecureUnregisteredUser = {
+        const unregisteredUser: UnregisteredUser = {
             ...userSession,
             provider_verified: (verifiedLinkableData.provider_verified) ? verifiedLinkableData.provider_verified : false,
         }
         
-        const providerLinkResponse = await createUserProvider(event, desired_user_id, secureUnregisteredUser)
+        const providerLinkResponse = await createUserProvider(event, desired_user_id, unregisteredUser)
 
         if (isDatabaseError(providerLinkResponse) || isValidationError(providerLinkResponse)) {
             return createError({

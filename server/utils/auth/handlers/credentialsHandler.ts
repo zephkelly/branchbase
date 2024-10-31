@@ -1,23 +1,29 @@
 import { H3Event } from 'h3'
 import { ProviderData } from '~~/server/types/userProvider'
-import { SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
-import { getProviderUser, getUsersProvidersByEmail, updateProviderEmail } from '~~/server/utils/database/user'
+import { Provider, RegisteredUser, SecureRegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
 
-export async function handleOAuthLogin(
+import { getEmailProviderUser } from '~~/server/utils/database/user'
+
+interface CredentialsHandlerResponse {
+    statusCode: number
+    statusMessage: string
+    route: string
+}
+
+export async function handleCredentialsLogin(
     event: H3Event, 
-    providerData: ProviderData
+    providerData: Omit<ProviderData & { password: string }, 'provider' | 'provider_id' | 'provider_verified'>
 ) {
-    const { provider, provider_id, provider_email, provider_verified, picture } = providerData
+    const {
+        provider_email,
+        password,
+        picture
+    } = providerData
 
     try {
-        const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
-
-        // Handle existing user
+        const existingUser: SecureRegisteredUser | null = await getEmailProviderUser(event, Provider.Credentials, provider_email)
+    
         if (existingUser) {
-            if (existingUser.provider_email !== provider_email) {
-                await updateProviderEmail(event, existingUser.provider, existingUser.provider_id as string, provider_email, provider_verified)
-            }
-
             const registeredUser: RegisteredUser = {
                 id: existingUser.id,
                 username: existingUser.username,
@@ -36,21 +42,23 @@ export async function handleOAuthLogin(
             })
 
             console.log("returning registered user")
-            return sendRedirect(event, '/')
+            return {
+                statusCode: 200,
+                statusMessage: 'registered',
+                redirect: '/'
+            }
         }
 
-        // Check for existing accounts with same email
-        const linkableUsersAndProviders = await getUsersProvidersByEmail(event, provider_email)
+        const linkableUsersAndProviders = await getUsersProvidersByEmail(event, provider_email);
 
-        // Handle linkable accounts case
         if (linkableUsersAndProviders) {
             const temporaryLinkableUser: UnregisteredUser = {
                 id: null,
                 username: null,
-                provider,
-                provider_id,
+                provider: Provider.Credentials,
+                provider_id: null,
                 provider_email,
-                provider_verified,
+                provider_verified: false,
                 picture,
             }
 
@@ -58,32 +66,28 @@ export async function handleOAuthLogin(
                 provider_email,
                 existing_users_count: linkableUsersAndProviders.length,
             }
-            
+
             await setUserSession(event, {
                 user: temporaryLinkableUser,
-                linkable_data: linkableData,
-                secure: {
-                    provider_email,
-                    provider_verified,
-                    linkable_data: linkableUsersAndProviders
-                },
-                loggedInAt: Date.now()
-            }, {
-                maxAge: 60 * 60 // 1 hour
+                linkableData,
+                loggedInAt: Date.now(),
             })
 
             console.log("returning linkable user")
-            return sendRedirect(event, '/register')
+            return {
+                statusCode: 200,
+                statusMessage: 'linkable',
+                redirect: '/register'
+            }
         }
 
-        // Handle new user case
         const temporaryUser: UnregisteredUser = {
             id: null,
             username: null,
-            provider,
-            provider_id,
+            provider: Provider.Credentials,
+            provider_id: null,
             provider_email,
-            provider_verified,
+            provider_verified: false,
             picture,
         }
 
@@ -91,18 +95,26 @@ export async function handleOAuthLogin(
             user: temporaryUser,
             secure: {
                 provider_email,
-                provider_verified,
+                provider_verified: false,
             },
             loggedInAt: Date.now(),
         }, {
             maxAge: 60 * 60 // 1 hour
         })
 
-        console.log("returning temporary user")
-        return sendRedirect(event, '/register')
+        console.log("returning new user")
+        return {
+            statusCode: 200,
+            statusMessage: 'temporary',
+            redirect: '/register'
+        }
     }
     catch (error) {
-        console.error(`Error logging in with ${provider}:`, error)
-        return sendRedirect(event, '/')
+        console.error(error)
+        return {
+            statusCode: 500,
+            statusMessage: 'Error logging in with credentials',
+            redirect: '/login'
+        }
     }
 }

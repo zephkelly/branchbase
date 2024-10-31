@@ -5,7 +5,8 @@
             <template #default="{ user }">
                 <h1>Register</h1>
             </template>
-            <template #unregistered="{ user }">
+            <template #unregistered="{ user, clearSession }">
+                <button @click="clearSession">Log out</button>
                 <div v-if="showAccountLinkingOption">
                     <h2>Can link account</h2>
                     <p>We found another account using the email: {{ linkableUsersData.provider_email  }} </p>
@@ -18,40 +19,60 @@
                         <a href="/register/link">I changed my mind, I want to link my account</a>
                     </div>
                     <h2>Complete your registration</h2>
-                    <form @submit.prevent="registerOAuth">
-                        <p>You are signing up through {{ user.provider }} with email: {{ user.provider_email }}</p>
-                        <div class="field-container email">
-                            <div v-if="user.provider === 'credentials'" class="new-registration">
-                                <div class="field">
-                                    <label for="email">Email</label>
-                                    <input type="email" id="email" name="email" required v-model="userEmail">
+                    <div v-if="isVerified">
+                        <form @submit.prevent="registerOAuth">
+                            <p>You are signing up through {{ user.provider }} with email: {{ user.provider_email }}</p>
+                            <div class="field-container email">
+                                <div v-if="user.provider === 'credentials'" class="new-registration">
+                                    <div class="field">
+                                        <label for="email">Email</label>
+                                        <input type="email" id="email" name="email" required v-model="userEmail">
+                                    </div>
+                                </div>
+                                <div v-else class="oauth-registration">
+                                    <div class="field">
+                                        <p>{{ user.provider }} Logo</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div v-else class="oauth-registration">
-                                <div class="field">
-                                    <p>{{ user.provider }} Logo</p>
+                            <div class="field-container">
+                                <div v-if="user.provider !== 'credentials'" class="oauth-registration">
+                                    <label for="username">{{ username }}</label>
+                                    <input
+                                        v-model="username"
+                                        type="text"
+                                        id="username"
+                                        @input="(e: Event) => oauthForm.updateField(
+                                            'username',
+                                            (e.target as HTMLInputElement).value)"
+                                    />
+                                    <span v-if="oauthForm.errors.value.username">{{ oauthForm.errors.value.username }}</span>
                                 </div>
+                                <button type="submit" :disabled="!oauthForm.isValid">
+                                    Submit
+                                </button>
                             </div>
-                        </div>
-                        <div class="field-container">
-                            <div v-if="user.provider !== 'credentials'" class="oauth-registration">
-                                <label for="username">{{ username }}</label>
-                                <input
-                                    v-model="username"
-                                    type="text"
-                                    id="username"
-                                    @input="(e: Event) => oauthForm.updateField(
-                                        'username',
-                                        (e.target as HTMLInputElement).value)"
-                                />
-                                <span v-if="oauthForm.errors.value.username">{{ oauthForm.errors.value.username }}</span>
-                            </div>
-                            <button type="submit" :disabled="!oauthForm.isValid">
-                                Submit
-                            </button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
+                    <div v-else>
+                        <p>Provider email not verified</p>
+                        <h2>Verify email</h2>
+                        <form @submit.prevent="sendVerificationOTP">
+                            <button type="submit">Verify Email</button>
+                            <p v-if="sentVerification"></p>
+                            <p v-if="errorSendingVerification" style="color: red;">Error sending verification. {{ errorMessage }}</p>
+                        </form>
+                        <form v-if="sentVerification" style="margin-top: 1rem;" @submit.prevent="verifyOTP">
+                            <label for="otp">OTP</label>
+                            <input type="text" id="otp" name="otp" required v-model="otpCode">
+                            <button type="submit">Verify OTP</button>
+                        </form>
+                    </div>
                 </div>
+            </template>
+            <template #public>
+                <h2>Sign In</h2>
+                <NuxtLink to="/register" class="button">Register with Email</NuxtLink>
             </template>
         </Authenticator>
     </div>
@@ -147,6 +168,75 @@ const registerOAuth = async () => {
     }
 }
 // ----------------------------------------------------------------
+
+// Provider not verified ------------------------------------------
+const sentVerification = ref(false)
+const errorSendingVerification = ref(false)
+const errorMessage = ref('')
+
+const isVerified = ref((user.value as UnregisteredUser).provider_verified)
+
+const sendVerificationOTP = async () => {
+    sentVerification.value = false
+    errorSendingVerification.value = false
+    errorMessage.value = ''
+
+    try {
+        const response = await fetch('/api/auth/verification/register/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+
+        if (!response.ok) {
+            errorSendingVerification.value = true
+            errorMessage.value = response.statusText
+            throw new Error('Verification sending failed')
+        }
+        else {
+            sentVerification.value = true
+        }
+
+    }
+    catch (error) {
+        console.error('Error during registration:', error)
+    }
+}
+
+const otpCode = ref('')
+const verifiedOTPId = ref('')
+const verifyOTP = async () => {
+    try {
+        const response = await fetch('/api/auth/verification/register/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                otp: otpCode.value
+            })
+        })
+
+        if (!response.ok) {
+            if (response.status === 409) {
+                isVerified.value = true
+                return
+            }
+        }
+
+
+        const data = await response.json()
+        verifiedOTPId.value = data.otp_id
+
+        isVerified.value = true
+
+        await getNewSession()
+    }
+    catch (error) {
+        console.error('Error during registration:', error)
+    }
+}
 </script>
 
 <style scoped>

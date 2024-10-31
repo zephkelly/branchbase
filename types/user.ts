@@ -44,12 +44,13 @@ export interface UnregisteredUser extends UserData {
     id: null;
     username: null;
     provider_email: string;
-}
-
-// Backend types
-export interface SecureUnregisteredUser extends UnregisteredUser {
     provider_verified: boolean;
 }
+
+// // Backend types
+// export interface SecureUnregisteredUser extends UnregisteredUser {
+//     provider_verified: boolean;
+// }
 
 // Session type
 export interface UserSessionData {

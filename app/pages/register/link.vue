@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { LazyLink } from '#build/components';
 import { type LinkableData, type VerifiedLinkableData } from '~~/types/user';
 
 const { session, getNewSession } = useAuthState()
@@ -158,8 +159,9 @@ onMounted(() => {
     linkableUsersData.value = session.value.linkable_data as LinkableData
     verifiedLinkableData.value = session.value.linkable_data as VerifiedLinkableData
 
-    if (!verifiedLinkableData.value) {
-        navigateTo('/register');
+    if (!linkableUsersData.value) {
+        isVerified.value = false
+        navigateTo('/register')
         return
     }
 

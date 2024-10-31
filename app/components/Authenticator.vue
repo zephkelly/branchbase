@@ -46,7 +46,7 @@ interface BaseState {
     loggedIn: ComputedRef<boolean>
     session: Ref<UserSession | null>
     error: ComputedRef<boolean>
-    clear: () => void
+    clearSession: () => void
 }
 
 // Auth state includes user
@@ -70,7 +70,7 @@ const {
     loggedIn,
     session,
     error,
-    clear,
+    clearSession,
     user
 } = state
 
@@ -81,7 +81,7 @@ const baseBindings: BaseState = {
     loggedIn,
     error,
     session,
-    clear
+    clearSession
 }
 
 // Type-safe user getters

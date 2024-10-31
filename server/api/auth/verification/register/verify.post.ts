@@ -1,6 +1,9 @@
+import { H3Error } from "h3";
+import { navigateTo } from "nuxt/app";
+
 import { OTPPurpose } from "~~/server/types/otp";
 
-import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/unregistered/verifiedLinkableSession";
+import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/sessions/unregistered/verifiedSession";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 
@@ -40,7 +43,7 @@ export default defineEventHandler(async (event) => {
             AND expires_at > NOW()
             AND used_at IS NULL
         `
-        const tokenResult = await client.query(checkTokenQuery, [email, OTPPurpose.ACCOUNT_LINKING])
+        const tokenResult = await client.query(checkTokenQuery, [email, OTPPurpose.EMAIL_VERIFICATION])
 
         if (tokenResult.rows.length === 0) {
             await client.query('ROLLBACK')
@@ -109,15 +112,21 @@ export default defineEventHandler(async (event) => {
         await client.query(markUsedQuery, [token.id])
         await client.query('COMMIT')
 
-        await createVerifiedLinkableSession(event, session)
+        await createVerifiedUnregisteredSession(event, session)
 
         return {
             statusText: 'Success',
             otp_id: token.id
         }
     }
-    catch (err) {
+    catch (err: any) {
         await client.query('ROLLBACK')
+
+        if (err instanceof H3Error) {
+            return err
+        }
+
+        console.error('Error verifying OTP:', err)
         return createError({
             statusCode: 500,
             statusMessage: 'Server error verifying OTP'

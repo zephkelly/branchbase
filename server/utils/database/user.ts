@@ -1,6 +1,6 @@
 import { H3Event } from 'h3';
 
-import { type SecureRegisteredUser, UnregisteredUser, Provider, SecureUnregisteredUser, LinkableUserProviderData } from '../../../types/user';
+import { type SecureRegisteredUser, UnregisteredUser, Provider, LinkableUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
@@ -56,6 +56,57 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
             provider_verified: result.rows[0].provider_verified
         }
 
+        return retrievedUser;
+    }
+    catch (error) {
+        console.error('Error in getProvider', error)
+        setResponseStatus(event, 500)
+        return null
+    }
+}
+
+export async function getEmailProviderUser(event: H3Event, provider: Provider, provider_email: string): Promise<SecureRegisteredUser | null> {
+    const nitroApp = useNitroApp()
+    const pool = nitroApp.database
+
+    if (!provider || !provider_email) {
+        setResponseStatus(event, 400)
+        return null
+    }
+
+    if (!VALID_PROVIDERS.includes(provider)) {
+        setResponseStatus(event, 400)
+        return null
+    }
+
+    try {
+        const query =
+            `SELECT 
+                u.id,
+                u.username,
+                u.picture,
+                up.provider_email,
+                up.provider_verified
+            FROM private.users u
+            INNER JOIN private.user_providers up ON u.id = up.user_id
+            WHERE up.provider = $1 
+            AND up.provider_email = $2;`
+        const result = await pool.query(query, [provider, provider_email])
+        
+        if (result.rows.length === 0) {
+            setResponseStatus(event, 404)
+            return null
+        }
+
+        const retrievedUser: SecureRegisteredUser = {
+            id: result.rows[0].id,
+            username: result.rows[0].username,
+            provider: provider,
+            provider_id: null,
+            provider_email: result.rows[0].provider_email,
+            picture: result.rows[0].picture,
+            provider_verified: result.rows[0].provider_verified
+        }
 
         return retrievedUser;
     }
@@ -355,7 +406,7 @@ export async function createUser(
  * Used when a user links a new provider to their existing account.
  * @warning This function does NOT sanitise or validate input data.
  */
-export async function createUserProvider(event: H3Event, user_id: number, user: SecureUnregisteredUser): Promise<UserProviderCreationResponse> {
+export async function createUserProvider(event: H3Event, user_id: number, user: UnregisteredUser): Promise<UserProviderCreationResponse> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()

@@ -19,7 +19,15 @@
                 <button @click="signInWithGoogle" class="auth-button google">Sign in with Google</button>
                 <button @click="signInWithGitHub" class="auth-button github">Sign in with GitHub</button>
                 <button @click="signInWithDiscord" class="auth-button discord">Sign in with Discord</button>
-                <NuxtLink to="/register" class="button">Register with Email</NuxtLink>
+                <div style="margin-top: 1rem;">
+                    <form @submit.prevent="signInWithCredentials">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required v-model="emailInput" />
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required v-model="passwordInput" />
+                        <button type="submit">Sign In</button>
+                    </form>
+                </div>
             </template>
             <template #loading>
                 <p>Loading...</p>
@@ -31,7 +39,7 @@
 <script setup lang="ts">
 import Authenticator from '@/components/Authenticator.vue';
 
-const { clearSession, session, user } = useAuthState()
+const { clearSession, getNewSession, session, user } = useAuthState()
 
 const signInWithGoogle = async () => {
     await clearSession();
@@ -55,4 +63,32 @@ const signOut = () => {
 const cancelRegistration = () => {
     clearSession();
 };
+
+const emailInput = ref('');
+const passwordInput = ref('');
+
+const signInWithCredentials = async () => {
+    await clearSession();
+    const response = await fetch('/api/auth/credentials', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: emailInput.value,
+            password: passwordInput.value,
+        }),
+    });
+
+    if (response.ok) {
+        await getNewSession();
+        
+        const responseBody = await response.json();
+
+        navigateTo(responseBody.redirect);
+    }
+    else {
+        console.error('Error signing in');
+    }
+}
 </script>
