@@ -15,7 +15,7 @@
                 </div>
                 <div v-else>
                     <div v-if="hasLinkableUsers">
-                        <button @click="showAccountLinkingOption = true">I changed my mind, I want to link my account</button>
+                        <a href="/register/link">I changed my mind, I want to link my account</a>
                     </div>
                     <h2>Complete your registration</h2>
                     <form @submit.prevent="registerOAuth">
