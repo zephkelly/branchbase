@@ -42,6 +42,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (session.user.provider !== 'credentials' || session.user.provider_id !== null) {
+        return createError({
+            statusCode: 409,
+            statusMessage: 'Invalid provider',
+            statusText: 'This route is for OAuth providers only'
+        })
+    }
+
     const userSessionData = session.user as UnregisteredUser
     const userSecureSessionData = session.secure as SecureSessionDataType
 
@@ -86,35 +94,24 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    if (!provider_verified.isValid) {
+    if (provider.sanitisedData === Provider.Credentials || !provider_id.isValid) {
         return createError({
             statusCode: 400,
-            statusText: 'Invalid input data',
-            statusMessage: provider_verified.message
+            statusText: 'Invalid provider',
+            statusMessage: 'This route is for OAuth providers only'
         })
     }
 
-    // Check for existing users
-    if (!provider_id.isValid) {
-        const credentialsUser = await getCredentialUserExists(event, provider_email.sanitisedData)
-        if (credentialsUser) {
-            return createError({
-                statusCode: 409,
-                statusMessage: 'A user with this email already exists'
-            })
-        }
-    } else {
-        const providerUser = await getProviderUserExists(
-            event,
-            provider.sanitisedData as Provider,
-            provider_id.sanitisedData
-        )
-        if (providerUser) {
-            return createError({
-                statusCode: 409,
-                statusMessage: 'A user with this provider ID already exists'
-            })
-        }
+    const providerUser = await getProviderUserExists(
+        event,
+        provider.sanitisedData as Provider,
+        provider_id.sanitisedData
+    )
+    if (providerUser) {
+        return createError({
+            statusCode: 409,
+            statusMessage: 'A user with this provider ID already exists'
+        })
     }
 
     try {

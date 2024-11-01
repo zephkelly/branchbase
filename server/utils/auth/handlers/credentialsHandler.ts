@@ -3,11 +3,12 @@ import { ProviderData } from '~~/server/types/userProvider'
 import { Provider, RegisteredUser, SecureRegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
 
 import { getEmailProviderUser } from '~~/server/utils/database/user'
+import Credentials from '~/pages/register/credentials.vue';
 
-interface CredentialsHandlerResponse {
-    statusCode: number
-    statusMessage: string
-    route: string
+interface CredentialsLoginResponse {
+    registered: boolean;
+    statusCode?: number;
+    statusMessage?: string;
 }
 
 export async function handleCredentialsLogin(
@@ -22,8 +23,23 @@ export async function handleCredentialsLogin(
 
     try {
         const existingUser: SecureRegisteredUser | null = await getEmailProviderUser(event, Provider.Credentials, provider_email)
-    
+
         if (existingUser) {
+            console.log(existingUser.password_hash)
+            console.log(password)
+
+            console.log(await verifyPassword(existingUser.password_hash as string, password))
+            
+            if (await verifyPassword(existingUser.password_hash as string, password) === false) {
+                const response: CredentialsLoginResponse = {
+                    registered: true,
+                    statusCode: 401,
+                    statusMessage: 'Invalid credentials'
+                }
+
+                return response
+            }
+
             const registeredUser: RegisteredUser = {
                 id: existingUser.id,
                 username: existingUser.username,
@@ -41,12 +57,12 @@ export async function handleCredentialsLogin(
                 loggedInAt: Date.now(),
             })
 
-            console.log("returning registered user")
-            return {
-                statusCode: 200,
-                statusMessage: 'registered',
-                redirect: '/'
+           
+            const response: CredentialsLoginResponse = {
+                registered: true
             }
+
+            return response
         }
 
         const linkableUsersAndProviders = await getUsersProvidersByEmail(event, provider_email);
@@ -69,16 +85,21 @@ export async function handleCredentialsLogin(
 
             await setUserSession(event, {
                 user: temporaryLinkableUser,
-                linkableData,
+                linkable_data: linkableData,
+                secure: {
+                    provider_email,
+                    provider_verified: false,
+                    linkable_data: linkableUsersAndProviders
+                },
                 loggedInAt: Date.now(),
             })
 
             console.log("returning linkable user")
-            return {
-                statusCode: 200,
-                statusMessage: 'linkable',
-                redirect: '/register'
+            const response: CredentialsLoginResponse = {
+                registered: false
             }
+
+            return response
         }
 
         const temporaryUser: UnregisteredUser = {
@@ -103,18 +124,20 @@ export async function handleCredentialsLogin(
         })
 
         console.log("returning new user")
-        return {
-            statusCode: 200,
-            statusMessage: 'temporary',
-            redirect: '/register'
+        const response: CredentialsLoginResponse = {
+            registered: false
         }
+
+        return response
     }
     catch (error) {
         console.error(error)
-        return {
+        const response: CredentialsLoginResponse = {
+            registered: false,
             statusCode: 500,
-            statusMessage: 'Error logging in with credentials',
-            redirect: '/login'
+            statusMessage: 'Internal server error'
         }
+
+        return response
     }
 }

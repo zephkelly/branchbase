@@ -1,6 +1,7 @@
 import { generateOTP } from "~~/server/utils/auth/tokens/otp"
 import { RateLimitType } from "~~/server/types/ratelimit"
 import { OTPPurpose } from "~~/server/types/otp"
+import { UnregisteredUser } from "~~/types/user"
 
 export default defineEventHandler(async (event) => {
     const nitroApp = useNitroApp()
@@ -9,7 +10,9 @@ export default defineEventHandler(async (event) => {
 
     try {
         const session = await getUserSession(event)
-        const email = (session?.secure?.provider_email) ? session.secure.provider_email : null
+        const user = session?.user as UnregisteredUser
+            
+        const email = (user.provider_email) ? user.provider_email : null
 
         if (!session || !email) {
             throw createError({

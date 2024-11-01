@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
-import { SecureSession, UnregisteredUser, SecureRegisteredUser } from '~~/types/user';
+import { SecureSession, UnregisteredUser, SecureRegisteredUser, UserSessionData } from '~~/types/user';
 
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
@@ -51,13 +51,20 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const session = await getUserSession(event)
-        const userSession: UnregisteredUser = session.user as UnregisteredUser
+        const session = await getUserSession(event) as UserSessionData
+        const unregisteredUser: UnregisteredUser = session.user as UnregisteredUser
 
         if (!session.user) {
             return createError({
                 statusCode: 403,
                 statusMessage: 'You have not initiated the linking process properly'
+            })
+        }
+
+        if (unregisteredUser.provider_verified === false) {
+            return createError({
+                statusCode: 403,
+                statusMessage: 'You have not verified your email address'
             })
         }
 
@@ -117,12 +124,12 @@ export default defineEventHandler(async (event) => {
 
         const desired_user_id = desired_user.id
 
-        const unregisteredUser: UnregisteredUser = {
-            ...userSession,
-            provider_verified: (verifiedLinkableData.provider_verified) ? verifiedLinkableData.provider_verified : false,
-        }
+        // const unregisteredUser: UnregisteredUser = {
+        //     ...unregisteredUser,
+        //     provider_verified: (verifiedLinkableData.provider_verified) ? verifiedLinkableData.provider_verified : false,
+        // }
         
-        const providerLinkResponse = await createUserProvider(event, desired_user_id, unregisteredUser)
+        const providerLinkResponse = await createUserProvider(event, desired_user_id, session)
 
         if (isDatabaseError(providerLinkResponse) || isValidationError(providerLinkResponse)) {
             return createError({

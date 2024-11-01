@@ -4,6 +4,8 @@ import { UnregisteredUser } from "~~/types/user"
 
 export async function createVerifiedUnregisteredSession(event: H3Event, userSession: UserSession) {
     const temporaryVerifiedUser: UnregisteredUser = userSession.user as UnregisteredUser
+    const secureLinkableData = userSession.secure?.linkable_data
+    const linkableData = userSession.linkable_data
 
     if (!temporaryVerifiedUser) {
         throw createError({

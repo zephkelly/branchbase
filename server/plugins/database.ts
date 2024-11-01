@@ -45,7 +45,7 @@ export default defineNitroPlugin(async (nitroApp) => {
                     id BIGSERIAL PRIMARY KEY,
                     user_id BIGINT NOT NULL,
                     provider TEXT NOT NULL,
-                    provider_id TEXT NOT NULL,
+                    provider_id TEXT DEFAULT NULL,
                     provider_email TEXT NOT NULL,
                     password TEXT DEFAULT NULL,
                     provider_verified BOOLEAN DEFAULT FALSE,

@@ -4,6 +4,7 @@ import { navigateTo } from "nuxt/app";
 import { OTPPurpose } from "~~/server/types/otp";
 
 import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/sessions/unregistered/verifiedSession";
+import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/unregistered/verifiedLinkableSession";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 
@@ -112,7 +113,12 @@ export default defineEventHandler(async (event) => {
         await client.query(markUsedQuery, [token.id])
         await client.query('COMMIT')
 
-        await createVerifiedUnregisteredSession(event, session)
+        if (session.linkable_data) {
+            await createVerifiedLinkableSession(event, session)
+        }
+        else {
+            await createVerifiedUnregisteredSession(event, session)
+        }
 
         return {
             statusText: 'Success',

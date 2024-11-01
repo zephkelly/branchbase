@@ -11,6 +11,13 @@ export default defineEventHandler(async (event) => {
         const email = body.email
         const password = body.password
 
+        if (!email || !password) {
+            return createError({
+                statusCode: 400,
+                statusMessage: 'Invalid or missing credentials'
+            })
+        }
+
         const avatarImage: string = getRandomAvatar()
 
         const response = await handleCredentialsLogin(event, {
@@ -19,12 +26,26 @@ export default defineEventHandler(async (event) => {
             picture: avatarImage
         })
 
-        setResponseStatus(event, response.statusCode, response.statusMessage)
-        return response
+        const responseStatus = response.statusCode
+        const responseMessage = response.statusMessage
+
+        if (responseStatus) {
+            setResponseStatus(event, responseStatus, responseMessage)
+            return
+        }
+
+        if (response.registered) {
+            return sendRedirect(event, '/')
+        }
+        else {
+            setResponseStatus(event, 200)
+            return {
+                registered: false
+            }
+        }
     }
     catch (error) {
         console.error(error)
-        console.log('Error logging in with credentials:', error)
         return createError({
             statusCode: 500,
             statusMessage: 'Error logging in with credentials'

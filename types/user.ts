@@ -36,6 +36,7 @@ export interface RegisteredUser extends UserData {
 export interface SecureRegisteredUser extends RegisteredUser {
     provider_verified: boolean;
     provider_email: string;
+    password_hash?: string;
 }
 
 // Unregistered user types
@@ -56,8 +57,9 @@ export interface UnregisteredUser extends UserData {
 export interface UserSessionData {
     loggedInAt: number;
     user: RegisteredUser | UnregisteredUser;
-    secure: Record<string, unknown>;
+    secure: SecureSession;
     linkable_data?: LinkableData | VerifiedLinkableData;
+    confirmed_password?: boolean;
 }
 
 
@@ -87,6 +89,7 @@ export interface SecureSession {
     provider_verified: boolean | null;
     provider_email: string | null;
     linkable_data?: LinkableUserProviderData[];
+    password_hash?: string;
 }
 
 export type SecureSessionDataType = SecureSession;

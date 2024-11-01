@@ -7,7 +7,7 @@
             </template>
             <template #unregistered="{ user, clearSession }">
                 <button @click="clearSession">Log out</button>
-                <div v-if="showAccountLinkingOption">
+                <div v-if="showAccountLinkingOption && isVerified">
                     <h2>Can link account</h2>
                     <p>We found another account using the email: {{ linkableUsersData.provider_email  }} </p>
                     <p>Do you want to link this provider an existing account?</p>
@@ -15,28 +15,15 @@
                     <button @click="showAccountLinkingOption = false">No</button>
                 </div>
                 <div v-else>
-                    <div v-if="hasLinkableUsers">
+                    <div v-if="hasLinkableUsers && isVerified">
                         <a href="/register/link">I changed my mind, I want to link my account</a>
                     </div>
                     <h2>Complete your registration</h2>
                     <div v-if="isVerified">
-                        <form @submit.prevent="registerOAuth">
+                        <form @submit.prevent="registerOAuth" v-if="user.provider !== 'credentials'">
                             <p>You are signing up through {{ user.provider }} with email: {{ user.provider_email }}</p>
-                            <div class="field-container email">
-                                <div v-if="user.provider === 'credentials'" class="new-registration">
-                                    <div class="field">
-                                        <label for="email">Email</label>
-                                        <input type="email" id="email" name="email" required v-model="userEmail">
-                                    </div>
-                                </div>
-                                <div v-else class="oauth-registration">
-                                    <div class="field">
-                                        <p>{{ user.provider }} Logo</p>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="field-container">
-                                <div v-if="user.provider !== 'credentials'" class="oauth-registration">
+                                <div class="oauth-registration">
                                     <label for="username">{{ username }}</label>
                                     <input
                                         v-model="username"
@@ -52,6 +39,27 @@
                                     Submit
                                 </button>
                             </div>
+                        </form>
+                        <form @submit.prevent="" v-else>
+                            <p>You are signing up through {{ user.provider }} with email: {{ user.provider_email }}</p>
+                            <div class="field-container email">
+                                <div class="field">
+                                    <p>Username</p>
+                                    <label for="username">{{ username }}</label>
+                                    <input
+                                        v-model="username"
+                                        type="text"
+                                        id="username"
+                                        @input="(e: Event) => oauthForm.updateField(
+                                            'username',
+                                            (e.target as HTMLInputElement).value)"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <p>{{ user.provider }} Logo</p>
+                                </div>
+                            </div>
+                            <button type="submit">Submit</button>
                         </form>
                     </div>
                     <div v-else>
@@ -84,7 +92,8 @@ import { isRegisteredUser, type UnregisteredUser, type LinkableData } from '~~/t
 
 const router = useRouter()
 const route = useRoute()
-const { session } = useAuthState()
+
+const { user, clearSession, getNewSession, session } = useAuthState()
 
 const linkableUsersData = await session.value.linkable_data as LinkableData;
 const hasLinkableUsers = (linkableUsersData && linkableUsersData.existing_users_count >= 1) 
@@ -102,9 +111,6 @@ if (hasLinkableUsers && !doesNotWantToLink) {
 if (doesNotWantToLink) {
     router.replace({ query: {} });
 }
-
-const { user, clearSession, getNewSession } = useAuthState()
-
 
 const userEmail = computed(() => {
     if (user && user.value && !isRegisteredUser(user.value)) {
@@ -174,7 +180,7 @@ const sentVerification = ref(false)
 const errorSendingVerification = ref(false)
 const errorMessage = ref('')
 
-const isVerified = ref((user.value as UnregisteredUser).provider_verified)
+const isVerified = ref((user.value as UnregisteredUser)?.provider_verified)
 
 const sendVerificationOTP = async () => {
     sentVerification.value = false
@@ -225,13 +231,19 @@ const verifyOTP = async () => {
             }
         }
 
+        console.log('Verification response', response)
+
 
         const data = await response.json()
         verifiedOTPId.value = data.otp_id
 
         isVerified.value = true
 
+        console.log(session.value)
+
         await getNewSession()
+
+        console.log(session.value)
     }
     catch (error) {
         console.error('Error during registration:', error)

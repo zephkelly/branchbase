@@ -20,16 +20,20 @@ export async function createVerifiedLinkableSession(event: H3Event, userSession:
     
         const verifiedLinkableData: VerifiedLinkableData = {
             ...linkableData,
-            linkable_providers: secureLinkableProviderData
+            linkable_providers: secureLinkableProviderData,
         }
     
+        temporaryVerifiedLinkableUser.provider_verified = true
+        
         await replaceUserSession(event, {
             user: temporaryVerifiedLinkableUser,
             linkable_data: verifiedLinkableData,
+            confirmed_password: userSession.confirmed_password as boolean | undefined,
             secure: {
                 linkable_data: secureLinkableProviderData,
                 provider_email: secureLinkableData.provider_email,
-                provider_verified: secureLinkableData.provider_verified
+                provider_verified: true,
+                password_hash: secureLinkableData.password_hash
             },
             loggedInAt: Date.now()
         }, {

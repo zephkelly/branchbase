@@ -1,6 +1,6 @@
 import { H3Event } from 'h3';
 
-import { type SecureRegisteredUser, UnregisteredUser, Provider, LinkableUserProviderData } from '../../../types/user';
+import { type SecureRegisteredUser, UserSessionData, UnregisteredUser, Provider, LinkableUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
@@ -86,7 +86,8 @@ export async function getEmailProviderUser(event: H3Event, provider: Provider, p
                 u.username,
                 u.picture,
                 up.provider_email,
-                up.provider_verified
+                up.provider_verified,
+                up.password
             FROM private.users u
             INNER JOIN private.user_providers up ON u.id = up.user_id
             WHERE up.provider = $1 
@@ -105,7 +106,8 @@ export async function getEmailProviderUser(event: H3Event, provider: Provider, p
             provider_id: null,
             provider_email: result.rows[0].provider_email,
             picture: result.rows[0].picture,
-            provider_verified: result.rows[0].provider_verified
+            provider_verified: result.rows[0].provider_verified,
+            password_hash: result.rows[0].password
         }
 
         return retrievedUser;
@@ -406,35 +408,68 @@ export async function createUser(
  * Used when a user links a new provider to their existing account.
  * @warning This function does NOT sanitise or validate input data.
  */
-export async function createUserProvider(event: H3Event, user_id: number, user: UnregisteredUser): Promise<UserProviderCreationResponse> {
+export async function createUserProvider(event: H3Event, user_id: number, session: UserSessionData): Promise<UserProviderCreationResponse> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
     
-    const providerQuery = `
-        INSERT INTO private.user_providers (
-            user_id,
-            provider,
-            provider_id,
-            provider_email,
-            provider_verified
-        )
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id
-    `
-    
-    const values = [
-        user_id,
-        user.provider,
-        user.provider_id,
-        user.provider_email,
-        user.provider_verified
-    ]
-
     try {
-        await client.query('BEGIN')
+        const user = session.user as UnregisteredUser
+        const isCredentialsProvider = user.provider === Provider.Credentials
+        const hasHashedPassword = session.confirmed_password === true && session.secure.password_hash
 
-        await pool.query(providerQuery, values)
+        if (isCredentialsProvider && hasHashedPassword) {
+            const credentialsProviderQuery = `
+                INSERT INTO private.user_providers (
+                    user_id,
+                    provider,
+                    provider_id,
+                    provider_email,
+                    provider_verified,
+                    password
+                )
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id
+            `
+
+            const credentialsProviderValues = [
+                user_id,
+                user.provider,
+                user.provider_id,
+                user.provider_email,
+                user.provider_verified,
+                session.secure.password_hash
+            ]
+
+            await client.query('BEGIN')
+
+            await pool.query(credentialsProviderQuery, credentialsProviderValues)
+        }
+        else {
+            const providerQuery = `
+                INSERT INTO private.user_providers (
+                    user_id,
+                    provider,
+                    provider_id,
+                    provider_email,
+                    provider_verified
+                )
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id
+            `
+            
+            const values = [
+                user_id,
+                user.provider,
+                user.provider_id,
+                user.provider_email,
+                user.provider_verified
+            ]
+
+            await client.query('BEGIN')
+
+            await pool.query(providerQuery, values)
+        }
 
         const userQuery = `
             SELECT u.id, u.username, u.picture

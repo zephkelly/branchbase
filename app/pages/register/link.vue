@@ -45,17 +45,23 @@
 </template>
 
 <script setup lang="ts">
-import { LazyLink } from '#build/components';
-import { type LinkableData, type VerifiedLinkableData } from '~~/types/user';
+import { type LinkableData, type VerifiedLinkableData, type UnregisteredUser, Provider } from '~~/types/user';
 
-const { session, getNewSession } = useAuthState()
+const { user, session, getNewSession } = useAuthState()
+
+const UnregisteredUser = user.value as UnregisteredUser
+
+if (!UnregisteredUser) {
+    console.error('No unregistered user found')
+    navigateTo('/register')
+}
 
 // Pre-verified session data
-const linkableUsersData = ref(null as LinkableData | null);
+const linkableUsersData = ref(session.value.linkable_data);
 
 // Verified session data
-const verifiedLinkableData = ref(null as VerifiedLinkableData | null);
-const isVerified = ref(false)
+const verifiedLinkableData = ref(session.value.linkable_data as VerifiedLinkableData);
+const isVerified = ref(verifiedLinkableData.value?.linkable_providers !== undefined)
 
 const router = useRouter()
 
@@ -155,18 +161,10 @@ const linkProvider = async (userIndex: number) => {
     }
 }
 
-onMounted(() => {
-    linkableUsersData.value = session.value.linkable_data as LinkableData
-    verifiedLinkableData.value = session.value.linkable_data as VerifiedLinkableData
-
-    if (!linkableUsersData.value) {
-        isVerified.value = false
-        navigateTo('/register')
-        return
-    }
-
-    isVerified.value = verifiedLinkableData.value.linkable_providers !== undefined
-})
+if (!linkableUsersData.value) {
+    isVerified.value = false
+    navigateTo('/register')
+}
 </script>
 
 <style lang="scss" scoped>

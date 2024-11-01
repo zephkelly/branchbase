@@ -26,6 +26,8 @@
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required v-model="passwordInput" />
                         <button type="submit">Sign In</button>
+                        <p v-if="isInvalidCredentialsCreateAccount">Invalid credentials. Did you want to <a href="/register/credentials?from=login">Create an Account?</a></p>
+                        <p v-if="isInvalidCredentials">Incorrect email or password, please try again</p>
                     </form>
                 </div>
             </template>
@@ -67,28 +69,62 @@ const cancelRegistration = () => {
 const emailInput = ref('');
 const passwordInput = ref('');
 
+const isInvalidCredentials = ref(false);
+const isInvalidCredentialsCreateAccount = ref(false);
+
 const signInWithCredentials = async () => {
-    await clearSession();
-    const response = await fetch('/api/auth/credentials', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            email: emailInput.value,
-            password: passwordInput.value,
-        }),
-    });
+    try {
+        await clearSession();
+        const response = await $fetch('/api/auth/credentials', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: emailInput.value,
+                password: passwordInput.value,
+            }),
+        });
+    
+        //@ts-expect-error
+        if (response.registered !== undefined && response.registered === false) {
+            isInvalidCredentialsCreateAccount.value = true;
+            isInvalidCredentials.value = false;
+            return;
+        }
 
-    if (response.ok) {
         await getNewSession();
-        
-        const responseBody = await response.json();
+        navigateTo('/');
+    }
+    catch (error: any) {
+        console.error('Error signing in:', error);
+        if (error.statusCode === 401) {
+            isInvalidCredentials.value = true;
+            isInvalidCredentialsCreateAccount.value = false;
+        }
+        else {
+            isInvalidCredentialsCreateAccount.value = true;
+            isInvalidCredentials.value = false;
+        }
+    }
 
-        navigateTo(responseBody.redirect);
-    }
-    else {
-        console.error('Error signing in');
-    }
+
+
+
+
+    // if (response.ok) {
+    //     await getNewSession();
+    //     isInvalidCredentials.value = false;
+    // }
+    // else {
+    //     console.error('Error signing in');
+
+    //     if (response.status === 401) {
+    //         isInvalidCredentials.value = true;
+    //     }
+    //     else {
+    //         isInvalidCredentialsCreateAccount.value = true;
+    //     }
+    // }
 }
 </script>
