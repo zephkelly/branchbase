@@ -7,14 +7,20 @@
                     <h2>Linkable Users</h2>
                 </section>
                 <section v-else class="registration-container">
-                    <div v-if="hasLinkableUsers && !noLinkQuery && !wantsToLinkProvider" class="linkable">
-                        <h2>Link to existing account</h2>
-                        <p>We found other accounts using the email: {{ linkableUsersData.provider_email  }} </p>
-                        <p>Do you want to link an email and password login to an existing account?</p>
-                        <button @click="wantsToLinkProvider = false">No</button>
-                        <button @click="wantsToLinkProvider = true;">Yes</button>
+                    <div v-if="hasLinkableUsers && !noLinkQuery && !showLinkAccounts" class="linkable">
+                        <div v-if="userWantsToLinkAccounts">
+                            <h2>Link to existing account</h2>
+                            <p>We found other accounts using the email: {{ linkableUsersData.provider_email  }} </p>
+                            <p>Do you want to link an email and password login to an existing account?</p>
+                            <button @click="showLinkAccounts = false; userWantsToLinkAccounts = false;">No</button>
+                            <button @click="showLinkAccounts = true;">Yes</button>
+                        </div>
+                        <div v-else>
+                            <button @click="showLinkAccounts = false; userWantsToLinkAccounts = true;">Back</button>
+                        </div>
                     </div>
-                    <div v-if="hasLinkableUsers && !noLinkQuery && wantsToLinkProvider" class="verify">
+                    <div v-if="hasLinkableUsers && !noLinkQuery && showLinkAccounts" class="verify">
+                        <button @click="showLinkAccounts = false;">Back</button>
                         <h2>Let's confirm your password</h2>
                         <form @submit.prevent="" style="display: flex; flex-direction: column; gap: 1rem;">
                             <label for="email">Email</label>
@@ -66,20 +72,18 @@ const linkableUsersData = ref(session.value.linkable_data as LinkableData);
 
 const hasLinkableUsers = ref(linkableUsersData.value !== null && linkableUsersData.value?.existing_users_count > 0)
 const noLinkQuery = ref(route.query.nolink === 'true')
-const wantsToLinkProvider = ref(false)
 
+const showLinkAccounts = ref(false)
+const userWantsToLinkAccounts = ref(true)
 
 const isVerified = ref(unregisteredUser.value?.provider_verified)
 
 // Check if the redirect came from login ------------------------------------
-
-
 const isFromLogin = ref(route.query.from === 'login')
 
 if (isFromLogin.value) {
     router.replace({ query: {} })
 }
-// --------------------------------------------------------------------------
 
 
 // Check if the user is actually unregistered --------------------------------
@@ -100,14 +104,9 @@ else {
         navigateTo('/register/oauth')
     }
 }
-// ----------------------------------------------------------------------------
-
-async function changeCredentials() {
-    await clearSession();
-    isFromLogin.value = false;
-}
 
 
+// Submit credentials to initiate account linking -----------------------------
 const passwordInput = ref('')
 const confirmPasswordInput = ref('')
 
@@ -141,5 +140,4 @@ async function submitUnregisteredLinkableCredentials() {
         alert('Invalid credentials')
     }
 }
-
 </script>
