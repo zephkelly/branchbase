@@ -1,11 +1,10 @@
 import { H3Event } from "h3";
 import { UserSession } from "#auth-utils";
-import { UnregisteredUser } from "~~/types/user"
+
+import { UnregisteredUser } from "~~/types/auth/user/session/unregistered";
 
 export async function createVerifiedUnregisteredSession(event: H3Event, userSession: UserSession) {
     const temporaryVerifiedUser: UnregisteredUser = userSession.user as UnregisteredUser
-    const secureLinkableData = userSession.secure?.linkable_data
-    const linkableData = userSession.linkable_data
 
     if (!temporaryVerifiedUser) {
         throw createError({

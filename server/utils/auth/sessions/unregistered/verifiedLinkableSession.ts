@@ -1,16 +1,21 @@
 import { H3Event } from "h3";
 import { UserSession } from "#auth-utils";
-import { VerifiedLinkableData, LinkableData, LinkableUserProviderData, UnregisteredUser, SecureSessionDataType } from "~~/types/user"
+// import { VerifiedLinkableData, LinkableData, LinkableUserProviderData, UnregisteredUser, SecureSessionDataType } from "~~/types/user"
+import { UnregisteredUser, UnregisteredLinkableData, VerifiedUnregisteredLinkableData, SecureUnregisteredLinkableSessionData, LinkableUserProviderData } from "~~/types/auth/user/session/unregistered";
+import { SecureUnregisteredCredSessionData } from "~~/types/auth/user/session/credentials/unregistered";
 
 export async function createVerifiedLinkableSession(event: H3Event, userSession: UserSession) {
     try {
-        const linkableData: LinkableData = userSession.linkable_data as LinkableData
-        const secureLinkableData = userSession.secure as SecureSessionDataType
-    
         const temporaryVerifiedLinkableUser: UnregisteredUser = userSession.user as UnregisteredUser
-        const secureLinkableProviderData = userSession.secure?.linkable_data as LinkableUserProviderData[]
+
+        const linkableData: UnregisteredLinkableData = userSession.linkable_data as UnregisteredLinkableData
+
+        const secureData = userSession.secure as SecureUnregisteredLinkableSessionData
+        const secureLinkableData = secureData.linkable_data as LinkableUserProviderData[]
+
+        const credentialsPasswordHash = (userSession.secure as SecureUnregisteredCredSessionData).password_hash || undefined
     
-        if (!linkableData || !secureLinkableProviderData || !secureLinkableData) {
+        if (!linkableData || !secureLinkableData || !secureLinkableData) {
             throw new Error('Invalid linkable data')
         }
     
@@ -18,9 +23,9 @@ export async function createVerifiedLinkableSession(event: H3Event, userSession:
             throw new Error('Invalid user session')
         }
     
-        const verifiedLinkableData: VerifiedLinkableData = {
+        const verifiedLinkableData: VerifiedUnregisteredLinkableData = {
             ...linkableData,
-            linkable_providers: secureLinkableProviderData,
+            linkable_data: secureLinkableData,
         }
     
         temporaryVerifiedLinkableUser.provider_verified = true
@@ -30,10 +35,10 @@ export async function createVerifiedLinkableSession(event: H3Event, userSession:
             linkable_data: verifiedLinkableData,
             confirmed_password: userSession.confirmed_password as boolean | undefined,
             secure: {
-                linkable_data: secureLinkableProviderData,
-                provider_email: secureLinkableData.provider_email,
+                linkable_data: secureLinkableData,
+                provider_email: secureData.provider_email,
                 provider_verified: true,
-                password_hash: secureLinkableData.password_hash
+                password_hash: credentialsPasswordHash
             },
             loggedInAt: Date.now()
         }, {

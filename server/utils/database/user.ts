@@ -1,12 +1,28 @@
 import { H3Event } from 'h3';
 
-import { type SecureRegisteredUser, UserSessionData, UnregisteredUser, Provider, LinkableUserProviderData } from '../../../types/user';
+import { UserSession } from '#auth-utils';
+
+import { Provider } from '~~/types/auth/user/providers';
+
+import { RegisteredUser } from '~~/types/auth/user/session/registered';
+import { UnregisteredUser } from '~~/types/auth/user/session/unregistered';
+
+import { LinkableUserProviderData } from '~~/types/auth/user/session/unregistered';
+
+import { SecureUnregisteredCredSessionData } from '~~/types/auth/user/session/credentials/unregistered';
+
+// import { type SecureRegisteredUser, UserSessionData, UnregisteredUser, Provider, LinkableUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
 
 const VALID_PROVIDERS = Object.values(Provider);
 
+interface SecureRegisteredUser extends RegisteredUser {
+    provider_verified: boolean;
+    provider_email: string;
+    password_hash?: string;
+}
 export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<SecureRegisteredUser | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
@@ -408,7 +424,7 @@ export async function createUser(
  * Used when a user links a new provider to their existing account.
  * @warning This function does NOT sanitise or validate input data.
  */
-export async function createUserProvider(event: H3Event, user_id: number, session: UserSessionData): Promise<UserProviderCreationResponse> {
+export async function createUserProvider(event: H3Event, user_id: number, session: UserSession): Promise<UserProviderCreationResponse> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
@@ -416,7 +432,7 @@ export async function createUserProvider(event: H3Event, user_id: number, sessio
     try {
         const user = session.user as UnregisteredUser
         const isCredentialsProvider = user.provider === Provider.Credentials
-        const hasHashedPassword = session.confirmed_password === true && session.secure.password_hash
+        const hasHashedPassword = session.confirmed_password === true && (session.secure as SecureUnregisteredCredSessionData).password_hash
 
         if (isCredentialsProvider && hasHashedPassword) {
             const credentialsProviderQuery = `
@@ -438,7 +454,7 @@ export async function createUserProvider(event: H3Event, user_id: number, sessio
                 user.provider_id,
                 user.provider_email,
                 user.provider_verified,
-                session.secure.password_hash
+                (session.secure as SecureUnregisteredCredSessionData).password_hash
             ]
 
             await client.query('BEGIN')
