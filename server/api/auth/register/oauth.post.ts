@@ -3,8 +3,12 @@ import { ref } from 'vue';
 // Types
 import { isDatabaseError, isValidationError } from '~~/server/types/error'
 import { UserCreationResponse } from '~~/server/types/user'
-import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '~~/types/user'
+// import { isRegisteredUser, UnregisteredUser, SecureRegisteredUser, SecureSessionDataType, Provider } from '~~/types/user'
 
+import { isRegisteredUser, RegisteredUser } from '~~/types/auth/user/session/registered';
+import { UnregisteredUser } from '~~/types/auth/user/session/unregistered';
+import { SecureSessionData } from '~~/types/auth/user/session/secure';
+import { Provider } from '~~/types/auth/user/providers';
 // Utilities
 import { getRandomAvatar } from '~~/server/utils/avatarSelector';
 
@@ -28,21 +32,23 @@ export default defineEventHandler(async (event) => {
 
     // Get and validate session first
     const session = await getUserSession(event)
-    if (!session?.user) {
+    const userSessionData = session.user as UnregisteredUser
+
+    if (!userSessionData) {
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
         })
     }
 
-    if (isRegisteredUser(session.user)) {
+    if (isRegisteredUser(userSessionData)) {
         return createError({
             statusCode: 409,
             statusMessage: 'User session indicates that you are already registered'
         })
     }
 
-    if (session.user.provider !== 'credentials' || session.user.provider_id !== null) {
+    if (userSessionData.provider !== 'credentials' || userSessionData.provider_id !== null) {
         return createError({
             statusCode: 409,
             statusMessage: 'Invalid provider',
@@ -50,8 +56,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const userSessionData = session.user as UnregisteredUser
-    const userSecureSessionData = session.secure as SecureSessionDataType
+    const userSecureSessionData = session.secure as SecureSessionData
 
     // Input data
     const username = isValidUsername(body.username as string)
@@ -132,7 +137,7 @@ export default defineEventHandler(async (event) => {
             });
         }
 
-        const registeredUser: SecureRegisteredUser = newUser.data
+        const registeredUser: RegisteredUser & SecureSessionData = newUser.data
 
         await replaceUserSession(event, {
             user: {

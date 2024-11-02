@@ -59,7 +59,9 @@
 </template>
 
 <script setup lang="ts">
-import { Provider, type LinkableData, type UnregisteredUser } from '~~/types/user';
+// import { Provider, type LinkableData, type UnregisteredUser } from '~~/types/user';
+import { Provider } from '~~/types/auth/user/providers';
+import { type UnregisteredUser, type UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
 
 const router = useRouter()
 const route = useRoute()
@@ -68,7 +70,7 @@ const route = useRoute()
 const { user, session, getNewSession, clearSession } = useAuthState()
 
 const unregisteredUser = ref(user.value as UnregisteredUser);
-const linkableUsersData = ref(session.value.linkable_data as LinkableData);
+const linkableUsersData = ref(session.value.linkable_data as UnregisteredLinkableData);
 
 const hasLinkableUsers = ref(linkableUsersData.value !== null && linkableUsersData.value?.existing_users_count > 0)
 const noLinkQuery = ref(route.query.nolink === 'true')

@@ -1,4 +1,4 @@
-import { Provider } from '~~/types/user'
+import { Provider } from '~~/types/auth/user/providers'
 import { handleOAuthLogin } from '~~/server/utils/auth/handlers/oauthHandler'
 
 export default defineOAuthDiscordEventHandler({

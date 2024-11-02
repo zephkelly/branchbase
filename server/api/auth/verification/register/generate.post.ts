@@ -1,7 +1,9 @@
 import { generateOTP } from "~~/server/utils/auth/tokens/otp"
 import { RateLimitType } from "~~/server/types/ratelimit"
 import { OTPPurpose } from "~~/server/types/otp"
-import { UnregisteredUser } from "~~/types/user"
+// import { UnregisteredUser } from "~~/types/user"
+
+import { UnregisteredUser } from "~~/types/auth/user/session/unregistered"
 
 export default defineEventHandler(async (event) => {
     const nitroApp = useNitroApp()

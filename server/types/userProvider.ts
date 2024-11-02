@@ -1,12 +1,14 @@
-import { Provider } from '~~/types/user'
-import type { SecureRegisteredUser } from '../../types/user';
 import type { DatabaseError, ValidationError } from './error'
+
+import { Provider } from '~~/types/auth/user/providers';
+import { RegisteredUser } from '~~/types/auth/user/session/registered';
+import { SecureSessionData } from '~~/types/auth/user/session/secure';
 
 export type UserProviderCreationError = DatabaseError | ValidationError;
 
 export interface UserProviderCreationSuccess {
     type: 'SUCCESS';
-    data: SecureRegisteredUser;
+    data: RegisteredUser & SecureSessionData;
 }
 
 export type UserProviderCreationResponse = UserProviderCreationError | UserProviderCreationSuccess;

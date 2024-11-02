@@ -2,6 +2,8 @@ import { generateOTP } from "~~/server/utils/auth/tokens/otp"
 import { RateLimitType } from "~~/server/types/ratelimit"
 import { OTPPurpose } from "~~/server/types/otp"
 
+import { SecureSessionData } from "~~/types/auth/user/session/secure"
+
 export default defineEventHandler(async (event) => {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
@@ -9,7 +11,8 @@ export default defineEventHandler(async (event) => {
 
     try {
         const session = await getUserSession(event)
-        const email = (session?.secure?.provider_email) ? session.secure.provider_email : null
+        const secureData = session?.secure as SecureSessionData
+        const email = (secureData.provider_email) ? secureData.provider_email : null
 
         if (!session || !email) {
             throw createError({

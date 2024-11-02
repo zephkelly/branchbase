@@ -5,6 +5,7 @@ import { OTPPurpose } from "~~/server/types/otp";
 
 import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/sessions/unregistered/verifiedSession";
 import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/unregistered/verifiedLinkableSession";
+import { SecureSessionData } from "~~/types/auth/user/session/secure";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 
@@ -18,7 +19,8 @@ export default defineEventHandler(async (event) => {
         const { otp } = body
 
         const session = await getUserSession(event)
-        const email = (session?.secure?.provider_email) ? session.secure.provider_email : null
+        const secureData = session?.secure as SecureSessionData
+        const email = (secureData.provider_email) ? secureData.provider_email : null
 
         if (!session || !email) {
             return createError({

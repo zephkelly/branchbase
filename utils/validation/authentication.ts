@@ -46,7 +46,7 @@ export function isValidUsername(username: unknown): ValidationResult {
     return { isValid: true, sanitisedData: trimmedUsername };
 }
 
-import { Provider } from "~~/types/user";
+import { Provider } from "~~/types/auth/user/providers";
 export const PROVIDER_MAX_LENGTH = 16;
 export const isValidProvider = (provider: unknown): ValidationResult => {
     if (!isString(provider)) {

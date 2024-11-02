@@ -11,7 +11,7 @@
                         <div
                             class="user"
                             :key="index"
-                            v-for="(account, index) in (session.value?.linkable_data as VerifiedLinkableData).linkable_providers">
+                            v-for="(account, index) in (session.value?.linkable_data as VerifiedUnregisteredLinkableData).linkable_data">
                                 <p>{{ account.username }}</p>
                                 <img :src="account.picture" alt="User Picture" />
                                 <p>{{ account.providers[0]?.provider }}</p>
@@ -45,7 +45,8 @@
 </template>
 
 <script setup lang="ts">
-import { type LinkableData, type VerifiedLinkableData, type UnregisteredUser, Provider } from '~~/types/user';
+// import { type LinkableData, type VerifiedLinkableData, type UnregisteredUser, Provider } from '~~/types/user';
+import { type LinkableUserProviderData, type UnregisteredUser, type VerifiedUnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
 
 const { user, session, getNewSession } = useAuthState()
 
@@ -60,8 +61,8 @@ if (!UnregisteredUser) {
 const linkableUsersData = ref(session.value.linkable_data);
 
 // Verified session data
-const verifiedLinkableData = ref(session.value.linkable_data as VerifiedLinkableData);
-const isVerified = ref(verifiedLinkableData.value?.linkable_providers !== undefined)
+const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredLinkableData;
+const isVerified = ref(verifiedLinkableData.linkable_data !== undefined)
 
 const router = useRouter()
 
@@ -129,13 +130,11 @@ const verifyOTP = async () => {
 
 const linkProvider = async (userIndex: number) => {
     try {
-        const user = (session.value?.linkable_data as VerifiedLinkableData).linkable_providers[userIndex]
-
-        if (!user) {
-            throw new Error('User not found')
+        const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredLinkableData
+        
+        if (!verifiedLinkableData.linkable_data) {
+            throw new Error('Linkable data not found')
         }
-
-        console.log('Selected user:', user)
 
         const response = await fetch('/api/auth/register/link', {
             method: 'POST',

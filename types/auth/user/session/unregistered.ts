@@ -1,4 +1,5 @@
 import { Provider } from "~~/types/auth/user/providers";
+import { type SecureSessionData } from "~~/types/auth/user/session/secure";
 
 export interface UnregisteredUser {
     id: null;
@@ -31,11 +32,7 @@ export interface VerifiedUnregisteredLinkableData extends UnregisteredLinkableDa
 
 
 // Kept on backend during linkable unregistered session
-export interface SecureUnregisteredSessionData {
-    provider_verified: boolean;
-    provider_email: string;
-}
-export interface SecureUnregisteredLinkableSessionData extends SecureUnregisteredSessionData {
+export interface SecureUnregisteredLinkableSessionData extends SecureSessionData {
     linkable_data: LinkableUserProviderData[];
 }
 

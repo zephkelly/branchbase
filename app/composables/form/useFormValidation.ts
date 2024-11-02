@@ -5,10 +5,6 @@ import {
     isNumber,
 } from '~~/utils/validation/primitives'
 
-import {
-    isValidEmail,
-} from '~~/utils/validation/authentication'
-
 import { ref, computed } from 'vue'
 
 export interface ValidationRule {

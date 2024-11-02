@@ -88,14 +88,17 @@
 
 <script setup lang="ts">
 import { useFormValidation } from '~/composables/form/useFormValidation';
-import { isRegisteredUser, type UnregisteredUser, type LinkableData } from '~~/types/user';
+// import { isRegisteredUser, type UnregisteredUser, type LinkableData } from '~~/types/user';
+
+import { isRegisteredUser } from '~~/types/auth/user/session/registered';
+import { type UnregisteredUser, type UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
 
 const router = useRouter()
 const route = useRoute()
 
 const { user, clearSession, getNewSession, session } = useAuthState()
 
-const linkableUsersData = await session.value.linkable_data as LinkableData;
+const linkableUsersData = await session.value.linkable_data as UnregisteredLinkableData;
 const hasLinkableUsers = (linkableUsersData && linkableUsersData.existing_users_count >= 1) 
     ? true 
     : false;

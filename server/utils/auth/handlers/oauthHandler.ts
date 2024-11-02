@@ -1,6 +1,9 @@
 import { H3Event } from 'h3'
 import { ProviderData } from '~~/server/types/userProvider'
-import { SecureRegisteredUser, RegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
+
+import { UnregisteredUser, UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered'
+import { RegisteredUser } from '~~/types/auth/user/session/registered'
+
 import { getProviderUser, getUsersProvidersByEmail, updateProviderEmail } from '~~/server/utils/database/user'
 
 export async function handleOAuthLogin(
@@ -10,7 +13,7 @@ export async function handleOAuthLogin(
     const { provider, provider_id, provider_email, provider_verified, picture } = providerData
 
     try {
-        const existingUser: SecureRegisteredUser | null = await getProviderUser(event, provider, provider_id)
+        const existingUser = await getProviderUser(event, provider, provider_id)
 
         // Handle existing user
         if (existingUser) {
@@ -54,7 +57,7 @@ export async function handleOAuthLogin(
                 picture,
             }
 
-            const linkableData: LinkableData = {
+            const linkableData: UnregisteredLinkableData = {
                 provider_email,
                 existing_users_count: linkableUsersAndProviders.length,
             }

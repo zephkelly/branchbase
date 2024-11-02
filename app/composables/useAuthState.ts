@@ -1,6 +1,9 @@
 import { computed } from 'vue'
 import { useUserSession } from '#imports'
-import { isRegisteredUser, type RegisteredUser, type UnregisteredUser } from '~~/types/user'
+// import { isRegisteredUser, type RegisteredUser, type UnregisteredUser } from '~~/types/user'
+
+import { isRegisteredUser, type RegisteredUser } from '~~/types/auth/user/session/registered'
+import { type UnregisteredUser } from '~~/types/auth/user/session/unregistered'
 
 export function useAuthState() {
     const { loggedIn, user, clear, ready, session, fetch } = useUserSession()

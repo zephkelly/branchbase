@@ -1,9 +1,13 @@
 import { H3Event } from 'h3'
+
 import { ProviderData } from '~~/server/types/userProvider'
-import { Provider, RegisteredUser, SecureRegisteredUser, UnregisteredUser, LinkableData } from '~~/types/user'
+
+import { Provider } from '~~/types/auth/user/providers';
+import { UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
+import { UnregisteredCredUser } from '~~/types/auth/user/session/credentials/unregistered';
+import { RegisteredUser } from '~~/types/auth/user/session/registered';
 
 import { getEmailProviderUser } from '~~/server/utils/database/user'
-import Credentials from '~/pages/register/credentials.vue';
 
 interface CredentialsLoginResponse {
     registered: boolean;
@@ -22,14 +26,9 @@ export async function handleCredentialsLogin(
     } = providerData
 
     try {
-        const existingUser: SecureRegisteredUser | null = await getEmailProviderUser(event, Provider.Credentials, provider_email)
+        const existingUser = await getEmailProviderUser(event, Provider.Credentials, provider_email)
 
         if (existingUser) {
-            console.log(existingUser.password_hash)
-            console.log(password)
-
-            console.log(await verifyPassword(existingUser.password_hash as string, password))
-            
             if (await verifyPassword(existingUser.password_hash as string, password) === false) {
                 const response: CredentialsLoginResponse = {
                     registered: true,
@@ -68,17 +67,16 @@ export async function handleCredentialsLogin(
         const linkableUsersAndProviders = await getUsersProvidersByEmail(event, provider_email);
 
         if (linkableUsersAndProviders) {
-            const temporaryLinkableUser: UnregisteredUser = {
+            const temporaryLinkableUser: UnregisteredCredUser = {
                 id: null,
                 username: null,
                 provider: Provider.Credentials,
-                provider_id: null,
                 provider_email,
                 provider_verified: false,
                 picture,
             }
 
-            const linkableData: LinkableData = {
+            const linkableData: UnregisteredLinkableData = {
                 provider_email,
                 existing_users_count: linkableUsersAndProviders.length,
             }
@@ -102,11 +100,10 @@ export async function handleCredentialsLogin(
             return response
         }
 
-        const temporaryUser: UnregisteredUser = {
+        const temporaryUser: UnregisteredCredUser = {
             id: null,
             username: null,
             provider: Provider.Credentials,
-            provider_id: null,
             provider_email,
             provider_verified: false,
             picture,

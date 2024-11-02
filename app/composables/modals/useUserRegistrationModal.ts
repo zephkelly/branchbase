@@ -1,5 +1,5 @@
 import { type User } from "#auth-utils"
-import { isUnregisteredUser } from "~~/types/user"
+import { isUnregisteredUser } from "~~/types/auth/user/session/unregistered"
 
 export const createUserRegistration = () => {
     const optedOutOfModals = ref(false)

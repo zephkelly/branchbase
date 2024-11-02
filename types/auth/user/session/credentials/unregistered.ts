@@ -1,14 +1,14 @@
-import { type SecureUnregisteredSessionData, type UnregisteredUser, type UnregisteredLinkableData, type VerifiedUnregisteredLinkableData } from "~~/types/auth/user/session/unregistered";
+import { type UnregisteredUser, type UnregisteredLinkableData, type VerifiedUnregisteredLinkableData } from "~~/types/auth/user/session/unregistered";
+import { type SecureSessionData } from "~~/types/auth/user/session/secure";
 
 // Unregistered cred user types
 
 // Unregistered cred user type
-export interface UnregisteredCredUser extends UnregisteredUser {
-    confirmed_password: boolean;
+export interface UnregisteredCredUser extends Omit<UnregisteredUser, "provider_id"> {
 }
 
 // Secure unregistered cred session data
-export interface SecureUnregisteredCredSessionData extends SecureUnregisteredSessionData {
+export interface SecureUnregisteredCredSessionData extends SecureSessionData {
     password_hash: string;
 }
 
@@ -17,6 +17,7 @@ export interface UnregisteredCredSession {
     user: UnregisteredCredUser;
     secure: SecureUnregisteredCredSessionData;
     logged_in_at: number;
+    confirmed_password: boolean;
 }
 
 // Unregistered cred session with linkable data

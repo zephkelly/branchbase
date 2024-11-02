@@ -1,11 +1,15 @@
 import { ref } from 'vue';
 import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
-import { SecureSession, UnregisteredUser, SecureRegisteredUser, UserSessionData } from '~~/types/user';
+// import { SecureSession, UnregisteredUser, SecureRegisteredUser, UserSessionData } from '~~/types/user';
+import { UnregisteredUser, SecureUnregisteredLinkableSessionData } from '~~/types/auth/user/session/unregistered';
+
 
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
 import { getOTPUsed } from '~~/server/utils/database/token';
+import { RegisteredUser } from '~~/types/auth/user/session/registered';
+import { SecureSessionData } from '#auth-utils';
 
 
 interface LinkProviderData {
@@ -51,10 +55,10 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const session = await getUserSession(event) as UserSessionData
+        const session = await getUserSession(event)
         const unregisteredUser: UnregisteredUser = session.user as UnregisteredUser
 
-        if (!session.user) {
+        if (!unregisteredUser) {
             return createError({
                 statusCode: 403,
                 statusMessage: 'You have not initiated the linking process properly'
@@ -75,7 +79,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        if (session.user.id !== null) {
+        if (unregisteredUser.id !== null) {
             return createError({
                 statusCode: 403,
                 statusMessage: 'You are already logged in'
@@ -90,7 +94,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const verifiedLinkableData = session.secure as SecureSession
+        const verifiedLinkableData = session.secure as SecureUnregisteredLinkableSessionData
         const secureLinkableUserProviderData = verifiedLinkableData.linkable_data
 
         if (!verifiedLinkableData || !secureLinkableUserProviderData) {
@@ -138,7 +142,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const linkedUser: SecureRegisteredUser = providerLinkResponse.data
+        const linkedUser = providerLinkResponse.data
 
         await replaceUserSession(event, {
             user: {

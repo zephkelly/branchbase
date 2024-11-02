@@ -37,7 +37,10 @@
 <script setup lang="ts">
 import { type UserSession } from '#auth-utils';
 import { computed } from 'vue'
-import { type RegisteredUser, type UnregisteredUser, isRegisteredUser } from '~~/types/user'
+// import { type RegisteredUser, type UnregisteredUser, isRegisteredUser } from '~~/types/user'
+import { type RegisteredUser, isRegisteredUser } from '~~/types/auth/user/session/registered';
+
+import { type UnregisteredUser } from '~~/types/auth/user/session/unregistered';
 
 // Base state without user
 interface BaseState {

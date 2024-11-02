@@ -1,4 +1,8 @@
-import { isRegisteredUser, Provider, UnregisteredUser, LinkableData, LinkableUserProviderData } from "~~/types/user"
+// import { isRegisteredUser, Provider, UnregisteredUser, LinkableData, LinkableUserProviderData } from "~~/types/user"
+import { isRegisteredUser } from "~~/types/auth/user/session/registered"
+import { UnregisteredUser, SecureUnregisteredLinkableSessionData, UnregisteredLinkableData } from "~~/types/auth/user/session/unregistered"
+import { UnregisteredCredUser } from "~~/types/auth/user/session/credentials/unregistered"
+import { Provider } from "~~/types/auth/user/providers"
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -23,22 +27,24 @@ export default defineEventHandler(async (event) => {
 
     // Get and validate session first
     const session = await getUserSession(event)
+    const unregisteredUser = session.user as UnregisteredUser
+    const secureSession = session.secure as SecureUnregisteredLinkableSessionData
 
-    if (!session?.user) {
+    if (!unregisteredUser) {
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
         })
     }
 
-    if (!session.secure?.provider_email) {
+    if (!secureSession.provider_email) {
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
         })
     }
 
-    if (email !== session.secure.provider_email) {
+    if (email !== secureSession.provider_email) {
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
@@ -52,34 +58,39 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    if (session.user.provider !== 'credentials' || session.user.provider_id !== null) {
+    if (unregisteredUser.provider !== Provider.Credentials || unregisteredUser.provider_id !== undefined) {
         return createError({
             statusCode: 409,
             statusMessage: 'Invalid provider'
         })
     }
 
-    const userSessionData = session.user as UnregisteredUser
-    const secureSessionData = session.secure
-
-    const hasLinkableData:boolean = secureSessionData.linkable_data !== undefined
+    const hasLinkableData: boolean = secureSession.linkable_data !== undefined
 
     if (hasLinkableData) {
         const hashedPassword = await hashPassword(password)
 
-        const temporaryLinkableUser: UnregisteredUser = {
+        const temporaryLinkableUser: UnregisteredCredUser = {
             id: null,
             username: null,
             provider: Provider.Credentials,
-            provider_id: null,
             provider_email: email,
             provider_verified: false,
             picture: '',
         }
 
-        const linkableData: LinkableData = {
+        const sessionLinkableData = session.linkable_data as UnregisteredLinkableData
+
+        if (!sessionLinkableData) {
+            return createError({
+                statusCode: 403,
+                statusMessage: 'No linkable account data found in session'
+            })
+        }
+
+        const linkableData: UnregisteredLinkableData = {
             provider_email: email,
-            existing_users_count: session.linkable_data?.existing_users_count as number,
+            existing_users_count: sessionLinkableData.existing_users_count as number,
         }
 
         await replaceUserSession(event, {
@@ -89,7 +100,7 @@ export default defineEventHandler(async (event) => {
             secure: {
                 provider_email: email,
                 provider_verified: false,
-                linkable_data: session.secure?.linkable_data as LinkableUserProviderData[],
+                linkable_data: secureSession.linkable_data,
                 password_hash: hashedPassword
             },
             loggedInAt: Date.now()
