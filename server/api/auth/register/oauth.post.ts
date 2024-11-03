@@ -48,7 +48,8 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    if (userSessionData.provider !== 'credentials' || userSessionData.provider_id !== null) {
+    console.log('userSessionData:', userSessionData)
+    if (userSessionData.provider === Provider.Credentials || userSessionData.provider_id === undefined) {
         return createError({
             statusCode: 409,
             statusMessage: 'Invalid provider',
