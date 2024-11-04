@@ -13,7 +13,7 @@ export interface SecureUnregisteredCredSessionData extends SecureSessionData {
 }
 
 export interface SecureUnregisteredLinkableCredSessionData extends SecureUnregisteredCredSessionData {
-    linkable_data: LinkableUserProviderData[];
+    linkable_users: LinkableUserProviderData[];
 }
 
 // Standard unregistered cred session

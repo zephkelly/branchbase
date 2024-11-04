@@ -68,7 +68,7 @@ export async function handleOAuthLogin(
                 secure: {
                     provider_email,
                     provider_verified,
-                    linkable_data: linkableUsersAndProviders
+                    linkable_users: linkableUsersAndProviders
                 },
                 loggedInAt: Date.now()
             }, {
@@ -76,7 +76,7 @@ export async function handleOAuthLogin(
             })
 
             console.log("returning linkable user")
-            return sendRedirect(event, '/register')
+            return sendRedirect(event, '/register/oauth')
         }
 
         // Handle new user case
@@ -102,7 +102,7 @@ export async function handleOAuthLogin(
         })
 
         console.log("returning temporary user")
-        return sendRedirect(event, '/register')
+        return sendRedirect(event, '/register/oauth')
     }
     catch (error) {
         console.error(`Error logging in with ${provider}:`, error)

@@ -60,7 +60,6 @@ const signInWithDiscord = async () => {
     await clearSession();
     window.location.href = '/api/auth/discord'
 }
-console.log(session.value)
 
 const emailInput = ref('');
 const passwordInput = ref('');

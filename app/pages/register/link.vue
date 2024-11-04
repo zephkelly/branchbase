@@ -10,7 +10,7 @@
                         <div
                             class="user"
                             :key="index"
-                            v-for="(account, index) in (session.value?.linkable_data as VerifiedUnregisteredCredLinkableSession).linkable_data">
+                            v-for="(account, index) in (session.value?.linkable_data as VerifiedUnregisteredLinkableData).linkable_users">
                                 <p>{{ account.username }}</p>
                                 <img :src="account.picture" alt="User Picture" />
                                 <p>{{ account.providers[0]?.provider }}</p>
@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { type UnregisteredUser } from '~~/types/auth/user/session/unregistered';
-import { type VerifiedUnregisteredCredLinkableSession } from '~~/types/auth/user/session/credentials/unregistered';
+import { type VerifiedUnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
 
 const { user, session, getNewSession } = useAuthState()
 
@@ -57,8 +57,8 @@ if (!UnregisteredUser) {
 const linkableUsersData = ref(session.value.linkable_data);
 
 // Verified session data
-const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredCredLinkableSession;
-const isVerified = ref(verifiedLinkableData.linkable_data !== undefined)
+const verifiedLinkableData = ref(session.value.linkable_data as VerifiedUnregisteredLinkableData);
+const isVerified = ref(verifiedLinkableData.value.linkable_users !== undefined)
 
 const router = useRouter()
 
@@ -126,13 +126,11 @@ const verifyOTP = async () => {
 
 const linkProvider = async (userIndex: number) => {
     try {
-        // const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredCredLinkableSession
-        
-        if (!verifiedLinkableData.linkable_data) {
+        if (!verifiedLinkableData.value) {
             throw new Error('Linkable data not found')
         }
 
-        const response = await fetch('/api/auth/register/link', {
+        const response: any = await $fetch('/api/auth/register/link', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -143,7 +141,7 @@ const linkProvider = async (userIndex: number) => {
             })
         })
 
-        if (!response.ok) {
+        if (response.statusCode !== 201) {
             throw new Error('Linking failed')
         }
 

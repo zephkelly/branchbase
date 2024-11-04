@@ -2,15 +2,15 @@
     <div class="page wrapper-container">
         <h1>Register</h1>
         <Authenticator>
-            <template #unregistered="{ user, session }">
+            <template #unregistered>
                 <section class="registration-container">
                     <div v-if="isPasswordConfirmed" class="password-confirmed">
                         <section v-if="isVerified" class="registration-container verified">
                             <NuxtLink to="/register/link">Actually I want to link!</NuxtLink>
                             <h2>Pick a username:</h2>
-                            <form @submit.prevent="">
+                            <form @submit.prevent="submitUsername()">
                                 <input type="text" id="username" name="username" required v-model="unregisteredUser.username" />
-                                <button @click="submitUsername()">Submit</button>
+                                <button type="submit">Submit</button>
                             </form>
                         </section>
                         <section v-else class="registration-container">
@@ -20,20 +20,17 @@
 
                             <!-- Linkable -->
                             <div v-if="hasLinkableUsers && showLinkAccounts" class="linkable">
-                                <div v-if="!noLinkQuery">
-                                    <!-- <div v-if="userWantsToLinkAccounts"> -->
-                                        <h2>Link to existing account</h2>
-                                        <p>We found other accounts using the email: {{ linkableUsersData.provider_email  }} </p>
-                                        <p>Do you want to link an email and password login to an existing account?</p>
-                                        <button @click="showLinkAccounts = false;">No</button>
-                                        <NuxtLink to="/register/link">Yes</NuxtLink>
-                                    <!-- </div> -->
-                                    
+                                <div>
+                                    <h2>Link to existing account</h2>
+                                    <p>We found other accounts using the email: {{ linkableUsersData.provider_email  }} </p>
+                                    <p>Do you want to link an email and password login to an existing account?</p>
+                                    <button @click="showLinkAccounts = false;">No</button>
+                                    <NuxtLink to="/register/link">Yes</NuxtLink>
                                 </div>
                             </div>
 
                             <!-- Unlinkable -->
-                             <div v-else class="unlinkable">
+                            <div v-else class="unlinkable">
                                 <h2>Email Verification</h2>
                                 <p>We need to verify your email with a short, OTP (one-time passcode).</p>
                                 <form @submit.prevent="">
@@ -45,7 +42,7 @@
                                         <button @click="verifyOTP()">Verify</button>
                                     </div>
                                 </form>
-                             </div>
+                            </div>
                         </section>         
                     </div>
                     <div v-else>
@@ -78,23 +75,15 @@ const route = useRoute()
 // Session data --------------------------------------------------------------
 const { user, session, getNewSession, clearSession } = useAuthState()
 
+console.log('Session:', session.value)
+
 const unregisteredUser = ref(user.value as UnregisteredCredUser);
 const linkableUsersData = ref(session.value.linkable_data as UnregisteredLinkableData);
 
 const hasLinkableUsers = ref(linkableUsersData.value !== null && linkableUsersData.value?.existing_users_count > 0)
-const noLinkQuery = ref(route.query.nolink === 'true')
-
 const showLinkAccounts = ref(true)
 
 const isPasswordConfirmed = computed(() => { return session.value?.confirmed_password })
-
-// Check if the redirect came from login ------------------------------------
-const isFromLogin = ref(route.query.from === 'login')
-
-if (isFromLogin.value) {
-    router.replace({ query: {} })
-}
-
 
 // Check if the user is actually unregistered --------------------------------
 if (!unregisteredUser.value) {
@@ -229,8 +218,6 @@ const submitUsername = async () => {
             username: unregisteredUser.value.username
         }),
     });
-
-    console.log(response)
 
     if (response.statusCode === 201) {
         await getNewSession()

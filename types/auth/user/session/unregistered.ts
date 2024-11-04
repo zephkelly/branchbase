@@ -28,11 +28,11 @@ export interface UnregisteredLinkableData {
 }
 
 export interface VerifiedUnregisteredLinkableData extends UnregisteredLinkableData {
-    linkable_data: LinkableUserProviderData[];
+    linkable_users: LinkableUserProviderData[];
 }
 
 export interface SecureUnregisteredLinkableSessionData extends SecureSessionData {
-    linkable_data: LinkableUserProviderData[];
+    linkable_users: LinkableUserProviderData[];
 }
 
 // Guard functions

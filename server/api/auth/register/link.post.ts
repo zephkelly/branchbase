@@ -95,9 +95,9 @@ export default defineEventHandler(async (event) => {
         }
 
         const verifiedLinkableData = session.secure as SecureUnregisteredLinkableSessionData
-        const secureLinkableUserProviderData = verifiedLinkableData.linkable_data
+        const secureLinkableUsers = verifiedLinkableData.linkable_users
 
-        if (!verifiedLinkableData || !secureLinkableUserProviderData) {
+        if (!verifiedLinkableData || !secureLinkableUsers) {
             return createError({
                 statusCode: 403,
                 statusMessage: 'No linkable account data found in session'
@@ -114,7 +114,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const existing_user_info = secureLinkableUserProviderData[existing_user_index.value]
+        const existing_user_info = secureLinkableUsers[existing_user_index.value]
         const { provider: existing_provider, provider_id: existing_provider_id } = existing_user_info.providers[0]
 
         const desired_user = await getProviderUser(event, existing_provider, existing_provider_id)
@@ -127,11 +127,6 @@ export default defineEventHandler(async (event) => {
         }
 
         const desired_user_id = desired_user.id
-
-        // const unregisteredUser: UnregisteredUser = {
-        //     ...unregisteredUser,
-        //     provider_verified: (verifiedLinkableData.provider_verified) ? verifiedLinkableData.provider_verified : false,
-        // }
         
         const providerLinkResponse = await createUserProvider(event, desired_user_id, session)
 
@@ -162,6 +157,7 @@ export default defineEventHandler(async (event) => {
         setResponseStatus(event, 201)
 
         return {
+            statusCode: 201,
             message: 'Linked successfully'
         }
     }

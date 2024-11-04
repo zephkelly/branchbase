@@ -59,8 +59,6 @@ export async function handleRegisterCredentials(
                 existing_users_count: linkableUsersAndProviders.length,
             }
 
-            console.log('Creating password hash')
-
             const session: UnregisteredCredLinkableSession = {
                 user: temporaryUser,
                 confirmed_password: true,
@@ -68,20 +66,26 @@ export async function handleRegisterCredentials(
                 secure: {
                     provider_email: email,
                     provider_verified: false,
-                    linkable_data: linkableUsersAndProviders,
+                    linkable_users: linkableUsersAndProviders,
                     password_hash: password_hash
                 },
                 logged_in_at: Date.now()
             }
+
+            console.log('Creating linkable session')
     
-            await setUserSession(event, {
+            await replaceUserSession(event, {
                 ...session
             }, {
                 maxAge: 60 * 60 // 1 hour
             })
     
-            setResponseStatus(event, 200)
-            return "New linkable user"
+            setResponseStatus(event, 200, "Ok")
+
+            return {
+                statusCode: 200,
+                statusMessage: 'Linkable user'
+            }
         }
 
         console.log('Creating password hash')
