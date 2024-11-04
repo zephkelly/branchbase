@@ -1,5 +1,5 @@
 <template>
-    <div class="page wrapper-container">
+    <!-- <div class="page wrapper-container">
         <h1>Register</h1>
         <Authenticator>
             <template #unregistered="{ user, session }">
@@ -34,7 +34,7 @@
                     </div>
 
 
-                    <!-- <h2>Create an account</h2>
+                    <h2>Create an account</h2>
                     <button @click="changeCredentials()">Sign up with a different account</button>
                     <form @submit.prevent="submitUnregisteredSession">
                         <label for="email">Email</label>
@@ -51,11 +51,11 @@
                         <input type="password" id="confirm-passwordInput" name="confirm-passwordInput" required v-model="confirmPasswordInput"/>
 
                         <button type="submit">Create Account</button>
-                    </form> -->
+                    </form>
                 </section>
             </template>
         </Authenticator>
-    </div>
+    </div> -->
 </template>
 
 <script setup lang="ts">
@@ -68,6 +68,8 @@ const route = useRoute()
 
 // Session data --------------------------------------------------------------
 const { user, session, getNewSession, clearSession } = useAuthState()
+
+console.log(user.value)
 
 const unregisteredUser = ref(user.value as UnregisteredUser);
 const linkableUsersData = ref(session.value.linkable_data as UnregisteredLinkableData);
@@ -89,7 +91,7 @@ if (isFromLogin.value) {
 
 
 // Check if the user is actually unregistered --------------------------------
-if (!unregisteredUser.value || !linkableUsersData.value) {
+if (!unregisteredUser.value) {
     console.error('No unregistered user found')
     navigateTo('/register')
 }

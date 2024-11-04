@@ -107,24 +107,5 @@ const signInWithCredentials = async () => {
             isInvalidCredentials.value = false;
         }
     }
-
-
-
-
-
-    // if (response.ok) {
-    //     await getNewSession();
-    //     isInvalidCredentials.value = false;
-    // }
-    // else {
-    //     console.error('Error signing in');
-
-    //     if (response.status === 401) {
-    //         isInvalidCredentials.value = true;
-    //     }
-    //     else {
-    //         isInvalidCredentialsCreateAccount.value = true;
-    //     }
-    // }
 }
 </script>

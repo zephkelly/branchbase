@@ -26,15 +26,6 @@ export interface UnregisteredLinkableData {
     provider_email: string;
     existing_users_count: number;
 }
-export interface VerifiedUnregisteredLinkableData extends UnregisteredLinkableData {
-    linkable_data: LinkableUserProviderData[];
-}
-
-
-// Kept on backend during linkable unregistered session
-export interface SecureUnregisteredLinkableSessionData extends SecureSessionData {
-    linkable_data: LinkableUserProviderData[];
-}
 
 
 // Guard functions

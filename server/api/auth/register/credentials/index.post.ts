@@ -1,7 +1,7 @@
 // import { isRegisteredUser, Provider, UnregisteredUser, LinkableData, LinkableUserProviderData } from "~~/types/user"
 import { isRegisteredUser } from "~~/types/auth/user/session/registered"
-import { UnregisteredUser, SecureUnregisteredLinkableSessionData, UnregisteredLinkableData } from "~~/types/auth/user/session/unregistered"
-import { UnregisteredCredUser } from "~~/types/auth/user/session/credentials/unregistered"
+import { UnregisteredUser, UnregisteredLinkableData } from "~~/types/auth/user/session/unregistered"
+import { UnregisteredCredUser, SecureUnregisteredLinkableCredSessionData } from "~~/types/auth/user/session/credentials/unregistered"
 import { Provider } from "~~/types/auth/user/providers"
 
 export default defineEventHandler(async (event) => {
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     // Get and validate session first
     const session = await getUserSession(event)
     const unregisteredUser = session.user as UnregisteredUser
-    const secureSession = session.secure as SecureUnregisteredLinkableSessionData
+    const secureSession = session.secure as SecureUnregisteredLinkableCredSessionData
 
     if (!unregisteredUser) {
         return createError({

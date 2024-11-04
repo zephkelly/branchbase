@@ -1,4 +1,4 @@
-import { type UnregisteredUser, type UnregisteredLinkableData, type VerifiedUnregisteredLinkableData } from "~~/types/auth/user/session/unregistered";
+import { type UnregisteredUser, type UnregisteredLinkableData, type LinkableUserProviderData } from "~~/types/auth/user/session/unregistered";
 import { type SecureSessionData } from "~~/types/auth/user/session/secure";
 
 // Unregistered cred user types
@@ -12,28 +12,28 @@ export interface SecureUnregisteredCredSessionData extends SecureSessionData {
     password_hash: string;
 }
 
+export interface SecureUnregisteredLinkableCredSessionData extends SecureUnregisteredCredSessionData {
+    linkable_data: LinkableUserProviderData[];
+}
+
 // Standard unregistered cred session
 export interface UnregisteredCredSession {
     user: UnregisteredCredUser;
     secure: SecureUnregisteredCredSessionData;
-    logged_in_at: number;
     confirmed_password: boolean;
+    logged_in_at: number;
 }
 
 // Unregistered cred session with linkable data
-export interface UnregisteredCredLinkableSession {
-    user: UnregisteredCredUser;
-    secure: SecureUnregisteredCredSessionData;
+export interface UnregisteredCredLinkableSession extends UnregisteredCredSession {
+    secure: SecureUnregisteredLinkableCredSessionData
     linkable_data: UnregisteredLinkableData;
-    logged_in_at: number;
 }
 
 // Verified unregistered cred session with extra linkable data
-export interface VerifiedUnregisteredCredLinkableSession {
-    user: UnregisteredCredUser & { confirmed_password: true };
-    secure: SecureUnregisteredCredSessionData;
-    linkable_data: VerifiedUnregisteredLinkableData;
-    logged_in_at: number;
+export interface VerifiedUnregisteredCredLinkableSession extends UnregisteredCredSession {
+    secure: SecureUnregisteredLinkableCredSessionData;
+    linkable_data: LinkableUserProviderData[];
 }
 
 
