@@ -1,5 +1,6 @@
-import { type UnregisteredUser, type UnregisteredLinkableData, type LinkableUserProviderData } from "~~/types/auth/user/session/unregistered";
+import { type UnregisteredUser, type UnregisteredLinkableData, type LinkableUserProviderData, type VerifiedUnregisteredLinkableData } from "~~/types/auth/user/session/unregistered";
 import { type SecureSessionData } from "~~/types/auth/user/session/secure";
+import { Provider } from "../../providers";
 
 // Unregistered cred user types
 
@@ -33,11 +34,11 @@ export interface UnregisteredCredLinkableSession extends UnregisteredCredSession
 // Verified unregistered cred session with extra linkable data
 export interface VerifiedUnregisteredCredLinkableSession extends UnregisteredCredSession {
     secure: SecureUnregisteredLinkableCredSessionData;
-    linkable_data: LinkableUserProviderData[];
+    linkable_data: VerifiedUnregisteredLinkableData;
 }
 
 
 // Guard functions
-export function isUnregisteredCredUser(user: any): user is UnregisteredCredUser {
-    return user.id === null;
+export function isUnregisteredCredSession(session: any): session is UnregisteredCredSession {
+    return session.user.id === null && session.user.provider_id !== null && session.user.provider === Provider.Credentials;
 }

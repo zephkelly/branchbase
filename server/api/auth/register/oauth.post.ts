@@ -48,7 +48,6 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    console.log('userSessionData:', userSessionData)
     if (userSessionData.provider === Provider.Credentials || userSessionData.provider_id === undefined) {
         return createError({
             statusCode: 409,

@@ -72,8 +72,6 @@ export async function handleRegisterCredentials(
                 logged_in_at: Date.now()
             }
 
-            console.log('Creating linkable session')
-    
             await replaceUserSession(event, {
                 ...session
             }, {
@@ -87,8 +85,6 @@ export async function handleRegisterCredentials(
                 statusMessage: 'Linkable user'
             }
         }
-
-        console.log('Creating password hash')
 
         const session: UnregisteredCredSession = {
             user: temporaryUser,

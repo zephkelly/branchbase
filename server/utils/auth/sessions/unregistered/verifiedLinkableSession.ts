@@ -1,53 +1,112 @@
 import { H3Event } from "h3";
-import { UserSession } from "#auth-utils";
-// import { VerifiedLinkableData, LinkableData, LinkableUserProviderData, UnregisteredUser, SecureSessionDataType } from "~~/types/user"
-import { UnregisteredUser, UnregisteredLinkableData, VerifiedUnregisteredLinkableData, LinkableUserProviderData, SecureUnregisteredLinkableSessionData } from "~~/types/auth/user/session/unregistered";
-import { SecureUnregisteredCredSessionData } from "~~/types/auth/user/session/credentials/unregistered";
 
-export async function createVerifiedLinkableSession(event: H3Event, userSession: UserSession) {
-    try {
-        const temporaryVerifiedLinkableUser: UnregisteredUser = userSession.user as UnregisteredUser
+import { VerifiedUnregisteredCredLinkableSession, UnregisteredCredLinkableSession, isUnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered";
+import { UnregisteredOAuthLinkableSession, VerifiedUnregisteredOAuthLinkableSession, isUnregisteredOAuthSession } from "~~/types/auth/user/session/oauth/unregistered";
 
-        const linkableData: UnregisteredLinkableData = userSession.linkable_data as UnregisteredLinkableData
-
-        const secureData = userSession.secure as SecureUnregisteredLinkableSessionData
-        const secureLinkableUsers = secureData.linkable_users as LinkableUserProviderData[]
-
-        const credentialsPasswordHash = (userSession.secure as SecureUnregisteredCredSessionData).password_hash || undefined
-    
-        if (!linkableData || !secureLinkableUsers) {
-            throw new Error('Invalid linkable data')
-        }
-    
-        if (!temporaryVerifiedLinkableUser) {
-            throw new Error('Invalid user session')
-        }
-    
-        const verifiedLinkableData: VerifiedUnregisteredLinkableData = {
-            ...linkableData,
-            linkable_users: secureLinkableUsers,
-        }
-    
-        temporaryVerifiedLinkableUser.provider_verified = true
-        
-        await replaceUserSession(event, {
-            user: temporaryVerifiedLinkableUser,
-            linkable_data: verifiedLinkableData,
-            confirmed_password: userSession.confirmed_password as boolean | undefined,
-            secure: {
-                linkable_users: secureLinkableUsers,
-                provider_email: secureData.provider_email,
-                provider_verified: true,
-                password_hash: credentialsPasswordHash
-            },
-            loggedInAt: Date.now()
-        }, {
-            maxAge: 60 * 60
-        })
-
-        console.log('Verified linkable session created')
+export async function createVerifiedLinkableSession(event: H3Event, session: UnregisteredOAuthLinkableSession | UnregisteredCredLinkableSession) {
+    if (isUnregisteredOAuthSession(session)) {
+        return createVerifiedLinkableUnregisteredOAuthSession(event, session)
     }
-    catch (error) {
-        console.error('Error creating verified linkable session:', error)
+
+    if (isUnregisteredCredSession(session)) {
+        return createVerifiedLinkableUnregisteredCredentialsSession(event, session)
+    }
+}
+
+export async function createVerifiedLinkableUnregisteredOAuthSession(event: H3Event, session: UnregisteredOAuthLinkableSession) {
+    const unregisteredLinkableUser = session.user
+    const publicLinkableData = session.linkable_data
+    const secureLinkableUsers = session.secure.linkable_users
+
+    if (!unregisteredLinkableUser) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: 'Invalid user session'
+        })
+    }
+
+    if (!unregisteredLinkableUser.provider_verified === null && unregisteredLinkableUser.provider_verified === true) {
+        throw createError({
+            statusCode: 409,
+            statusMessage: 'Already verified'
+        })
+    }
+
+    const verifiedUnregisteredSession: VerifiedUnregisteredOAuthLinkableSession = {
+        user: unregisteredLinkableUser,
+        secure: {
+            provider_email: unregisteredLinkableUser.provider_email,
+            provider_verified: true,
+            linkable_users: secureLinkableUsers
+        },
+        linkable_data: {
+            ...publicLinkableData,
+            linkable_users: secureLinkableUsers
+        },
+        logged_in_at: Date.now()
+    }
+
+    await replaceUserSession(event, {
+        ...verifiedUnregisteredSession
+    }, {
+        maxAge: 60 * 60
+    })
+
+    setResponseStatus(event, 200, "Ok")
+    return {
+        statusCode: 200,
+        statusMessage: "Ok",
+        data: verifiedUnregisteredSession
+    }
+}
+
+export async function createVerifiedLinkableUnregisteredCredentialsSession(event: H3Event, session: UnregisteredCredLinkableSession) {
+    const unregisteredLinkableUser = session.user
+    const confirmedPassword: boolean = session.confirmed_password
+    const passwordHash: string = session.secure.password_hash
+    const publicLinkableData = session.linkable_data
+    const secureLinkableUsers = session.secure.linkable_users
+
+    if (!unregisteredLinkableUser) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: 'Invalid user session'
+        })
+    }
+
+    if (!unregisteredLinkableUser.provider_verified === null && unregisteredLinkableUser.provider_verified === true) {
+        throw createError({
+            statusCode: 409,
+            statusMessage: 'Already verified'
+        })
+    }
+
+    const verifiedUnregisteredSession: VerifiedUnregisteredCredLinkableSession = {
+        user: unregisteredLinkableUser,
+        secure: {
+            provider_email: unregisteredLinkableUser.provider_email,
+            provider_verified: true,
+            password_hash: passwordHash,
+            linkable_users: secureLinkableUsers
+        },
+        confirmed_password: confirmedPassword,
+        linkable_data: {
+            ...publicLinkableData,
+            linkable_users: secureLinkableUsers
+        },
+        logged_in_at: Date.now()
+    }
+
+    await replaceUserSession(event, {
+        ...verifiedUnregisteredSession
+    }, {
+        maxAge: 60 * 60
+    })
+
+    setResponseStatus(event, 200, "Ok")
+    return {
+        statusCode: 200,
+        statusMessage: "Ok",
+        data: verifiedUnregisteredSession
     }
 }

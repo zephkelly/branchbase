@@ -1,11 +1,11 @@
-import { type UnregisteredUser, type UnregisteredLinkableData, type SecureUnregisteredLinkableSessionData } from "~~/types/auth/user/session/unregistered";
-
-// Oauth unregistered session types
+import { Provider } from "../../providers";
+import { type SecureSessionData } from "~~/types/auth/user/session/secure";
+import { type UnregisteredUser, type UnregisteredLinkableData, type SecureUnregisteredLinkableSessionData, type VerifiedUnregisteredLinkableData } from "~~/types/auth/user/session/unregistered";
 
 // Standard unregistered oauth session
 export interface UnregisteredOAuthSession {
     user: UnregisteredUser;
-    secure: SecureUnregisteredLinkableSessionData;
+    secure: SecureSessionData;
     logged_in_at: number;
 }
 
@@ -21,12 +21,12 @@ export interface UnregisteredOAuthLinkableSession {
 export interface VerifiedUnregisteredOAuthLinkableSession {
     user: UnregisteredUser;
     secure: SecureUnregisteredLinkableSessionData;
-    linkable_data: SecureUnregisteredLinkableSessionData;
+    linkable_data: VerifiedUnregisteredLinkableData;
     logged_in_at: number;
 }
 
 
 // Guard functions
 export function isUnregisteredOAuthSession(session: any): session is UnregisteredOAuthSession {
-    return session.user.id === null;
+    return session.user.id === null && session.user.provider_id !== null && session.user.provider !== Provider.Credentials;
 }
