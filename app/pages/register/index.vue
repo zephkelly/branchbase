@@ -1,9 +1,7 @@
 <template>
     <div class="page wrapper-container">
         <Authenticator>
-            <template #default="{ user }">
-            </template>
-            <template #public="{ user }">
+            <template #public>
                 <section class="register default">
                     <h1 class="title">Create an account</h1>
                     <div class="oauth">
@@ -43,7 +41,10 @@
 </template>
 
 <script setup lang="ts">
-const { clearSession, getNewSession } = useAuthState();
+import { Provider } from '~~/types/auth/user/providers';
+import { isRegisteredUser } from '~~/types/auth/user/session/registered';
+
+const { clearSession, getNewSession, session, user } = useAuthState();
 
 const signInWithGoogle = async () => {
     await clearSession();
@@ -59,6 +60,7 @@ const signInWithDiscord = async () => {
     await clearSession();
     window.location.href = '/api/auth/discord'
 }
+console.log(session.value)
 
 const emailInput = ref('');
 const passwordInput = ref('');
@@ -80,13 +82,24 @@ const signInWithCredentials = async () => {
             }),
         });
 
-        console.log(response)
-    
         await getNewSession();
         navigateTo('/register/credentials');
     }
     catch (error: any) {
         console.error('Error signing in:', error);
+    }
+}
+
+if (user.value) {
+    if (isRegisteredUser(user.value)) {
+        navigateTo('/');
+    }
+
+    if (user.value.provider === Provider.Credentials) {
+        navigateTo('/register/credentials');
+    }
+    else {
+        navigateTo('/register/oauth');
     }
 }
 </script>

@@ -295,9 +295,10 @@ export async function createUser(
     username: string,
     provider_email: string,
     provider: Provider,
-    provider_id: string,
+    provider_id: string | null,
     provider_verified: boolean,
-    picture: string
+    picture: string,
+    password_hash?: string
 ): Promise<UserCreationResponse> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
@@ -333,9 +334,10 @@ export async function createUser(
                 provider_id,
                 provider_email,
                 provider_verified,
-                is_primary
+                is_primary,
+                password
             )
-            VALUES ($1, $2, $3, $4, $5, $6)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
         `
         const providerValues = [
@@ -344,7 +346,8 @@ export async function createUser(
             provider_id,
             provider_email,
             provider_verified,
-            true
+            true,
+            password_hash
         ]
 
         await client.query(providerQuery, providerValues)

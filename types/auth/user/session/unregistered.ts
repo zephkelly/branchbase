@@ -30,5 +30,13 @@ export interface UnregisteredLinkableData {
 
 // Guard functions
 export function isUnregisteredUser(user: any): user is UnregisteredUser {
-    return user.id === null;
+    if (user === null) {
+        return false;
+    }
+
+    if (user.id !== undefined || user.id !== null) {
+        return false;
+    }
+
+    return true;
 }

@@ -10,5 +10,13 @@ export interface RegisteredUser {
 
 // Guard functions
 export function isRegisteredUser(user: any): user is RegisteredUser {
-    return user.id !== null;
+    if (user === null) {
+        return false;
+    }
+    
+    if (user.id === undefined || user.id === null) {
+        return false;
+    }
+
+    return true;
 }

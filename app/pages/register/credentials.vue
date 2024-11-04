@@ -1,28 +1,59 @@
 <template>
-    <!-- <div class="page wrapper-container">
+    <div class="page wrapper-container">
         <h1>Register</h1>
         <Authenticator>
             <template #unregistered="{ user, session }">
-                <section v-if="isVerified" class="registration-container verified">
-                    <h2>Linkable Users</h2>
-                </section>
-                <section v-else class="registration-container">
-                    <div v-if="hasLinkableUsers && !noLinkQuery && !showLinkAccounts" class="linkable">
-                        <div v-if="userWantsToLinkAccounts">
-                            <h2>Link to existing account</h2>
-                            <p>We found other accounts using the email: {{ linkableUsersData.provider_email  }} </p>
-                            <p>Do you want to link an email and password login to an existing account?</p>
-                            <button @click="showLinkAccounts = false; userWantsToLinkAccounts = false;">No</button>
-                            <button @click="showLinkAccounts = true;">Yes</button>
-                        </div>
-                        <div v-else>
-                            <button @click="showLinkAccounts = false; userWantsToLinkAccounts = true;">Back</button>
-                        </div>
+                
+
+                <!-- Unlinkable -->
+                <section class="registration-container">
+                    <div v-if="isPasswordConfirmed" class="password-confirmed">
+                        <section v-if="isVerified" class="registration-container verified">
+                            <NuxtLink to="/register/link">Actually I want to link!</NuxtLink>
+                            <h2>Pick a username:</h2>
+                            <form @submit.prevent="">
+                                <input type="text" id="username" name="username" required v-model="unregisteredUser.username" />
+                                <button @click="submitUsername()">Submit</button>
+                            </form>
+                        </section>
+                        <section v-else class="registration-container">
+                            <div v-if="!showLinkAccounts">
+                                <button @click="showLinkAccounts = true;">Back</button>
+                            </div>
+
+                            <!-- Linkable -->
+                            <div v-if="hasLinkableUsers && showLinkAccounts" class="linkable">
+                                <div v-if="!noLinkQuery">
+                                    <!-- <div v-if="userWantsToLinkAccounts"> -->
+                                        <h2>Link to existing account</h2>
+                                        <p>We found other accounts using the email: {{ linkableUsersData.provider_email  }} </p>
+                                        <p>Do you want to link an email and password login to an existing account?</p>
+                                        <button @click="showLinkAccounts = false;">No</button>
+                                        <NuxtLink to="/register/link">Yes</NuxtLink>
+                                    <!-- </div> -->
+                                    
+                                </div>
+                            </div>
+
+                            <!-- Unlinkable -->
+                             <div v-else class="unlinkable">
+                                <h2>Email Verification</h2>
+                                <p>We need to verify your email with a short, OTP (one-time passcode).</p>
+                                <form @submit.prevent="">
+                                    <input type="email" id="email" name="email" required v-model="unregisteredUser.provider_email" disabled />
+                                    <button @click="sendVerificationOTP()">Send Code</button>
+                                    <div v-if="codeSent" >
+                                        <label for="code">Code</label>
+                                        <input type="text" id="code" name="code" required v-model="codeInput" />
+                                        <button @click="verifyOTP()">Verify</button>
+                                    </div>
+                                </form>
+                             </div>
+                        </section>         
                     </div>
-                    <div v-if="hasLinkableUsers && !noLinkQuery && showLinkAccounts" class="verify">
-                        <button @click="showLinkAccounts = false;">Back</button>
-                        <h2>Let's confirm your password</h2>
-                        <form @submit.prevent="" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div v-else>
+                        <h2>Register with email</h2>
+                        <form @submit.prevent="">
                             <label for="email">Email</label>
                             <input type="email" id="email" name="email" required v-model="unregisteredUser.provider_email" disabled />
                             <label for="password">Password</label>
@@ -32,36 +63,17 @@
                             <button @click="submitUnregisteredLinkableCredentials()">Submit</button>
                         </form>
                     </div>
-
-
-                    <h2>Create an account</h2>
-                    <button @click="changeCredentials()">Sign up with a different account</button>
-                    <form @submit.prevent="submitUnregisteredSession">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required v-model="unregisteredUser.provider_email" disabled />
-
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required v-model="unregisteredUser.username" />
-
-                        <p>We need to confirm your password</p>
-                        <label for="passwordInput">Password</label>
-                        <input type="password" id="passwordInput" name="passwordInput" required v-model="passwordInput"/>
-
-                        <label for="confirm-passwordInput">Confirm Password</label>
-                        <input type="password" id="confirm-passwordInput" name="confirm-passwordInput" required v-model="confirmPasswordInput"/>
-
-                        <button type="submit">Create Account</button>
-                    </form>
                 </section>
             </template>
         </Authenticator>
-    </div> -->
+    </div>
 </template>
 
 <script setup lang="ts">
 // import { Provider, type LinkableData, type UnregisteredUser } from '~~/types/user';
 import { Provider } from '~~/types/auth/user/providers';
-import { type UnregisteredUser, type UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
+import { type UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
+import { type UnregisteredCredUser } from '~~/types/auth/user/session/credentials/unregistered';
 
 const router = useRouter()
 const route = useRoute()
@@ -69,18 +81,15 @@ const route = useRoute()
 // Session data --------------------------------------------------------------
 const { user, session, getNewSession, clearSession } = useAuthState()
 
-console.log(user.value)
-
-const unregisteredUser = ref(user.value as UnregisteredUser);
+const unregisteredUser = ref(user.value as UnregisteredCredUser);
 const linkableUsersData = ref(session.value.linkable_data as UnregisteredLinkableData);
 
 const hasLinkableUsers = ref(linkableUsersData.value !== null && linkableUsersData.value?.existing_users_count > 0)
 const noLinkQuery = ref(route.query.nolink === 'true')
 
-const showLinkAccounts = ref(false)
-const userWantsToLinkAccounts = ref(true)
+const showLinkAccounts = ref(true)
 
-const isVerified = ref(unregisteredUser.value?.provider_verified)
+const isPasswordConfirmed = computed(() => { return session.value?.confirmed_password })
 
 // Check if the redirect came from login ------------------------------------
 const isFromLogin = ref(route.query.from === 'login')
@@ -120,7 +129,7 @@ async function submitUnregisteredLinkableCredentials() {
         return
     }
 
-    const response = await $fetch('/api/auth/register/credentials', {
+    const response: any = await $fetch('/api/auth/register/credentials', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -144,4 +153,102 @@ async function submitUnregisteredLinkableCredentials() {
         alert('Invalid credentials')
     }
 }
+
+
+// Email verification --------------------------------------------------------
+const codeSent = ref(false)
+const isVerified = ref(unregisteredUser.value?.provider_verified)
+
+const errorSendingVerification = ref(false)
+const errorMessage = ref('')
+const sendVerificationOTP = async () => {
+    codeSent.value = false
+    errorSendingVerification.value = false
+    errorMessage.value = ''
+    
+    try {
+        const response = await fetch('/api/auth/verification/linking/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        
+        if (!response.ok) {
+            errorSendingVerification.value = true
+            errorMessage.value = response.statusText
+            throw new Error('Verification sending failed')
+        }
+        else {
+            codeSent.value = true
+        }
+        
+    }
+    catch (error) {
+        console.error('Error during registration:', error)
+    }
+}
+
+const codeInput = ref('')
+const verifiedOTPId = ref('')
+const verifyOTP = async () => {
+    try {
+        const response = await fetch('/api/auth/verification/linking/verify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                otp: codeInput.value
+            })
+        })
+
+        if (!response.ok) {
+            console.log(response)
+            throw new Error('Verification failed')
+        }
+
+        const data = await response.json()
+        verifiedOTPId.value = data.otp_id
+
+        isVerified.value = true
+
+        await getNewSession()
+    }
+    catch (error) {
+        console.error('Error during registration:', error)
+    }
+}
+
+
+// Submit username -----------------------------------------------------------
+const submitUsername = async () => {
+    const response: any = await $fetch('/api/auth/register/credentials', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            username: unregisteredUser.value.username
+        }),
+    });
+
+    console.log(response)
+
+    if (response.statusCode === 201) {
+        await getNewSession()
+        navigateTo('/')
+    }
+    else {
+        alert('Invalid username')
+    }
+}
 </script>
+
+<style lang="scss" scoped>
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+</style>
