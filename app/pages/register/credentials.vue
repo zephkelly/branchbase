@@ -3,9 +3,6 @@
         <h1>Register</h1>
         <Authenticator>
             <template #unregistered="{ user, session }">
-                
-
-                <!-- Unlinkable -->
                 <section class="registration-container">
                     <div v-if="isPasswordConfirmed" class="password-confirmed">
                         <section v-if="isVerified" class="registration-container verified">

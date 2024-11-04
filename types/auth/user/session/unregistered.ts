@@ -27,6 +27,10 @@ export interface UnregisteredLinkableData {
     existing_users_count: number;
 }
 
+export interface VerifiedUnregisteredLinkableData extends UnregisteredLinkableData {
+    linkable_data: LinkableUserProviderData[];
+}
+
 export interface SecureUnregisteredLinkableSessionData extends SecureSessionData {
     linkable_data: LinkableUserProviderData[];
 }

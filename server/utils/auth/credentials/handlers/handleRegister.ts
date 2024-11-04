@@ -59,6 +59,8 @@ export async function handleRegisterCredentials(
                 existing_users_count: linkableUsersAndProviders.length,
             }
 
+            console.log('Creating password hash')
+
             const session: UnregisteredCredLinkableSession = {
                 user: temporaryUser,
                 confirmed_password: true,
@@ -81,6 +83,8 @@ export async function handleRegisterCredentials(
             setResponseStatus(event, 200)
             return "New linkable user"
         }
+
+        console.log('Creating password hash')
 
         const session: UnregisteredCredSession = {
             user: temporaryUser,

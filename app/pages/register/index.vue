@@ -1,8 +1,8 @@
 <template>
     <div class="page wrapper-container">
-        <Authenticator>
-            <template #public>
-                <section class="register default">
+        <section class="register default">
+            <Authenticator>
+                <template #public>
                     <h1 class="title">Create an account</h1>
                     <div class="oauth">
                         <button class="auth-button google" @click="signInWithGoogle">Sign up with Google</button>
@@ -34,9 +34,9 @@
                             <button type="submit">Create Account</button>
                         </form>
                     </div>
-                </section>
-            </template>
-        </Authenticator>
+                </template>
+            </Authenticator>
+        </section>
     </div>
 </template>
 

@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
     const secureSession = session.secure as SecureUnregisteredCredSessionData
 
     if (!unregisteredUser) {
+        console.log('no unregistered user')
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
@@ -28,6 +29,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!secureSession.provider_email) {
+        console.log('no provider email')
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
@@ -47,8 +49,11 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Invalid provider'
         })
     }
+
+    console.log('secureSession', secureSession)
     
     if (!secureSession.password_hash) {
+        console.log('no password hash')
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'

@@ -14,7 +14,7 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
 
     try {
         const session = await getUserSession(event)
-        const secureData = session?.secure as SecureSessionData
+        const secureData = session?.secure as any
         const email = (secureData.provider_email) ? secureData.provider_email : null
 
         if (!session || !email) {
