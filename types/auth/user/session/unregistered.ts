@@ -27,6 +27,9 @@ export interface UnregisteredLinkableData {
     existing_users_count: number;
 }
 
+export interface SecureUnregisteredLinkableSessionData extends SecureSessionData {
+    linkable_data: LinkableUserProviderData[];
+}
 
 // Guard functions
 export function isUnregisteredUser(user: any): user is UnregisteredUser {

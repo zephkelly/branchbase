@@ -1,17 +1,16 @@
 <template>
-    <!-- <div class="page wrapper-container" v-if="!pageLoading"> -->
+    <div class="page wrapper-container">
         <Authenticator>
             <template #unregistered="{ user, session }">
                 <h1>Register</h1>
                 <a href="/register?nolink=true">Actually i dont want to link</a>
                 <div class="linkable-users" v-if="isVerified">
                     <h2>Linkable Users</h2>
-                    <!-- <p>{{ session.value?.linkable_data }}</p> -->
                     <div class="users" style="display: flex; flex-direction: row;">
                         <div
                             class="user"
                             :key="index"
-                            v-for="(account, index) in (session.value?.linkable_data as VerifiedUnregisteredLinkableData).linkable_data">
+                            v-for="(account, index) in (session.value?.linkable_data as VerifiedUnregisteredCredLinkableSession).linkable_data">
                                 <p>{{ account.username }}</p>
                                 <img :src="account.picture" alt="User Picture" />
                                 <p>{{ account.providers[0]?.provider }}</p>
@@ -38,15 +37,12 @@
                 <p>Loading authenticator...</p>
             </template>
         </Authenticator>
-    <!-- </div>
-    <div v-else>
-        <p>Loading...</p>
-    </div> -->
+    </div>
 </template>
 
 <script setup lang="ts">
-// import { type LinkableData, type VerifiedLinkableData, type UnregisteredUser, Provider } from '~~/types/user';
-import { type LinkableUserProviderData, type UnregisteredUser, type VerifiedUnregisteredLinkableData } from '~~/types/auth/user/session/unregistered';
+import { type UnregisteredUser } from '~~/types/auth/user/session/unregistered';
+import { type VerifiedUnregisteredCredLinkableSession } from '~~/types/auth/user/session/credentials/unregistered';
 
 const { user, session, getNewSession } = useAuthState()
 
@@ -61,7 +57,7 @@ if (!UnregisteredUser) {
 const linkableUsersData = ref(session.value.linkable_data);
 
 // Verified session data
-const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredLinkableData;
+const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredCredLinkableSession;
 const isVerified = ref(verifiedLinkableData.linkable_data !== undefined)
 
 const router = useRouter()
@@ -130,7 +126,7 @@ const verifyOTP = async () => {
 
 const linkProvider = async (userIndex: number) => {
     try {
-        const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredLinkableData
+        // const verifiedLinkableData = session.value.linkable_data as VerifiedUnregisteredCredLinkableSession
         
         if (!verifiedLinkableData.linkable_data) {
             throw new Error('Linkable data not found')

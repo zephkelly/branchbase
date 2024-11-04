@@ -1,10 +1,5 @@
-// import { navigateTo } from 'nuxt/app'
-// import { ref } from 'vue'
-// import { handleCredentialsLogin } from '~~/server/utils/auth/handlers/credentialsHandler'
-
-// import { getRandomAvatar } from '~~/server/utils/avatarSelector'
-
 import { handleRegisterCredentials } from "~~/server/utils/auth/credentials/handlers/handleRegister";
+import { handleLoginCredentials } from "~~/server/utils/auth/credentials/handlers/handleLogin";
 
 interface CredentialsLoginRequest {
     email: string;
@@ -17,9 +12,6 @@ export default defineEventHandler(async (event) => {
 
     const { email, password, confirm_password } = body;
 
-    // There are two main flows in this intermediate credentials registration step:
-    // 1. The user has tried to log in with credentials, meaning they only have password, but they are not registered yet
-    // 2. The user has tried to register with credentials, meaning they have email, password, and confirm_password
     if (!email || !password) {
         return createError({
             statusCode: 400,
@@ -27,6 +19,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    // User is trying to register
     if (confirm_password) {
         return handleRegisterCredentials(event, {
             email,
@@ -36,5 +29,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // User is trying to log in
-    
+    return handleLoginCredentials(event, {
+        email,
+        password
+    })
 })

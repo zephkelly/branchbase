@@ -1,4 +1,4 @@
-import { type UnregisteredUser, type UnregisteredLinkableData, type SecureUnregisteredLinkableSessionData, type VerifiedUnregisteredLinkableData } from "~~/types/auth/user/session/unregistered";
+import { type UnregisteredUser, type UnregisteredLinkableData, type SecureUnregisteredLinkableSessionData } from "~~/types/auth/user/session/unregistered";
 
 // Oauth unregistered session types
 
@@ -21,7 +21,7 @@ export interface UnregisteredOAuthLinkableSession {
 export interface VerifiedUnregisteredOAuthLinkableSession {
     user: UnregisteredUser;
     secure: SecureUnregisteredLinkableSessionData;
-    linkable_data: VerifiedUnregisteredLinkableData;
+    linkable_data: SecureUnregisteredLinkableSessionData;
     logged_in_at: number;
 }
 

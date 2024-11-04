@@ -29,8 +29,6 @@ export async function handleRegisterCredentials(
             })
         }
     
-    
-        // Check for existing users -------------------------------------------------------
         const existingUser = await getEmailProviderUser(event, Provider.Credentials, email)
     
         if (existingUser) {
@@ -39,7 +37,6 @@ export async function handleRegisterCredentials(
                 statusMessage: 'User already exists'
             })
         }
-    
     
         const password_hash = await hashPassword(password)
         const randomPicture = getRandomAvatar()
@@ -102,8 +99,11 @@ export async function handleRegisterCredentials(
             maxAge: 60 * 60 // 1 hour
         })
     
-        setResponseStatus(event, 200)
-        return "New user"
+        setResponseStatus(event, 200, "Ok")
+        return {
+            statusCode: 200,
+            statusMessage: 'New user'
+        }
     }
     catch (error) {
         console.error(error)
