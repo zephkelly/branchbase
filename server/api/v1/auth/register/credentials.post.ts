@@ -1,30 +1,31 @@
 import { isDatabaseError, isValidationError } from '~~/server/types/error'
 
-import { Provider } from '~~/types/auth/user/providers';
-import { isRegisteredUser } from '~~/types/auth/user/session/registered';
-import { UnregisteredOAuthSession, VerifiedUnregisteredOAuthLinkableSession } from '~~/types/auth/user/session/oauth/unregistered';
+import { Provider } from "~~/types/auth/user/providers"
+import { isRegisteredUser } from "~~/types/auth/user/session/registered"
+import { VerifiedUnregisteredCredLinkableSession, UnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered"
+
+import { createUser } from "~~/server/utils/database/user"
+import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/standardSession"
+import { getOTPUsed } from "~~/server/utils/database/tokens/otp/used"
 
 import { 
     isValidEmail,
     isValidUsername,
     isValidProvider,
-    isValidProviderId,
     isValidPictureUrl,
     isValidProviderVerified,
 } from '~~/utils/validation/authentication'
 
-import { getRandomAvatar } from '~~/server/utils/avatarSelector';
-import { getProviderUserExists, createUser } from '~~/server/utils/database/user'
-import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession';
-
-interface RegisterOAuthRequest {
+interface RegisterCredentialsRequest {
     username: string
+    otp_id: string
 }
 export default defineEventHandler(async (event) => {
-    const body = await readBody<RegisterOAuthRequest>(event)
+    const body = await readBody<RegisterCredentialsRequest>(event)
     const username: string = body.username
+    const otp_id: string = body.otp_id
 
-    if (!username) {
+    if (!username || !otp_id) {
         return createError({
             statusCode: 400,
             statusMessage: 'Invalid or missing credentials'
@@ -40,52 +41,56 @@ export default defineEventHandler(async (event) => {
     }
 
     const uncastedSession = await getUserSession(event)
-    const session = uncastedSession as unknown as UnregisteredOAuthSession | VerifiedUnregisteredOAuthLinkableSession
-    const userSessionData = session.user
+    const session = uncastedSession as unknown as VerifiedUnregisteredCredLinkableSession | UnregisteredCredSession
+    const unregisteredUser = session.user
     const secureSession = session.secure
 
+
     // Check that the session is not malformed and of the correct type
-    if (!userSessionData || !secureSession.provider_email) {
+    if (!unregisteredUser || !secureSession.password_hash || !secureSession.provider_email) {
         return createError({
             statusCode: 403,
             statusMessage: 'Registration process not initiated properly'
         })
     }
 
-    if (isRegisteredUser(userSessionData)) {
+    if (isRegisteredUser(session.user)) {
         return createError({
             statusCode: 409,
             statusMessage: 'Session indicates you are already registered'
         })
     }
 
-    if (userSessionData.provider === Provider.Credentials || userSessionData.provider_id === undefined) {
+    if (unregisteredUser.provider !== Provider.Credentials) {
         return createError({
             statusCode: 409,
-            statusMessage: 'Invalid provider. Use credentials registration route'
+            statusMessage: 'Invalid provider. Use OAuth registration route'
         })
     }
 
     if (secureSession.provider_verified === undefined || secureSession.provider_verified === false) {
         return createError({
             statusCode: 403,
-            statusMessage: 'Email is not verified on your provider account'
+            statusMessage: 'Email is not verified'
+        })
+    }
+
+
+    // Cleanup OTP from database used for email verification
+    const otpVerificationResponse = await getOTPUsed(event, parseInt(otp_id))
+
+    if (otpVerificationResponse.verified === false) {
+        return createError({
+            statusCode: 403,
+            statusMessage: 'Invalid OTP used or expired. Please start registration process again'
         })
     }
 
     // Validate data before hitting database
     const provider_email = isValidEmail(secureSession.provider_email)
-    const picture = isValidPictureUrl(getRandomAvatar())
-    const provider = isValidProvider(userSessionData.provider)
-    const provider_id = isValidProviderId(userSessionData.provider_id)
+    const picture = isValidPictureUrl(unregisteredUser.picture)
+    const provider = isValidProvider(unregisteredUser.provider)
     const provider_verified = isValidProviderVerified(secureSession.provider_verified)
-
-    if (provider.sanitisedData === Provider.Credentials || !provider_id.isValid) {
-        return createError({
-            statusCode: 400,
-            statusMessage: 'This route is for OAuth providers only'
-        })
-    }
 
     if (!provider_email.isValid) {
         return createError({
@@ -105,33 +110,25 @@ export default defineEventHandler(async (event) => {
             statusMessage: provider.message
         })
     }
-
-    //TODO check if the username already exists
-
-
-    // Check if user already exists
-    const providerUser = await getProviderUserExists(
-        event,
-        provider.sanitisedData as Provider,
-        provider_id.sanitisedData
-    )
-
-    if (providerUser) {
+    if (!provider_verified.isValid) {
         return createError({
-            statusCode: 409,
-            statusMessage: 'A user with this provider ID already exists'
+            statusCode: 400,
+            statusMessage: provider_verified.message
         })
     }
 
+    // TODO: Check if username is already taken, check if account is already registered
+
     // Create user in database
-    const userCreationResponse = await createUser(event, 
+    const userCreationResponse = await createUser(event,
         usernameValidation.sanitisedData,
         provider_email.sanitisedData,
         provider.sanitisedData,
-        provider_id.sanitisedData,
+        null,
         provider_verified.sanitisedData,
-        picture.sanitisedData
-    );
+        picture.sanitisedData,
+        secureSession.password_hash,
+    )
 
     if (isDatabaseError(userCreationResponse) || isValidationError(userCreationResponse)) {
         return createError({
@@ -139,8 +136,8 @@ export default defineEventHandler(async (event) => {
             statusMessage: userCreationResponse.message
         });
     }
-
-    const registeredUser= userCreationResponse.data
+    
+    const registeredUser = userCreationResponse.data
 
 
     // Login user with a registered session

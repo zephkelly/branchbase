@@ -17,7 +17,7 @@ export async function createUnregisteredOAuthSession(event: H3Event, user: Unreg
         user: user,
         secure: {
             provider_email: user.provider_email,
-            provider_verified: false
+            provider_verified: user.provider_verified
         },
         logged_in_at: Date.now()
     }
@@ -41,7 +41,7 @@ export async function createUnregisteredCredentialsSession(event: H3Event, user:
         confirmed_password: true,
         secure: {
             provider_email: user.provider_email,
-            provider_verified: false,
+            provider_verified: user.provider_verified,
             password_hash: password_hash
         },
         logged_in_at: Date.now()
