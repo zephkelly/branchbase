@@ -1,14 +1,11 @@
 import { ref } from 'vue';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
 
-import { SecureSessionData } from '~~/types/auth/user/session/secure';
-import { UnregisteredUser, SecureUnregisteredLinkableSessionData } from '~~/types/auth/user/session/unregistered';
-
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
-import { createUserProvider } from '~~/server/utils/database/user';
-import { getOTPUsed } from '~~/server/utils/database/tokens/otp/used';
-import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession';
+import { getProviderUser, createUserProvider } from '~~/server/utils/auth/database/user';
+import { getOTPUsed } from '~~/server/utils/auth/database/tokens/otp/used';
+import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession';
 
 import { VerifiedUnregisteredCredLinkableSession } from '~~/types/auth/user/session/credentials/unregistered';
 import { VerifiedUnregisteredOAuthLinkableSession } from '~~/types/auth/user/session/oauth/unregistered';

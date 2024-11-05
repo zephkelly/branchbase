@@ -4,9 +4,9 @@ import { Provider } from "~~/types/auth/user/providers"
 import { isRegisteredUser } from "~~/types/auth/user/session/registered"
 import { VerifiedUnregisteredCredLinkableSession, UnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered"
 
-import { createUser } from "~~/server/utils/database/user"
-import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/standardSession"
-import { getOTPUsed } from "~~/server/utils/database/tokens/otp/used"
+import { createUser } from "~~/server/utils/auth/database/user"
+import { createRegisteredSession } from "~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession"
+import { getOTPUsed } from "~~/server/utils/auth/database/tokens/otp/used"
 
 import { 
     isValidEmail,

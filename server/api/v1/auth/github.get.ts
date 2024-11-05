@@ -1,5 +1,5 @@
 import { Provider } from '~~/types/auth/user/providers'
-import { handleOAuthLogin } from '~~/server/utils/auth/oauth/handlers/oauthHandler'
+import { handleOAuthLogin } from '~~/server/utils/auth/handlers/oauth/handleOAuth'
 
 export type GitHubEmailVisibility = 'public' | 'private' | null;
 
@@ -20,7 +20,7 @@ export default defineOAuthGitHubEventHandler({
         let provider_email = user.email;
         let provider_verified = false;
     
-        // GitHub-specific email fetching logic
+        // Extra fetch to get primary email from github account
         if (!provider_email) {
             const res = await $fetch<GitHubEmailsResponse>('https://api.github.com/user/emails', {
                 headers: {

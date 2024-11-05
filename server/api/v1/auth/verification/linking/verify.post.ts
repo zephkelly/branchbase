@@ -1,4 +1,4 @@
-import { handleVerifyOTP } from "~~/server/utils/database/tokens/otp/verify";
+import { handleVerifyOTP } from "~~/server/utils/auth/database/tokens/otp/verify";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 

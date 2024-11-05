@@ -2,8 +2,8 @@ import { H3Error, H3Event } from 'h3'
 import { OTPPurpose } from '~~/server/types/otp';
 import { SecureSessionData } from "~~/types/auth/user/session/secure";
 
-import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/unregistered/verifiedLinkableSession";
-import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/sessions/unregistered/verifiedSession";
+import { createVerifiedLinkableSession } from "~~/server/utils/auth/handlers/sessions/unregistered/createVerifiedLinkableSession";
+import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/handlers/sessions/unregistered/createVerifiecUnregisteredSession";
 import { UnregisteredCredLinkableSession, UnregisteredCredSession } from '~~/types/auth/user/session/credentials/unregistered';
 import { UnregisteredOAuthLinkableSession, UnregisteredOAuthSession } from '~~/types/auth/user/session/oauth/unregistered';
 

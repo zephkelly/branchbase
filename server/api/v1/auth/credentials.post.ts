@@ -1,5 +1,5 @@
-import { handleRegisterCredentials } from "~~/server/utils/auth/credentials/handlers/handleRegister";
-import { handleLoginCredentials } from "~~/server/utils/auth/credentials/handlers/handleLogin";
+import { handleRegisterCredentials } from "~~/server/utils/auth/handlers/credentials/handleRegister";
+import { handleLoginCredentials } from "~~/server/utils/auth/handlers/credentials/handleLogin";
 
 interface CredentialsLoginRequest {
     email: string;

@@ -1,14 +1,13 @@
 import { H3Event } from 'h3'
 import { ProviderData } from '~~/server/types/userProvider'
 
-import { UnregisteredUser, UnregisteredLinkableData } from '~~/types/auth/user/session/unregistered'
-import { RegisteredUser } from '~~/types/auth/user/session/registered'
+import { UnregisteredUser } from '~~/types/auth/user/session/unregistered'
 
-import { getProviderUser, getUsersProvidersByEmail, updateProviderEmail } from '~~/server/utils/database/user'
+import { getProviderUser, getUsersProvidersByEmail, updateProviderEmail } from '~~/server/utils/auth/database/user'
 
-import { createUnverifiedLinkableSession } from '~~/server/utils/auth/sessions/unregistered/unverifiedLinkableSession'
-import { createUnregisteredSession } from '~~/server/utils/auth/sessions/unregistered/standardSession'
-import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession'
+import { createUnverifiedLinkableSession } from '~~/server/utils/auth/handlers/sessions/unregistered/createUnverifiedLinkableSession'
+import { createUnregisteredSession } from '~~/server/utils/auth/handlers/sessions/unregistered/createUnregisteredSession'
+import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession'
 
 export async function handleOAuthLogin(
     event: H3Event, 

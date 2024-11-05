@@ -1,5 +1,5 @@
 import { Provider } from '~~/types/auth/user/providers'
-import { handleOAuthLogin } from '~~/server/utils/auth/oauth/handlers/oauthHandler'
+import { handleOAuthLogin } from '~~/server/utils/auth/handlers/oauth/handleOAuth'
 
 export default defineOAuthGoogleEventHandler({
     config: {
