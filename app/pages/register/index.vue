@@ -52,7 +52,7 @@
                                 Create Account
                             </button>
                             <p class="input-tip error">{{ registerCredentialsErrorMessage }}</p>
-                            <NuxtLink to="/" v-if="wouldYouLikeToSignIn">Trying to sign in?</NuxtLink>
+                            <NuxtLink to="/" class="input-tip error" v-if="wouldYouLikeToSignIn">Trying to sign in?</NuxtLink>
                         </form>
                     </div>
                 </template>
@@ -169,6 +169,10 @@ const registerWithCredentials = async () => {
             registerCredentialsErrorMessage.value = 'An account with this email already exists';
             wouldYouLikeToSignIn.value = true;
         }
+
+        if (error.statusCode === 500) {
+            registerCredentialsErrorMessage.value = 'An error occurred while creating your account, please try again. If the error persists, please contact support.';
+        }
     }
 }
 
@@ -268,6 +272,11 @@ h1, h2 {
         }
 
         p.input-tip {
+            margin: 0rem;
+            color: rgb(173, 0, 0);
+        }
+        
+        a.input-tip {
             margin: 0rem;
             color: red;
         }
