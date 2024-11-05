@@ -41,7 +41,6 @@ export async function handleLoginCredentials(
         return await createRegisteredSession(event, existingUser);
     }
     catch (error) {
-        console.error(error)
         return createError({
             statusCode: 500,
             statusMessage: 'Internal server error'

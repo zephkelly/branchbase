@@ -4,8 +4,17 @@ import { SecureSessionData } from "~~/types/auth/user/session/secure"
 
 export async function createRegisteredSession(event: H3Event, user: RegisteredUser & SecureSessionData) {
     const session: RegisteredSession = {
-        user: user as RegisteredUser,
-        secure: user as SecureSessionData,
+        user: {
+            id: user.id,
+            username: user.username,
+            provider: user.provider,
+            provider_id: user.provider_id,
+            picture: user.picture,
+        },
+        secure: {
+            provider_email: user.provider_email,
+            provider_verified: user.provider_verified
+        },
         logged_in_at: Date.now()
     }
 
@@ -18,7 +27,6 @@ export async function createRegisteredSession(event: H3Event, user: RegisteredUs
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: session
+        statusMessage: "Ok"
     }
 }

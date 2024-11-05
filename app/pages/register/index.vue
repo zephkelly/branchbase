@@ -45,14 +45,16 @@
                                     :disabled="!isConfirmEnabled"
                                 />
                             </div>
-                            <button 
-                                type="submit"
-                                :disabled="!!registerCredentialsErrorMessage || !isConfirmEnabled || !isSubmitEnabled"
-                            >
-                                Create Account
-                            </button>
+                            <ClientOnly>
+                                <button 
+                                    type="submit"
+                                    :disabled="!!registerCredentialsErrorMessage || !isConfirmEnabled || !isSubmitEnabled"
+                                >
+                                    Create Account
+                                </button>
+                            </ClientOnly>
                             <p class="input-tip error">{{ registerCredentialsErrorMessage }}</p>
-                            <NuxtLink to="/" class="input-tip error" v-if="wouldYouLikeToSignIn">Trying to sign in?</NuxtLink>
+                            <NuxtLink to="/">Trying to sign in?</NuxtLink>
                         </form>
                     </div>
                 </template>
@@ -92,8 +94,6 @@ const isSubmitEnabled = ref(false);
 
 const registerCredentialsErrorMessage = ref('');
 
-const wouldYouLikeToSignIn = ref(false);
-
 const handlePasswordInput = () => {
     if (passwordInput.value.length >= 6) {
         isConfirmEnabled.value = true;
@@ -115,8 +115,6 @@ const debouncedPasswordCheck = debounce((password: string, confirmPassword: stri
 }, 1500);
 
 watch([passwordInput, confirmPasswordInput], ([password, confirmPassword]) => {
-    wouldYouLikeToSignIn.value = false;
-
     if (!isConfirmEnabled.value || !confirmPassword) {
         registerCredentialsErrorMessage.value = '';
         isSubmitEnabled.value = false;
@@ -153,6 +151,7 @@ const registerWithCredentials = async () => {
         });
 
         await getNewSession();
+        console.log(session.value);
         navigateTo('/register/credentials');
     }
     catch (error: any) {
@@ -167,7 +166,6 @@ const registerWithCredentials = async () => {
 
         if (error.statusCode === 409) {
             registerCredentialsErrorMessage.value = 'An account with this email already exists';
-            wouldYouLikeToSignIn.value = true;
         }
 
         if (error.statusCode === 500) {
@@ -274,11 +272,6 @@ h1, h2 {
         p.input-tip {
             margin: 0rem;
             color: rgb(173, 0, 0);
-        }
-        
-        a.input-tip {
-            margin: 0rem;
-            color: red;
         }
 
         button {

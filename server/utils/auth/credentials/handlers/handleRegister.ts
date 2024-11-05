@@ -53,7 +53,7 @@ export async function handleRegisterCredentials(
         }
 
         if (linkableUsersAndProviders) {
-            return createUnverifiedLinkableSession(event,
+            return await createUnverifiedLinkableSession(event,
                 temporaryUser,
                 linkableUsersAndProviders,
                 password_hash

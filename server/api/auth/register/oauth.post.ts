@@ -26,6 +26,7 @@ import {
     isValidPictureUrl,
     isValidProviderVerified,
 } from '~~/utils/validation/authentication'
+import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession';
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -137,28 +138,8 @@ export default defineEventHandler(async (event) => {
             });
         }
 
-        const registeredUser: RegisteredUser & SecureSessionData = newUser.data
-
-        await replaceUserSession(event, {
-            user: {
-                id: registeredUser.id,
-                username: registeredUser.username,
-                provider: registeredUser.provider,
-                provider_id: registeredUser.provider_id,
-                picture: registeredUser.picture,
-            },
-            secure: {
-                provider_verified: registeredUser.provider_verified,
-                provider_email: provider_email.sanitisedData,
-            },
-            loggedInAt: Date.now()
-        })
-
-        setResponseStatus(event, 201)
-        return {
-            statusCode: 201,
-            statusMessage: 'User registered successfully'
-        }
+        const registeredUser= newUser.data
+        return await createRegisteredSession(event, registeredUser)
     }
     catch (error) {
         console.error('Error registering user:', error)

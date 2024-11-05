@@ -31,12 +31,11 @@ export async function createUnregisteredOAuthSession(event: H3Event, user: Unreg
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: session
+        statusMessage: "Ok"
     }
 }
 
-export function createUnregisteredCredentialsSession(event: H3Event, user: UnregisteredCredUser, password_hash: string) {
+export async function createUnregisteredCredentialsSession(event: H3Event, user: UnregisteredCredUser, password_hash: string) {
     const session: UnregisteredCredSession = {
         user: user,
         confirmed_password: true,
@@ -48,7 +47,7 @@ export function createUnregisteredCredentialsSession(event: H3Event, user: Unreg
         logged_in_at: Date.now()
     }
 
-    setUserSession(event, {
+    await replaceUserSession(event, {
         ...session
     }, {
         maxAge: 60 * 60
@@ -57,7 +56,6 @@ export function createUnregisteredCredentialsSession(event: H3Event, user: Unreg
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: session
+        statusMessage: "Ok"
     }
 }

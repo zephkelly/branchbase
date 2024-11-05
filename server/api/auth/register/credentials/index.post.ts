@@ -3,6 +3,7 @@ import { isRegisteredUser } from "~~/types/auth/user/session/registered"
 import { UnregisteredCredUser, SecureUnregisteredCredSessionData } from "~~/types/auth/user/session/credentials/unregistered"
 
 import { createUser } from "~~/server/utils/database/user"
+import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/standardSession"
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -48,8 +49,6 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    console.log('secureSession', secureSession)
-    
     if (!secureSession.password_hash) {
         return createError({
             statusCode: 403,
@@ -57,7 +56,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const userCreationResponse: any = await createUser(event,
+    const userCreationResponse = await createUser(event,
         username,
         secureSession.provider_email,
         unregisteredUser.provider,
@@ -66,7 +65,6 @@ export default defineEventHandler(async (event) => {
         unregisteredUser.picture,
         secureSession.password_hash,
     )
-
 
     if (!userCreationResponse) {
         return createError({
@@ -82,24 +80,9 @@ export default defineEventHandler(async (event) => {
         })
     }
     
-    await replaceUserSession(event, {
-        user: {
-            id: userCreationResponse.data.id,
-            username: userCreationResponse.data.username,
-            provider: userCreationResponse.data.provider,
-            provider_id: userCreationResponse.data.provider_id,
-            picture: userCreationResponse.data.picture,
-        },
-        secure: {
-            provider_verified: userCreationResponse.data.provider_verified,
-            provider_email: userCreationResponse.data.provider_email
-        },
-        loggedInAt: Date.now()
-    })
-    
-    setResponseStatus(event, 201, 'Ok')
-    return {
-        statusCode: 201,
-        statusMessage: 'Ok',
-    }
+    const response = await createRegisteredSession(event, userCreationResponse.data)
+    response.statusCode = 201
+    response.statusMessage = 'Created'
+
+    return response
 })

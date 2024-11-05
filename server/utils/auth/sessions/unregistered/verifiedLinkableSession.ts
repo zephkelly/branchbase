@@ -57,8 +57,7 @@ export async function createVerifiedLinkableUnregisteredOAuthSession(event: H3Ev
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: verifiedUnregisteredSession
+        statusMessage: "Ok"
     }
 }
 
@@ -110,7 +109,6 @@ export async function createVerifiedLinkableUnregisteredCredentialsSession(event
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: verifiedUnregisteredSession
+        statusMessage: "Ok"
     }
 }

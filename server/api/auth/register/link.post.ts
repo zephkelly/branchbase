@@ -8,6 +8,7 @@ import { useFormValidation } from '~/composables/form/useFormValidation';
 
 import { createUserProvider } from '~~/server/utils/database/user';
 import { getOTPUsed } from '~~/server/utils/database/token';
+import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession';
 
 
 interface LinkProviderData {
@@ -16,7 +17,7 @@ interface LinkProviderData {
 }
 
 export default defineEventHandler(async (event) => {
-    const body = await readBody(event)
+    const body = await readBody<LinkProviderData>(event)
 
     try {
         const otp_id = ref(body.otp_id)
@@ -134,29 +135,8 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const linkedUser = providerLinkResponse.data
-
-        await replaceUserSession(event, {
-            user: {
-                id: linkedUser.id,
-                username: linkedUser.username,
-                provider: linkedUser.provider,
-                provider_id: linkedUser.provider_id,
-                picture: linkedUser.picture,
-            },
-            secure: {
-                provider_verified: linkedUser.provider_verified,
-                provider_email: linkedUser.provider_email
-            },
-            loggedInAt: Date.now()
-        })
-
-        setResponseStatus(event, 201)
-
-        return {
-            statusCode: 201,
-            message: 'Linked successfully'
-        }
+        const linkedRegisteredUser = providerLinkResponse.data
+        return await createRegisteredSession(event, linkedRegisteredUser);
     }
     catch (error) {
         console.error('Error linking account:', error)

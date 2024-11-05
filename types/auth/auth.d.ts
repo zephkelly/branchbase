@@ -8,7 +8,7 @@ type MergedUser = RegisteredUser | UnregisteredUser;
 
 type MergedOAuthSession = UnregisteredOAuthSession | UnregisteredOAuthLinkableSession | VerifiedUnregisteredOAuthLinkableSession;
 type MergedCredSession = UnregisteredCredSession | UnregisteredCredLinkableSession | VerifiedUnregisteredCredLinkableSession
-type MergedUserSession = MergedCredSession | MergedOAuthSession;
+type MergedUserSession = MergedCredSession | MergedOAuthSession | RegisteredSession;
 
 type MergedSecureSessionData = SecureUnregisteredCredSessionData | SecureUnregisteredSessionData | SecureUnregisteredLinkableSessionData;
 

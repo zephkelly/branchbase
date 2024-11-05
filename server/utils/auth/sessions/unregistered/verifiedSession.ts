@@ -48,8 +48,7 @@ export async function createVerifiedUnregisteredOAuthSession(event: H3Event, ses
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: verifiedUnregisteredSession
+        statusMessage: "Ok"
     }
 }
 
@@ -93,7 +92,6 @@ export async function createVerifiedUnregisteredCredentialsSession(event: H3Even
     setResponseStatus(event, 200, "Ok")
     return {
         statusCode: 200,
-        statusMessage: "Ok",
-        data: verifiedUnregisteredSession
+        statusMessage: "Ok"
     }
 }

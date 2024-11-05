@@ -74,6 +74,8 @@ const route = useRoute()
 
 // Session data --------------------------------------------------------------
 const { user, session, getNewSession, clearSession } = useAuthState()
+// await getNewSession()
+// console.log('Session:', session.value)
 
 const unregisteredUser = ref(user.value as UnregisteredCredUser);
 const linkableUsersData = ref(session.value.linkable_data as UnregisteredLinkableData);
@@ -85,19 +87,16 @@ const isPasswordConfirmed = computed(() => { return session.value?.confirmed_pas
 
 // Check if the user is actually unregistered --------------------------------
 if (!unregisteredUser.value) {
-    console.error('No unregistered user found')
     navigateTo('/register')
 }
 else {
     // If they are already registered, redirect to the home page --------------
     if (unregisteredUser.value.id !== null) {
-        console.log('User is registered:')
         navigateTo('/')
     }
     // If they are not a credentials user redirect them to OAuth --------------
     else
     if (unregisteredUser.value.provider !== Provider.Credentials) {
-        console.log('OAuth unregistered user found:', unregisteredUser.value)
         navigateTo('/register/oauth')
     }
 }
@@ -222,7 +221,7 @@ const submitUsername = async () => {
         navigateTo('/')
     }
     else {
-        alert('Invalid username')
+        console.log(response)
     }
 }
 </script>
