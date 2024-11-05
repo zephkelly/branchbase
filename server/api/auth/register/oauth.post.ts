@@ -139,7 +139,13 @@ export default defineEventHandler(async (event) => {
         }
 
         const registeredUser= newUser.data
-        return await createRegisteredSession(event, registeredUser)
+        await createRegisteredSession(event, registeredUser)
+
+        setResponseStatus(event, 201, 'Created')
+        return {
+            statusCode: 201,
+            statusMessage: 'User registered successfully',
+        }
     }
     catch (error) {
         console.error('Error registering user:', error)

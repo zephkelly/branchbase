@@ -49,6 +49,13 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (secureSession.provider_verified === undefined || secureSession.provider_verified === false) {
+        return createError({
+            statusCode: 403,
+            statusMessage: 'You have not verified your email address'
+        })
+    }
+
     if (!secureSession.password_hash) {
         return createError({
             statusCode: 403,

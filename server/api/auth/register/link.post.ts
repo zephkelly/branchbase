@@ -115,8 +115,8 @@ export default defineEventHandler(async (event) => {
         const existing_user_info = secureLinkableUsers[existing_user_index.value]
         const { provider: existing_provider, provider_id: existing_provider_id } = existing_user_info.providers[0]
 
-        const desired_user = await getProviderUser(event, existing_provider, existing_provider_id)
-
+        const desired_user = await getProviderUser(event, existing_provider, existing_provider_id, verifiedLinkableData.provider_email)
+        
         if (!desired_user || desired_user.id === null || desired_user.id === undefined) {
             return createError({
                 statusCode: 404,
@@ -136,7 +136,13 @@ export default defineEventHandler(async (event) => {
         }
 
         const linkedRegisteredUser = providerLinkResponse.data
-        return await createRegisteredSession(event, linkedRegisteredUser);
+        await createRegisteredSession(event, linkedRegisteredUser);
+
+        setResponseStatus(event, 201, 'Ok')
+        return {
+            statusCode: 201,
+            statusMessage: 'Account linked'
+        }
     }
     catch (error) {
         console.error('Error linking account:', error)

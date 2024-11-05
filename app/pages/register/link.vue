@@ -60,8 +60,6 @@ const linkableUsersData = ref(session.value.linkable_data);
 const verifiedLinkableData = ref(session.value.linkable_data as VerifiedUnregisteredLinkableData);
 const isVerified = ref(verifiedLinkableData.value.linkable_users !== undefined)
 
-const router = useRouter()
-
 const sentVerification = ref(false)
 const errorSendingVerification = ref(false)
 const errorMessage = ref('')
@@ -142,12 +140,12 @@ const linkProvider = async (userIndex: number) => {
         })
 
         if (response.statusCode !== 201) {
+
             throw new Error('Linking failed')
         }
 
         await getNewSession()
-
-        router.push('/')
+        navigateTo('/')
     }
     catch (error) {
         console.error('Error during registration:', error)

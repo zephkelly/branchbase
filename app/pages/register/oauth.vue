@@ -2,7 +2,6 @@
     <div class="page wrapper-container">
         <h1>Register</h1>
         <section class="registration-container">
-            <p>aowdiunaw</p>
             <Authenticator>
                 <template #unregistered>
                     <div v-if="showLinkAccounts">

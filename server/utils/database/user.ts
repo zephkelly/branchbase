@@ -24,11 +24,11 @@ const VALID_PROVIDERS = Object.values(Provider);
 //     provider_email: string;
 //     password_hash?: string;
 // }
-export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<RegisteredUser & SecureSessionData | null> {
+export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string | null, provider_email?: string): Promise<RegisteredUser & SecureSessionData | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
-    if (!provider || !provider_id) {
+    if (!provider || (!provider_id && !provider_email)) {
         setResponseStatus(event, 400)
         return null
     }
@@ -38,25 +38,49 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
         return null
     }
 
-    if ((typeof provider_id !== 'string' && typeof provider_id !== 'number') || provider_id === '') {
+    if (provider_email && typeof provider_email !== 'string') {
         setResponseStatus(event, 400)
-        console.error('Invalid provider_id:', provider_id)
         return null
     }
 
     try {
-        const query =
-            `SELECT 
-                u.id,
-                u.username,
-                u.picture,
-                up.provider_email,
-                up.provider_verified
-            FROM private.users u
-            INNER JOIN private.user_providers up ON u.id = up.user_id
-            WHERE up.provider = $1 
-            AND up.provider_id = $2;`
-        const result = await pool.query(query, [provider, provider_id])
+        let query: string;
+        let values: any[];
+
+        if (provider_email || provider_id === null) {
+            query =
+                `SELECT 
+                    u.id,
+                    u.username,
+                    u.picture,
+                    up.provider_email,
+                    up.provider_verified
+                FROM private.users u
+                INNER JOIN private.user_providers up ON u.id = up.user_id
+                WHERE up.provider = $1 
+                AND up.provider_email = $2;
+            `
+            
+            values = [provider, provider_email]
+        }
+        else {
+            query =
+                `SELECT 
+                    u.id,
+                    u.username,
+                    u.picture,
+                    up.provider_email,
+                    up.provider_verified
+                FROM private.users u
+                INNER JOIN private.user_providers up ON u.id = up.user_id
+                WHERE up.provider = $1 
+                AND up.provider_id = $2;
+            `
+
+            values = [provider, provider_id]
+        }
+
+        const result = await pool.query(query, values)
         
         if (result.rows.length === 0) {
             setResponseStatus(event, 404)

@@ -4,6 +4,8 @@ import { SecureSessionData } from "~~/types/auth/user/session/secure";
 
 import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/unregistered/verifiedLinkableSession";
 import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/sessions/unregistered/verifiedSession";
+import { UnregisteredCredLinkableSession, UnregisteredCredSession } from '~~/types/auth/user/session/credentials/unregistered';
+import { UnregisteredOAuthLinkableSession, UnregisteredOAuthSession } from '~~/types/auth/user/session/oauth/unregistered';
 
 const DEFAULT_MAX_VERIFICATION_ATTEMPTS = 5
 
@@ -107,15 +109,17 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
             WHERE id = $1
         `
         await client.query(markUsedQuery, [token.id])
-        await client.query('COMMIT')
-
+        
         if (session.linkable_data) {
-            await createVerifiedLinkableSession(event, session)
+            const linkableSession = session as unknown as UnregisteredCredLinkableSession | UnregisteredOAuthLinkableSession
+            await createVerifiedLinkableSession(event, linkableSession)
         }
         else {
-            await createVerifiedUnregisteredSession(event, session)
+            const unregisteredSession = session as unknown as UnregisteredCredSession | UnregisteredOAuthSession
+            await createVerifiedUnregisteredSession(event, unregisteredSession)
         }
-
+        
+        await client.query('COMMIT')
         setResponseStatus(event, 200, 'Ok')
         return {
             otp_id: token.id
