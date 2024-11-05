@@ -57,7 +57,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const userSecureSessionData = session.secure as SecureSessionData
+    const userSecureSessionData = session.secure as SecureSessionData | undefined
+
+    if (!userSecureSessionData) {
+        return createError({
+            statusCode: 403,
+            statusMessage: 'You have not initiated the registration process properly'
+        })
+    }
 
     // Input data
     const username = isValidUsername(body.username as string)

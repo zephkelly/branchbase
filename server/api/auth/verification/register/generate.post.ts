@@ -4,8 +4,8 @@ import { SecureSessionData } from "~~/types/auth/user/session/secure"
 
 export default defineEventHandler(async (event) => {
     const session = await getUserSession(event)
-    const secureData = session.secure as SecureSessionData
-    const email = (secureData.provider_email) ? secureData.provider_email : null
+    const secureData: SecureSessionData | undefined = session.secure as SecureSessionData | undefined
+    const email = (secureData?.provider_email) ? secureData.provider_email : null
 
     if (!session || !email) {
         throw createError({

@@ -10,6 +10,9 @@ import { createUserProvider } from '~~/server/utils/database/user';
 import { getOTPUsed } from '~~/server/utils/database/token';
 import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession';
 
+import { VerifiedUnregisteredCredLinkableSession } from '~~/types/auth/user/session/credentials/unregistered';
+import { VerifiedUnregisteredOAuthLinkableSession } from '~~/types/auth/user/session/oauth/unregistered';
+
 
 interface LinkProviderData {
     otp_id: number;
@@ -23,20 +26,27 @@ export default defineEventHandler(async (event) => {
         const otp_id = ref(body.otp_id)
         const existing_user_index = ref(body.existing_user_index)
 
+        if (!otp_id || existing_user_index === undefined) {
+            return createError({
+                statusCode: 400,
+                statusMessage: 'Missing required fields. otp_id and existing_user_index are required'
+            })
+        }
+
         const validator = useFormValidation<LinkProviderData>({
             otp_id: Number(otp_id.value),
             existing_user_index: existing_user_index.value
         })
-
+        
         validator.bindField('otp_id', otp_id)
         validator.bindField('existing_user_index', existing_user_index)
-
+        
         validator.setFieldRules(
             'otp_id',
             validator.rules.required('OTP code is required'),
             validator.rules.isNumber('OTP code must be a number'),
         )
-
+        
         validator.setFieldRules(
             'existing_user_index',
             validator.rules.required('Existing user index is required'),
@@ -44,7 +54,7 @@ export default defineEventHandler(async (event) => {
         )
 
         const isValid = validator.validateForm()
-
+        
         if (!isValid) {
             return createError({
                 statusCode: 400,
@@ -52,11 +62,13 @@ export default defineEventHandler(async (event) => {
                 statusMessage: `Invalid input data: ${validator.errors.value.otp_id}`,
             })
         }
+        
+        const uncastedSession = await getUserSession(event)
+        const session = uncastedSession as unknown as VerifiedUnregisteredCredLinkableSession | VerifiedUnregisteredOAuthLinkableSession
+        const unregisteredUser = session.user
+        const secureSession = session.secure
 
-        const session = await getUserSession(event)
-        const unregisteredUser: UnregisteredUser = session.user as UnregisteredUser
-        const secureSession: SecureSessionData = session.secure as SecureSessionData
-        if (!unregisteredUser) {
+        if (!session || !unregisteredUser || !secureSession) {
             return createError({
                 statusCode: 403,
                 statusMessage: 'You have not initiated the linking process properly'
@@ -84,15 +96,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        if (!otp_id || existing_user_index === undefined) {
-            console.log(!otp_id, !existing_user_index)
-            return createError({
-                statusCode: 400,
-                statusMessage: 'Missing required fields. otp_id and existing_user_index are required'
-            })
-        }
-
-        const verifiedLinkableData = session.secure as SecureUnregisteredLinkableSessionData
+        const verifiedLinkableData = session.secure
         const secureLinkableUsers = verifiedLinkableData.linkable_users
 
         if (!verifiedLinkableData || !secureLinkableUsers) {
@@ -126,7 +130,7 @@ export default defineEventHandler(async (event) => {
 
         const desired_user_id = desired_user.id
         
-        const providerLinkResponse = await createUserProvider(event, desired_user_id, session)
+        const providerLinkResponse = await createUserProvider(event, desired_user_id, uncastedSession)
 
         if (isDatabaseError(providerLinkResponse) || isValidationError(providerLinkResponse)) {
             return createError({

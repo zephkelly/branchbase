@@ -1,6 +1,6 @@
 import { Provider } from "~~/types/auth/user/providers"
 import { isRegisteredUser } from "~~/types/auth/user/session/registered"
-import { UnregisteredCredUser, SecureUnregisteredCredSessionData } from "~~/types/auth/user/session/credentials/unregistered"
+import { UnregisteredCredUser, SecureUnregisteredCredSessionData, UnregisteredCredLinkableSession, UnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered"
 
 import { createUser } from "~~/server/utils/database/user"
 import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/standardSession"
@@ -17,9 +17,10 @@ export default defineEventHandler(async (event) => {
     }
 
     // Get and validate session first
-    const session = await getUserSession(event)
-    const unregisteredUser = session.user as UnregisteredCredUser
-    const secureSession = session.secure as SecureUnregisteredCredSessionData
+    const uncastedSession = await getUserSession(event)
+    const session = uncastedSession as unknown as UnregisteredCredLinkableSession | UnregisteredCredSession
+    const unregisteredUser = session.user
+    const secureSession = session.secure
 
     if (!unregisteredUser) {
         return createError({

@@ -53,7 +53,7 @@ export async function createVerifiedUnregisteredOAuthSession(event: H3Event, ses
 }
 
 export async function createVerifiedUnregisteredCredentialsSession(event: H3Event, session: UnregisteredCredSession) {
-    const unregisteredUser = session.user as UnregisteredCredUser
+    const unregisteredUser = session.user
     const confirmedPassword: boolean = session.confirmed_password
     const passwordHash: string = session.secure.password_hash
 
