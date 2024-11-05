@@ -1,22 +1,19 @@
 import { ref } from 'vue';
-import { createUserProvider } from '~~/server/utils/database/user';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';
-// import { SecureSession, UnregisteredUser, SecureRegisteredUser, UserSessionData } from '~~/types/user';
-import { UnregisteredUser, SecureUnregisteredLinkableSessionData } from '~~/types/auth/user/session/unregistered';
 
+import { SecureSessionData } from '~~/types/auth/user/session/secure';
+import { UnregisteredUser, SecureUnregisteredLinkableSessionData } from '~~/types/auth/user/session/unregistered';
 
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
+import { createUserProvider } from '~~/server/utils/database/user';
 import { getOTPUsed } from '~~/server/utils/database/token';
-import { RegisteredUser } from '~~/types/auth/user/session/registered';
-import { SecureSessionData } from '#auth-utils';
 
 
 interface LinkProviderData {
     otp_id: number;
     existing_user_index: number;
 }
-
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -57,7 +54,7 @@ export default defineEventHandler(async (event) => {
 
         const session = await getUserSession(event)
         const unregisteredUser: UnregisteredUser = session.user as UnregisteredUser
-
+        const secureSession: SecureSessionData = session.secure as SecureSessionData
         if (!unregisteredUser) {
             return createError({
                 statusCode: 403,
@@ -65,7 +62,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        if (unregisteredUser.provider_verified === false) {
+        if (unregisteredUser.provider_verified === false || secureSession.provider_verified === false) {
             return createError({
                 statusCode: 403,
                 statusMessage: 'You have not verified your email address'

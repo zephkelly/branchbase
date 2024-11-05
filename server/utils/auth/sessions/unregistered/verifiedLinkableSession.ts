@@ -32,11 +32,13 @@ export async function createVerifiedLinkableUnregisteredOAuthSession(event: H3Ev
         })
     }
 
+    unregisteredLinkableUser.provider_verified = true
+
     const verifiedUnregisteredSession: VerifiedUnregisteredOAuthLinkableSession = {
         user: unregisteredLinkableUser,
         secure: {
             provider_email: unregisteredLinkableUser.provider_email,
-            provider_verified: true,
+            provider_verified: unregisteredLinkableUser.provider_verified,
             linkable_users: secureLinkableUsers
         },
         linkable_data: {
@@ -73,13 +75,15 @@ export async function createVerifiedLinkableUnregisteredCredentialsSession(event
             statusMessage: 'Invalid user session'
         })
     }
-
+    
     if (!unregisteredLinkableUser.provider_verified === null && unregisteredLinkableUser.provider_verified === true) {
         throw createError({
             statusCode: 409,
             statusMessage: 'Already verified'
         })
     }
+
+    unregisteredLinkableUser.provider_verified = true
 
     const verifiedUnregisteredSession: VerifiedUnregisteredCredLinkableSession = {
         user: unregisteredLinkableUser,

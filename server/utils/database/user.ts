@@ -15,15 +15,16 @@ import { SecureUnregisteredCredSessionData } from '~~/types/auth/user/session/cr
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
+import { SecureSessionData } from '~~/types/auth/user/session/secure';
 
 const VALID_PROVIDERS = Object.values(Provider);
 
-interface SecureRegisteredUser extends RegisteredUser {
-    provider_verified: boolean;
-    provider_email: string;
-    password_hash?: string;
-}
-export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<SecureRegisteredUser | null> {
+// interface SecureRegisteredUser extends RegisteredUser {
+//     provider_verified: boolean;
+//     provider_email: string;
+//     password_hash?: string;
+// }
+export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string): Promise<RegisteredUser & SecureSessionData | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -62,7 +63,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
             return null
         }
 
-        const retrievedUser: SecureRegisteredUser = {
+        const retrievedUser: RegisteredUser & SecureSessionData = {
             id: result.rows[0].id,
             username: result.rows[0].username,
             provider: provider,
@@ -81,7 +82,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
     }
 }
 
-export async function getEmailProviderUser(event: H3Event, provider: Provider, provider_email: string): Promise<SecureRegisteredUser | null> {
+export async function getEmailProviderUser(event: H3Event, provider: Provider, provider_email: string): Promise<RegisteredUser & SecureSessionData & { password_hash: string } | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
 
@@ -115,7 +116,7 @@ export async function getEmailProviderUser(event: H3Event, provider: Provider, p
             return null
         }
 
-        const retrievedUser: SecureRegisteredUser = {
+        const retrievedUser: RegisteredUser & SecureSessionData & { password_hash: string } = {
             id: result.rows[0].id,
             username: result.rows[0].username,
             provider: provider,
@@ -355,7 +356,7 @@ export async function createUser(
         // Commit transaction
         await client.query('COMMIT')
 
-        const newUser: SecureRegisteredUser = {
+        const newUser: RegisteredUser & SecureSessionData = {
             id: parseInt(userId),
             username: username as string,
             picture: userResult.rows[0].picture,
@@ -500,7 +501,7 @@ export async function createUserProvider(event: H3Event, user_id: number, sessio
         await client.query('COMMIT')
 
         // Construct the response with the linked user data
-        const linkedUser: SecureRegisteredUser = {
+        const linkedUser: RegisteredUser & SecureSessionData = {
             id: userResult.rows[0].id,
             username: userResult.rows[0].username,
             picture: userResult.rows[0].picture,

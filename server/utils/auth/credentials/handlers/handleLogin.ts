@@ -2,6 +2,7 @@ import { H3Event } from 'h3'
 
 import { Provider } from '~~/types/auth/user/providers'
 import { RegisteredUser } from '~~/types/auth/user/session/registered'
+import { createRegisteredSession } from '../../sessions/registered/standardSession'
 
 export async function handleLoginCredentials(
     event: H3Event,
@@ -34,32 +35,14 @@ export async function handleLoginCredentials(
         }
     
     
-        if (await verifyPassword(existingUser.password_hash as string, password) === false) {
+        if (await verifyPassword(existingUser.password_hash, password) === false) {
             return createError({
                 statusCode: 401,
                 statusMessage: 'Invalid or missing credentials'
             })
         }
 
-        const registeredUser: RegisteredUser = {
-            id: existingUser.id,
-            username: existingUser.username,
-            provider: existingUser.provider,
-            provider_id: existingUser.provider_id,
-            picture: existingUser.picture
-        }
-
-        await replaceUserSession(event, {
-            user: registeredUser,
-            session: {
-                provider: existingUser.provider,
-                provider_id: existingUser.provider_id
-            },
-            logged_in_at: Date.now()
-        }, {
-            maxAge: 60 * 60 * 24 * 30,
-        })
-
+        await createRegisteredSession(event, existingUser);
         return {
             statusCode: 200,
             statusMessage: 'OK'

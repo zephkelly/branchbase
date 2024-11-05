@@ -1,4 +1,5 @@
 import { Provider } from "~~/types/auth/user/providers";
+import { type SecureSessionData } from "~~/types/auth/user/session/secure";
 
 export interface RegisteredUser {
     id: number;
@@ -6,6 +7,12 @@ export interface RegisteredUser {
     provider_id: string | null;
     picture: string;
     provider: Provider;
+}
+
+export interface RegisteredSession {
+    user: RegisteredUser;
+    secure: SecureSessionData;
+    logged_in_at: number;
 }
 
 // Guard functions
