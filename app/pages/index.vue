@@ -97,7 +97,7 @@ const signInWithCredentials = async () => {
         navigateTo('/');
     }
     catch (error: any) {
-        console.error('Error signing in:', error);
+        // console.error('Error signing in:', error);
         if (error.statusCode === 401) {
             isInvalidCredentials.value = true;
             isInvalidCredentialsCreateAccount.value = false;

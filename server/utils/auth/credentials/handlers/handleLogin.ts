@@ -15,14 +15,10 @@ export async function handleLoginCredentials(
         const { email, password } = body
     
         if (!password || !email) {
-            const randomTime = Math.floor(Math.random() * 1000)
-
-            await setTimeout(() => {
-                return createError({
-                    statusCode: 400,
-                    statusMessage: 'Invalid or missing credentials'
-                })
-            }, randomTime);
+            return createError({
+                statusCode: 400,
+                statusMessage: 'Invalid or missing credentials'
+            })
         }
     
         const existingUser = await getEmailProviderUser(event, Provider.Credentials, email)
@@ -42,17 +38,13 @@ export async function handleLoginCredentials(
             })
         }
 
-        await createRegisteredSession(event, existingUser);
-        return {
-            statusCode: 200,
-            statusMessage: 'OK'
-        }
+        return await createRegisteredSession(event, existingUser);
     }
     catch (error) {
         console.error(error)
-        return {
+        return createError({
             statusCode: 500,
             statusMessage: 'Internal server error'
-        }
+        })
     }
 }

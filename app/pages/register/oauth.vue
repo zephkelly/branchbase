@@ -61,9 +61,6 @@ const showLinkAccounts = ref(hasLinkableUsers.value)
 const codeSent = ref(false)
 const isVerified = ref(unregisteredUser.value?.provider_verified)
 
-console.log(isVerified.value)
-console.log(unregisteredUser.value)
-
 const errorSendingVerification = ref(false)
 const errorMessage = ref('')
 const sendVerificationOTP = async () => {
@@ -127,22 +124,27 @@ const verifyOTP = async () => {
 
 // Submit username -----------------------------------------------------------
 const submitUsername = async () => {
-    const response: any = await $fetch('/api/auth/register/oauth', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            username: unregisteredUser.value.username
-        }),
-    });
-
-    if (response.statusCode === 201) {
-        await getNewSession()
-        navigateTo('/')
+    try {
+        const response: any = await $fetch('/api/auth/register/oauth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: unregisteredUser.value.username
+            }),
+        });
+    
+        if (response.statusCode === 201) {
+            await getNewSession()
+            navigateTo('/')
+        }
+        else {
+            alert('Invalid username')
+        }
     }
-    else {
-        alert('Invalid username')
+    catch(error: any) {
+        console.error('Error during registration:', error)
     }
 }
 </script>

@@ -35,7 +35,7 @@ export async function handleRegisterCredentials(
         if (existingUser) {
             return createError({
                 statusCode: 409,
-                statusMessage: 'Invalid credentials'
+                statusMessage: 'An account with this email already exists'
             })
         }
 
@@ -60,13 +60,13 @@ export async function handleRegisterCredentials(
             );
         }
 
-        return createUnregisteredSession(event, temporaryUser, password_hash);
+        return await createUnregisteredSession(event, temporaryUser, password_hash);
     }
     catch (error) {
         console.error(error)
-        return {
+        return createError({
             statusCode: 500,
             statusMessage: 'Internal server error'
-        }
+        })
     }
 }

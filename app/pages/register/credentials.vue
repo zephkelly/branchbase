@@ -75,8 +75,6 @@ const route = useRoute()
 // Session data --------------------------------------------------------------
 const { user, session, getNewSession, clearSession } = useAuthState()
 
-console.log('Session:', session.value)
-
 const unregisteredUser = ref(user.value as UnregisteredCredUser);
 const linkableUsersData = ref(session.value.linkable_data as UnregisteredLinkableData);
 
