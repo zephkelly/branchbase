@@ -1,6 +1,7 @@
 import { Provider } from "~~/types/auth/user/providers"
 import { isRegisteredUser } from "~~/types/auth/user/session/registered"
 import { UnregisteredCredUser, SecureUnregisteredCredSessionData, UnregisteredCredLinkableSession, UnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered"
+import { getOTPUsed } from "~~/server/utils/database/tokens/otp/used"
 
 import { createUser } from "~~/server/utils/database/user"
 import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/standardSession"
@@ -8,8 +9,9 @@ import { createRegisteredSession } from "~~/server/utils/auth/sessions/registere
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const username: string = body.username
+    const otp_id: string = body.otp_id
 
-    if (!username) {
+    if (!username || !otp_id) {
         return createError({
             statusCode: 400,
             statusMessage: 'Invalid or missing credentials'
@@ -61,6 +63,15 @@ export default defineEventHandler(async (event) => {
         return createError({
             statusCode: 403,
             statusMessage: 'You have not initiated the registration process properly'
+        })
+    }
+
+    const otpVerificationResponse = await getOTPUsed(event, parseInt(otp_id))
+
+    if (otpVerificationResponse.verified === false) {
+        return createError({
+            statusCode: 403,
+            statusMessage: 'OTP code has already been used. Please start the linking process again.'
         })
     }
 

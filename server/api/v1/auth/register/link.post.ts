@@ -7,7 +7,7 @@ import { UnregisteredUser, SecureUnregisteredLinkableSessionData } from '~~/type
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
 import { createUserProvider } from '~~/server/utils/database/user';
-import { getOTPUsed } from '~~/server/utils/database/token';
+import { getOTPUsed } from '~~/server/utils/database/tokens/otp/used';
 import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/standardSession';
 
 import { VerifiedUnregisteredCredLinkableSession } from '~~/types/auth/user/session/credentials/unregistered';
@@ -108,7 +108,6 @@ export default defineEventHandler(async (event) => {
 
         //check if the otp code has been used
         const otpVerificationResponse = await getOTPUsed(event, otp_id.value)
-
         if (otpVerificationResponse.verified === false) {
             return createError({
                 statusCode: 403,

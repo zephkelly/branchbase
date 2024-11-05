@@ -9,6 +9,10 @@ import { UnregisteredOAuthLinkableSession, UnregisteredOAuthSession } from '~~/t
 
 const DEFAULT_MAX_VERIFICATION_ATTEMPTS = 5
 
+interface OTPVerificationResponse {
+    otp_id: number
+}
+
 export async function handleVerifyOTP(event: H3Event, otp: string, verification_attempts: number = DEFAULT_MAX_VERIFICATION_ATTEMPTS) {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database

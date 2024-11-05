@@ -45,17 +45,17 @@ const { clearSession, getNewSession, session, user } = useAuthState()
 
 const signInWithGoogle = async () => {
     await clearSession();
-    window.location.href = '/api/auth/google'
+    window.location.href = '/api/v1/auth/google'
 }
 
 const signInWithGitHub = async () => {
     await clearSession();
-    window.location.href = '/api/auth/github'
+    window.location.href = '/api/v1/auth/github'
 }
 
 const signInWithDiscord = async () => {
     await clearSession();
-    window.location.href = '/api/auth/discord'
+    window.location.href = '/api/v1/auth/discord'
 }
 
 const signOut = () => {
@@ -75,7 +75,7 @@ const isInvalidCredentialsCreateAccount = ref(false);
 const signInWithCredentials = async () => {
     try {
         await clearSession();
-        const response = await $fetch('/api/auth/credentials', {
+        const response = await $fetch('/api/v1/auth/credentials', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

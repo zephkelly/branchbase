@@ -1,5 +1,5 @@
 import { Provider } from '~~/types/auth/user/providers'
-import { handleOAuthLogin } from '~~/server/utils/auth/handlers/oauthHandler'
+import { handleOAuthLogin } from '~~/server/utils/auth/oauth/handlers/oauthHandler'
 
 export type GitHubEmailVisibility = 'public' | 'private' | null;
 

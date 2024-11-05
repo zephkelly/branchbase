@@ -72,17 +72,17 @@ const { clearSession, getNewSession, session, user } = useAuthState();
 
 const registerWithGoogle = async () => {
     await clearSession();
-    window.location.href = '/api/auth/google'
+    window.location.href = '/api/v1/auth/google'
 }
 
 const registerWithGitHub = async () => {
     await clearSession();
-    window.location.href = '/api/auth/github'
+    window.location.href = '/api/v1/auth/github'
 }
 
 const registerWithDiscord = async () => {
     await clearSession();
-    window.location.href = '/api/auth/discord'
+    window.location.href = '/api/v1/auth/discord'
 }
 
 const emailInput = ref('');
@@ -138,7 +138,7 @@ const registerWithCredentials = async () => {
     try {
         await clearSession();
 
-        await $fetch('/api/auth/credentials', {
+        await $fetch('/api/v1/auth/credentials', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

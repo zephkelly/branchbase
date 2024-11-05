@@ -69,7 +69,7 @@ const sendVerificationOTP = async () => {
     errorMessage.value = ''
 
     try {
-        const response = await fetch('/api/auth/verification/linking/generate', {
+        const response = await fetch('/api/v1/auth/verification/linking/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ const otpCode = ref('')
 const verifiedOTPId = ref('')
 const verifyOTP = async () => {
     try {
-        const response = await fetch('/api/auth/verification/linking/verify', {
+        const response = await fetch('/api/v1/auth/verification/linking/verify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ const linkProvider = async (userIndex: number) => {
             throw new Error('Linkable data not found')
         }
 
-        const response: any = await $fetch('/api/auth/register/link', {
+        const response: any = await $fetch('/api/v1/auth/register/link', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

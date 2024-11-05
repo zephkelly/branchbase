@@ -1,5 +1,5 @@
 import { OTPPurpose } from "~~/server/types/otp"
-import { handleGenerateOTP } from "~~/server/utils/auth/tokens/otp/generate"
+import { handleGenerateOTP } from "~~/server/utils/database/tokens/otp/generate"
 import { SecureSessionData } from "~~/types/auth/user/session/secure"
 
 export default defineEventHandler(async (event) => {

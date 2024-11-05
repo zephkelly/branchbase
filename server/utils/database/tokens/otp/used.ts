@@ -16,6 +16,7 @@ export async function getOTPUsed(event: H3Event, otp_id: number): Promise<OTPVer
         return { verified: false }
     }
     if (typeof otp_id !== 'number') {
+        console.log('NAN')
         setResponseStatus(event, 400)
         return { verified: false }
     }
