@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
         if (!session || !email) {
             throw createError({
                 statusCode: 401,
-                message: 'Unauthorized'
+                message: 'Session not found'
             })
         }
 
@@ -23,7 +23,14 @@ export default defineEventHandler(async (event) => {
 
         setResponseStatus(event, 201, 'Created')
     }
-    catch (error) {
+    catch (error: any) {
+        if (error.statusCode) {
+            throw error
+        }
 
+        throw createError({
+            statusCode: 500,
+            message: 'Failed to generate verification code'
+        })
     }
 })
