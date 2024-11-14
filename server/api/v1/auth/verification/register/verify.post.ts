@@ -1,4 +1,4 @@
-import { handleVerifyOTP } from "~~/server/utils/auth/database/tokens/otp/verify";
+import { verifyOTP } from "~~/server/utils/auth/database/tokens/otp/verify";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 
@@ -13,5 +13,10 @@ export default defineEventHandler(async (event) => {
         })
     }
     
-    return await handleVerifyOTP(event, otp, MAXIMUM_VERIFICATION_ATTEMPTS)
+    const otp_id = await verifyOTP(event, otp, MAXIMUM_VERIFICATION_ATTEMPTS)
+
+    setResponseStatus(event, 200, 'OK')
+    return {
+        otp_id: otp_id
+    }
 });

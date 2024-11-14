@@ -8,29 +8,53 @@ interface CredentialsLoginRequest {
 }
 
 export default defineEventHandler(async (event) => {
-    const body = await readBody<CredentialsLoginRequest>(event)
+    try {
+        const body = await readBody<CredentialsLoginRequest>(event)
 
-    const { email, password, confirm_password } = body;
+        const { email, password, confirm_password } = body;
 
-    if (!email || !password) {
-        return createError({
-            statusCode: 400,
-            statusMessage: 'Invalid or missing credentials'
-        })
-    }
+        if (!email || !password) {
+            throw createError({
+                statusCode: 400,
+                message: 'Invalid or missing credentials'
+            })
+        }
 
-    // User is trying to register
-    if (confirm_password) {
-        return handleRegisterCredentials(event, {
+        // User is trying to register
+        if (confirm_password) {
+            await handleRegisterCredentials(event, {
+                email,
+                password,
+                confirm_password
+            })
+
+            setResponseStatus(event, 201, 'Created')
+            return {
+                statusCode: 201,
+                message: 'User successfully registered'
+            }
+        }
+
+        // User is trying to log in
+        await handleLoginCredentials(event, {
             email,
-            password,
-            confirm_password
+            password
+        })
+
+        setResponseStatus(event, 200, 'OK')
+        return {
+            statusCode: 200,
+            message: 'User successfully logged in'
+        }
+    }
+    catch (error: any) {
+        if (error.statusCode) {
+            throw error
+        }
+
+        throw createError({
+            statusCode: 500,
+            message: 'Error handling credentials'
         })
     }
-
-    // User is trying to log in
-    return handleLoginCredentials(event, {
-        email,
-        password
-    })
 })

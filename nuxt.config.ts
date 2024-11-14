@@ -45,6 +45,16 @@ export default defineNuxtConfig({
                 clientSecret: process.env.NUXT_OAUTH_DISCORD_CLIENT_SECRET,
                 redirectURL: process.env.NUXT_OAUTH_DISCORD_REDIRECT_URL
             }
+        },
+
+        smtp: {
+            host: process.env.AMAZON_SES_SMTP_HOST,
+            port: process.env.AMAZON_SES_SMTP_PORT,
+            secure: process.env.AMAZON_SES_SMTP_SECURE,
+            user: process.env.AMAZON_SES_SMTP_USER,
+            password: process.env.AMAZON_SES_SMTP_PASS,
+
+            from_no_reply: process.env.EMAIL_FROM_NO_REPLY
         }
     },
 

@@ -44,12 +44,6 @@ export async function createVerifiedUnregisteredOAuthSession(event: H3Event, ses
     }, {
         maxAge: 60 * 60
     })
-
-    setResponseStatus(event, 200, "Ok")
-    return {
-        statusCode: 200,
-        statusMessage: "Ok"
-    }
 }
 
 export async function createVerifiedUnregisteredCredentialsSession(event: H3Event, session: UnregisteredCredSession) {
@@ -88,10 +82,4 @@ export async function createVerifiedUnregisteredCredentialsSession(event: H3Even
     }, {
         maxAge: 60 * 60
     })
-
-    setResponseStatus(event, 200, "Ok")
-    return {
-        statusCode: 200,
-        statusMessage: "Ok"
-    }
 }

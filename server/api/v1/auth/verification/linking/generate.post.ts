@@ -1,5 +1,5 @@
 import { OTPPurpose } from "~~/server/types/otp"
-import { handleGenerateOTP } from "~~/server/utils/auth/database/tokens/otp/generate"
+import { createOTP } from "~~/server/utils/auth/database/tokens/otp/generate"
 import { SecureSessionData } from "~~/types/auth/user/session/secure"
 
 export default defineEventHandler(async (event) => {
@@ -14,5 +14,11 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    return handleGenerateOTP(event, email, OTPPurpose.ACCOUNT_LINKING)
+    const otp_code = await createOTP(event, email, OTPPurpose.ACCOUNT_LINKING)
+
+    const nitroApp = useNitroApp()
+    const mailer = nitroApp.mailer
+    await mailer.sendVerificationEmail('evan.connor.kelly@gmail.com', otp_code)
+
+    setResponseStatus(event, 201, 'Created')
 })

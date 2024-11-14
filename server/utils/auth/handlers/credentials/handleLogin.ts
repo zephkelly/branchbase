@@ -15,35 +15,42 @@ export async function handleLoginCredentials(
         const { email, password } = body
     
         if (!password || !email) {
-            return createError({
+            throw createError({
                 statusCode: 400,
-                statusMessage: 'Invalid or missing credentials'
+                message: 'Invalid or missing credentials'
             })
         }
     
         const existingUser = await getEmailProviderUser(event, Provider.Credentials, email)
+
+        console.log("Is existing user", existingUser)
     
         if (!existingUser) {
-            return createError({
+            throw createError({
                 statusCode: 404,
-                statusMessage: 'User not found'
+                message: 'User not found'
             })
         }
     
     
         if (await verifyPassword(existingUser.password_hash, password) === false) {
-            return createError({
+            throw createError({
                 statusCode: 401,
-                statusMessage: 'Invalid or missing credentials'
+                message: 'Invalid or missing credentials'
             })
         }
 
-        return await createRegisteredSession(event, existingUser);
+        await createRegisteredSession(event, existingUser);
     }
-    catch (error) {
-        return createError({
+    catch (error: any) {
+        if (error.statusCode) {
+            throw error
+        }
+
+        console.log(error)
+        throw createError({
             statusCode: 500,
-            statusMessage: 'Internal server error'
+            message: 'Error logging in'
         })
     }
 }

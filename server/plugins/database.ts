@@ -1,11 +1,5 @@
 import pg from 'pg'
 
-declare module 'nitropack' {
-    interface NitroApp {
-        database: pg.Pool
-    }
-}
-
 export default defineNitroPlugin(async (nitroApp) => {
     const config = useRuntimeConfig()
 

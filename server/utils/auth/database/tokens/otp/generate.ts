@@ -3,17 +3,19 @@ import { H3Event } from 'h3'
 import { RateLimitType } from "~~/server/types/ratelimit"
 import { OTPPurpose } from "~~/server/types/otp"
 
-export function generateOTP(length: number = 6): string {
+export function generateOTPCode(length: number = 6): string {
     return Array.from(
       { length },
       () => Math.floor(Math.random() * 10)
     ).join('')
 }
 
-export async function handleGenerateOTP(event: H3Event, email: string, purpose: OTPPurpose) {
+export async function createOTP(event: H3Event, email: string, purpose: OTPPurpose): Promise<string>{
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
+
+    const otp_code = generateOTPCode()
 
     try {
         await client.query('BEGIN')
@@ -56,9 +58,9 @@ export async function handleGenerateOTP(event: H3Event, email: string, purpose: 
             const cooldown = rateLimit.cooldown_until as Date
             const cooldownMinutes = Math.ceil((cooldown.getTime() - Date.now()) / 60000)
 
-            return createError({
+            throw createError({
                 statusCode: 429,
-                statusMessage: 'Too many attempts. Try again in: ' + cooldownMinutes + ' minutes.',
+                message: 'Too many attempts. Try again in: ' + cooldownMinutes + ' minutes.',
             })
         }
 
@@ -93,20 +95,23 @@ export async function handleGenerateOTP(event: H3Event, email: string, purpose: 
 
         const upsertOTPValues = [
             email,
-            generateOTP(),
+            otp_code,
             purpose
         ]
 
         await client.query(upsertOTPQuery, upsertOTPValues)
 
         await client.query('COMMIT')
-        
-        setResponseStatus(event, 200, 'Ok')
+
+        return otp_code
     }
-    catch (error) {
+    catch (error: any) {
         await client.query('ROLLBACK')
+        if (error.statusCode) {
+            throw error
+        }
         console.error('Error in handleGenerateOTP:', error)
-        return createError({
+        throw createError({
             statusCode: 500,
             message: 'Server error creating OTP'
         })

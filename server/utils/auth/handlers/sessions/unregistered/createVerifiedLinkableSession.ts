@@ -53,12 +53,6 @@ export async function createVerifiedLinkableUnregisteredOAuthSession(event: H3Ev
     }, {
         maxAge: 60 * 60
     })
-
-    setResponseStatus(event, 200, "Ok")
-    return {
-        statusCode: 200,
-        statusMessage: "Ok"
-    }
 }
 
 export async function createVerifiedLinkableUnregisteredCredentialsSession(event: H3Event, session: UnregisteredCredLinkableSession) {
@@ -105,10 +99,4 @@ export async function createVerifiedLinkableUnregisteredCredentialsSession(event
     }, {
         maxAge: 60 * 60
     })
-
-    setResponseStatus(event, 200, "Ok")
-    return {
-        statusCode: 200,
-        statusMessage: "Ok"
-    }
 }

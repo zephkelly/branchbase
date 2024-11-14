@@ -4,7 +4,8 @@ import { isDatabaseError, isValidationError } from '~~/server/types/error';
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
 import { getProviderUser, createUserProvider } from '~~/server/utils/auth/database/user';
-import { getOTPUsed } from '~~/server/utils/auth/database/tokens/otp/used';
+import { getOTPVerified } from '~~/server/utils/auth/database/tokens/otp/verify';
+import { cleanupOTP } from '~~/server/utils/auth/database/tokens/otp/cleanup';
 import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession';
 
 import { VerifiedUnregisteredCredLinkableSession } from '~~/types/auth/user/session/credentials/unregistered';
@@ -24,9 +25,9 @@ export default defineEventHandler(async (event) => {
         const existing_user_index = ref(body.existing_user_index)
 
         if (!otp_id || existing_user_index === undefined) {
-            return createError({
+            throw createError({
                 statusCode: 400,
-                statusMessage: 'Missing required fields. otp_id and existing_user_index are required'
+                message: 'Missing required fields. otp_id and existing_user_index are required'
             })
         }
 
@@ -53,10 +54,9 @@ export default defineEventHandler(async (event) => {
         const isValid = validator.validateForm()
         
         if (!isValid) {
-            return createError({
+            throw createError({
                 statusCode: 400,
-                statusText: 'Invalid input data',
-                statusMessage: `Invalid input data: ${validator.errors.value.otp_id}`,
+                message: `Invalid input data: ${validator.errors.value.otp_id}`,
             })
         }
         
@@ -66,30 +66,30 @@ export default defineEventHandler(async (event) => {
         const secureSession = session.secure
 
         if (!session || !unregisteredUser || !secureSession) {
-            return createError({
+            throw createError({
                 statusCode: 403,
-                statusMessage: 'You have not initiated the linking process properly'
+                message: 'You have not initiated the linking process properly'
             })
         }
 
         if (unregisteredUser.provider_verified === false || secureSession.provider_verified === false) {
-            return createError({
+            throw createError({
                 statusCode: 403,
-                statusMessage: 'You have not verified your email address'
+                message: 'You have not verified your email address'
             })
         }
 
         if (!session.linkable_data) {
-            return createError({
+            throw createError({
                 statusCode: 403,
-                statusMessage: 'No linkable account data found in session'
+                message: 'No linkable account data found in session'
             })
         }
 
         if (unregisteredUser.id !== null) {
-            return createError({
+            throw createError({
                 statusCode: 403,
-                statusMessage: 'You are already logged in'
+                message: 'You are already logged in'
             })
         }
 
@@ -97,18 +97,26 @@ export default defineEventHandler(async (event) => {
         const secureLinkableUsers = verifiedLinkableData.linkable_users
 
         if (!verifiedLinkableData || !secureLinkableUsers) {
-            return createError({
+            throw createError({
                 statusCode: 403,
-                statusMessage: 'No linkable account data found in session'
+                message: 'No linkable account data found in session'
             })
         }
 
         //check if the otp code has been used
-        const otpVerificationResponse = await getOTPUsed(event, otp_id.value)
-        if (otpVerificationResponse.verified === false) {
-            return createError({
+        const otpVerificationResponse = await getOTPVerified(event, otp_id.value)
+        if (otpVerificationResponse.verified === false || !otpVerificationResponse.email) {
+            throw createError({
                 statusCode: 403,
-                statusMessage: 'OTP code has already been used. Please start the linking process again.'
+                message: 'Invalid OTP used or expired. Please start registration process again'
+            })
+        }
+
+        const is_otp_cleaned  = await cleanupOTP(event, otp_id.value, otpVerificationResponse.email)
+        if (is_otp_cleaned === false) {
+            throw createError({
+                statusCode: 500,
+                message: 'Failed to cleanup OTP from database'
             })
         }
 
@@ -118,9 +126,10 @@ export default defineEventHandler(async (event) => {
         const desired_user = await getProviderUser(event, existing_provider, existing_provider_id, verifiedLinkableData.provider_email)
         
         if (!desired_user || desired_user.id === null || desired_user.id === undefined) {
-            return createError({
+            
+            throw createError({
                 statusCode: 404,
-                statusMessage: 'No accounts found to link with'
+                message: 'No accounts found to link with'
             })
         }
 
@@ -129,9 +138,9 @@ export default defineEventHandler(async (event) => {
         const providerLinkResponse = await createUserProvider(event, desired_user_id, uncastedSession)
 
         if (isDatabaseError(providerLinkResponse) || isValidationError(providerLinkResponse)) {
-            return createError({
+            throw createError({
                 statusCode: providerLinkResponse.statusCode,
-                statusMessage: providerLinkResponse.message
+                message: providerLinkResponse.message
             })
         }
 
@@ -141,14 +150,18 @@ export default defineEventHandler(async (event) => {
         setResponseStatus(event, 201, 'Ok')
         return {
             statusCode: 201,
-            statusMessage: 'Account linked'
+            message: 'Account linked'
         }
     }
-    catch (error) {
-        console.error('Error linking account:', error)
-        return createError({
+    catch (error: any) {
+        if (error.statusCode) {
+            throw error
+        }
+
+        throw createError({
             statusCode: 500,
-            statusMessage: 'An error occurred while linking accounts'
+            statusMessage: 'Internal Server Error',
+            message: 'Failed to link account'
         })
     }
 });

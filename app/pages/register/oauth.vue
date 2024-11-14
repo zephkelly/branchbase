@@ -134,13 +134,8 @@ const submitUsername = async () => {
             }),
         });
     
-        if (response.statusCode === 201) {
-            await getNewSession()
-            navigateTo('/')
-        }
-        else {
-            alert('Invalid username')
-        }
+        await getNewSession()
+        navigateTo('/')
     }
     catch(error: any) {
         console.error('Error during registration:', error)

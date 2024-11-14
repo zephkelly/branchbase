@@ -85,22 +85,16 @@ const signInWithCredentials = async () => {
                 password: passwordInput.value,
             }),
         });
-    
-        //@ts-expect-error
-        if (response.registered !== undefined && response.registered === false) {
-            isInvalidCredentialsCreateAccount.value = true;
-            isInvalidCredentials.value = false;
-            return;
-        }
 
         await getNewSession();
         navigateTo('/');
     }
     catch (error: any) {
-        // console.error('Error signing in:', error);
+        console.error('Error signing in:', error);
+        console.log(error.data)
         if (error.statusCode === 401) {
-            isInvalidCredentials.value = true;
             isInvalidCredentialsCreateAccount.value = false;
+            isInvalidCredentials.value = true;
         }
         else {
             isInvalidCredentialsCreateAccount.value = true;

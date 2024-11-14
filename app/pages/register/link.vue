@@ -15,6 +15,7 @@
                                 <img :src="account.picture" alt="User Picture" />
                                 <p>{{ account.providers[0]?.provider }}</p>
                                 <button @click.prevent="linkProvider(index)">Link {{ index }}</button>
+                                <p v-if="errorLinkingProvider" style="color: red;">{{ errorLinkingProviderMessage }}</p>
                         </div>
                     </div>
                 </div>
@@ -23,13 +24,13 @@
                     <p>{{ session.value?.linkable_data }}</p>
                     <form @submit.prevent="sendVerificationOTP">
                         <button type="submit">Verify Email</button>
-                        <p v-if="sentVerification"></p>
-                        <p v-if="errorSendingVerification" style="color: red;">Error sending verification. {{ errorMessage }}</p>
+                        <p v-if="errorSendingVerification" style="color: red;">{{ errorSendingVerificationMessage }}</p>
                     </form>
                     <form v-if="sentVerification" style="margin-top: 1rem;" @submit.prevent="verifyOTP">
                         <label for="otp">OTP</label>
                         <input type="text" id="otp" name="otp" required v-model="otpCode">
                         <button type="submit">Verify OTP</button>
+                        <p v-if="errorVerifyingOtp" style="color: red;">{{ errorVerifyingOtpMessage }}</p>
                     </form>
                 </div>
             </template>
@@ -56,72 +57,69 @@ if (!UnregisteredUser) {
 // Pre-verified session data
 const linkableUsersData = ref(session.value.linkable_data);
 
+if (!linkableUsersData.value) {
+    console.error('No linkable data found')
+    navigateTo('/register')
+}
+
 // Verified session data
 const verifiedLinkableData = ref(session.value.linkable_data as VerifiedUnregisteredLinkableData);
 const isVerified = ref(verifiedLinkableData.value.linkable_users !== undefined)
 
 const sentVerification = ref(false)
 const errorSendingVerification = ref(false)
-const errorMessage = ref('')
+const errorSendingVerificationMessage = ref('')
 const sendVerificationOTP = async () => {
     sentVerification.value = false
     errorSendingVerification.value = false
-    errorMessage.value = ''
+    errorSendingVerificationMessage.value = ''
 
     try {
-        const response = await fetch('/api/v1/auth/verification/linking/generate', {
+        const response = await $fetch('/api/v1/auth/verification/linking/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
         })
 
-        if (!response.ok) {
-            errorSendingVerification.value = true
-            errorMessage.value = response.statusText
-            throw new Error('Verification sending failed')
-        }
-        else {
-            sentVerification.value = true
-        }
-
+        sentVerification.value = true   
     }
-    catch (error) {
-        console.error('Error during registration:', error)
+    catch (error: any) {
+        errorSendingVerification.value = true
+        errorSendingVerificationMessage.value = error.data.message
     }
 }
 
 const otpCode = ref('')
-const verifiedOTPId = ref('')
+const verifiedOTPId = ref(0)
+const errorVerifyingOtp = ref(false)
+const errorVerifyingOtpMessage = ref('')
 const verifyOTP = async () => {
     try {
-        const response = await fetch('/api/v1/auth/verification/linking/verify', {
+        const response = await $fetch('/api/v1/auth/verification/linking/verify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
+            body: {
                 otp: otpCode.value
-            })
+            }
         })
 
-        if (!response.ok) {
-            console.log(response)
-            throw new Error('Verification failed')
-        }
-
-        const data = await response.json()
-        verifiedOTPId.value = data.otp_id
+        verifiedOTPId.value = response.otp_id
 
         isVerified.value = true
 
         await getNewSession()
     }
-    catch (error) {
-        console.error('Error during registration:', error)
+    catch (error: any) {
+        errorVerifyingOtp.value = true
+        errorVerifyingOtpMessage.value = error.data.message
     }
 }
 
+const errorLinkingProvider = ref(false)
+const errorLinkingProviderMessage = ref('')
 const linkProvider = async (userIndex: number) => {
     try {
         if (!verifiedLinkableData.value) {
@@ -139,22 +137,13 @@ const linkProvider = async (userIndex: number) => {
             })
         })
 
-        if (response.statusCode !== 201) {
-
-            throw new Error('Linking failed')
-        }
-
         await getNewSession()
         navigateTo('/')
     }
-    catch (error) {
-        console.error('Error during registration:', error)
+    catch (error: any) {
+        errorLinkingProvider.value = true
+        errorLinkingProviderMessage.value = error.data.message
     }
-}
-
-if (!linkableUsersData.value) {
-    isVerified.value = false
-    navigateTo('/register')
 }
 </script>
 

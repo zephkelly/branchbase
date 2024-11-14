@@ -52,10 +52,4 @@ export async function createUnregisteredCredentialsSession(event: H3Event, user:
     }, {
         maxAge: 60 * 60
     })
-
-    setResponseStatus(event, 200, "Ok")
-    return {
-        statusCode: 200,
-        statusMessage: "Ok"
-    }
 }

@@ -1,6 +1,5 @@
-import { H3Error, H3Event } from 'h3'
+import { H3Event } from 'h3'
 import { OTPPurpose } from '~~/server/types/otp';
-import { SecureSessionData } from "~~/types/auth/user/session/secure";
 
 import { createVerifiedLinkableSession } from "~~/server/utils/auth/handlers/sessions/unregistered/createVerifiedLinkableSession";
 import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/handlers/sessions/unregistered/createVerifiecUnregisteredSession";
@@ -9,11 +8,7 @@ import { UnregisteredOAuthLinkableSession, UnregisteredOAuthSession } from '~~/t
 
 const DEFAULT_MAX_VERIFICATION_ATTEMPTS = 5
 
-interface OTPVerificationResponse {
-    otp_id: number
-}
-
-export async function handleVerifyOTP(event: H3Event, otp: string, verification_attempts: number = DEFAULT_MAX_VERIFICATION_ATTEMPTS) {
+export async function verifyOTP(event: H3Event, otp: number, verification_attempts: number = DEFAULT_MAX_VERIFICATION_ATTEMPTS): Promise<number> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
@@ -24,14 +19,14 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
         const email = (secureData.provider_email) ? secureData.provider_email : null
 
         if (!session || !email) {
-            return createError({
+            throw createError({
                 statusCode: 401,
                 statusMessage: 'Unauthorized'
             })
         }
 
         if (!otp) {
-            return createError({
+            throw createError({
                 statusCode: 400,
                 statusMessage: 'OTP required'
             })
@@ -52,7 +47,7 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
         if (tokenResult.rows.length === 0) {
             await client.query('ROLLBACK')
 
-            return createError({
+            throw createError({
                 statusCode: 404,
                 statusText: 'No OTP found. Please request a new one.'
             })
@@ -70,7 +65,7 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
             await client.query(deleteTokenQuery, [token.id])
             await client.query('COMMIT')
             
-            return createError({
+            throw createError({
                 statusCode: 429,
                 statusMessage: 'Maximum verification attempts. Please request a new OTP.'
             })
@@ -94,15 +89,17 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
 
             // If this was the last attempt, include that in the message
             if (remainingAttempts === 0) {
-                return createError({
+                throw createError({
                     statusCode: 401,
-                    statusMessage: 'Maximum verification attempts reached. Request a new OTP.'
+                    statusText: 'Invalid OTP',
+                    message: 'Maximum verification attempts reached. Request a new OTP.'
                 })
             }
             
-            return createError({
+            throw createError({
                 statusCode: 401,
-                statusMessage: `Invalid OTP. ${remainingAttempts} attempts remaining.`
+                statusText: 'Invalid OTP',
+                message: `Invalid OTP. ${remainingAttempts} attempts remaining.`
             })
         }
 
@@ -124,24 +121,77 @@ export async function handleVerifyOTP(event: H3Event, otp: string, verification_
         }
         
         await client.query('COMMIT')
-        setResponseStatus(event, 200, 'Ok')
-        return {
-            otp_id: token.id
-        }
+
+        return parseInt(token.id)
     }
     catch (err) {
         await client.query('ROLLBACK')
 
-        if (err instanceof H3Error) {
-            return err
+        throw err
+    } 
+    finally {
+        client.release()
+    }
+}
+
+
+interface OTPVerificationResult {
+    verified: boolean;
+    email: string;
+}
+
+export async function getOTPVerified(event: H3Event, otp_id: number): Promise<OTPVerificationResult> {
+    const nitroApp = useNitroApp()
+    const pool = nitroApp.database
+    const client = await pool.connect()
+
+    // Input validation
+    if (!otp_id) {
+        throw createError({
+            statusCode: 400,
+            message: 'Missing required parameters'
+        })
+    }
+    if (typeof otp_id !== 'number') {
+        throw createError({
+            statusCode: 400,
+            message: 'Invalid OTP ID'
+        })
+    }
+
+    try {
+        // Check for used OTP and get email
+        const checkQuery = `
+            SELECT email
+            FROM private.otp_tokens
+            WHERE id = $1
+            AND used_at IS NOT NULL;
+        `
+        
+        const checkResult = await client.query(checkQuery, [otp_id])
+        
+        if (checkResult.rows.length === 0) {
+            throw createError({
+                statusCode: 404,
+                message: 'OTP not found or not used'
+            })
         }
 
-        console.error('Error verifying OTP:', err)
-        return createError({
+        return {
+            verified: true,
+            email: checkResult.rows[0].email
+        }
+    }
+    catch (error: any) {
+        if (error.statusCode) {
+            throw error
+        }
+
+        throw createError({
             statusCode: 500,
-            statusMessage: 'Server error verifying OTP'
+            message: 'Failed to verify OTP'
         })
-    } 
+    }
     finally {
         client.release()
     }

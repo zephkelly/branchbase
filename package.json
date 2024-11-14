@@ -11,6 +11,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "nodemailer": "^6.9.16",
     "nuxt": "^3.13.2",
     "nuxt-auth-utils": "^0.5.0",
     "pg": "^8.13.0",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@nuxt/test-utils": "^3.14.3",
+    "@types/nodemailer": "^6.4.16",
     "@types/pg": "^8.11.10",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^15.7.4",
