@@ -2,7 +2,7 @@ import { H3Event } from 'h3'
 
 import { Provider } from '~~/types/auth/user/providers'
 import { getEmailProviderUser } from '~~/server/utils/auth/database/user'
-import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession'
+import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/createRegisteredSession'
 
 export async function handleLoginCredentials(
     event: H3Event,

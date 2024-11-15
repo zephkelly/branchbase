@@ -2,8 +2,8 @@ import { H3Event } from 'h3'
 
 import { Provider } from '~~/types/auth/user/providers'
 import { UnregisteredCredUser } from '~~/types/auth/user/session/credentials/unregistered'
-import { createUnverifiedLinkableSession } from '~~/server/utils/auth/handlers/sessions/unregistered/createUnverifiedLinkableSession'
-import { createUnregisteredSession } from '~~/server/utils/auth/handlers/sessions/unregistered/createUnregisteredSession'
+import { createUnverifiedLinkableSession } from '~~/server/utils/auth/sessions/unregistered/createUnverifiedLinkableSession'
+import { createUnregisteredSession } from '~~/server/utils/auth/sessions/unregistered/createUnregisteredSession'
 
 import { getEmailProviderUser, getUsersProvidersByEmail } from '~~/server/utils/auth/database/user'
 

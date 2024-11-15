@@ -1,4 +1,5 @@
 import { Provider } from "~~/types/auth/user/providers";
+import { UUIDv7 } from "~~/server/types/uuidv7";
 import { type SecureSessionData } from "~~/types/auth/user/session/secure";
 
 export interface RegisteredUser {
@@ -11,7 +12,7 @@ export interface RegisteredUser {
 
 export interface RegisteredSession {
     user: RegisteredUser;
-    secure: SecureSessionData;
+    secure: SecureSessionData & { current_session_version: string };
     logged_in_at: number;
 }
 

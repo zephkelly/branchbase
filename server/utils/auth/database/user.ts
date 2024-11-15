@@ -1,32 +1,25 @@
 import { H3Event } from 'h3';
 
 import { UserSession } from '#auth-utils';
+import { SecureSessionData } from '~~/types/auth/user/session/secure';
 
 import { Provider } from '~~/types/auth/user/providers';
-
 import { RegisteredUser } from '~~/types/auth/user/session/registered';
 import { UnregisteredUser } from '~~/types/auth/user/session/unregistered';
-
 import { LinkableUserProviderData } from '~~/types/auth/user/session/unregistered';
-
 import { SecureUnregisteredCredSessionData } from '~~/types/auth/user/session/credentials/unregistered';
 
-// import { type SecureRegisteredUser, UserSessionData, UnregisteredUser, Provider, LinkableUserProviderData } from '../../../types/user';
 import { ErrorType, PostgresError } from '~~/server/types/error';
 import type { UserCreationResponse } from '~~/server/types/user'
 import type { UserProviderCreationResponse } from '~~/server/types/userProvider';
-import { SecureSessionData } from '~~/types/auth/user/session/secure';
+
+import { getPool } from '~~/server/utils/database'
 
 const VALID_PROVIDERS = Object.values(Provider);
 
-// interface SecureRegisteredUser extends RegisteredUser {
-//     provider_verified: boolean;
-//     provider_email: string;
-//     password_hash?: string;
-// }
 export async function getProviderUser(event: H3Event, provider: Provider, provider_id: string | null, provider_email?: string): Promise<RegisteredUser & SecureSessionData | null> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
+    const client = await pool.connect()
 
     if (!provider || (!provider_id && !provider_email)) {
         setResponseStatus(event, 400)
@@ -80,7 +73,7 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
             values = [provider, provider_id]
         }
 
-        const result = await pool.query(query, values)
+        const result = await client.query(query, values)
         
         if (result.rows.length === 0) {
             setResponseStatus(event, 404)
@@ -107,8 +100,8 @@ export async function getProviderUser(event: H3Event, provider: Provider, provid
 }
 
 export async function getEmailProviderUser(event: H3Event, provider: Provider, provider_email: string): Promise<RegisteredUser & SecureSessionData & { password_hash: string } | null> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
+    const client = await pool.connect()
 
     if (!provider || !provider_email) {
         setResponseStatus(event, 400)
@@ -133,7 +126,7 @@ export async function getEmailProviderUser(event: H3Event, provider: Provider, p
             INNER JOIN private.user_providers up ON u.id = up.user_id
             WHERE up.provider = $1 
             AND up.provider_email = $2;`
-        const result = await pool.query(query, [provider, provider_email])
+        const result = await client.query(query, [provider, provider_email])
         
         if (result.rows.length === 0) {
             setResponseStatus(event, 404)
@@ -162,8 +155,8 @@ export async function getEmailProviderUser(event: H3Event, provider: Provider, p
 
 
 export async function getUsersProvidersByEmail(event: H3Event, email: string): Promise<LinkableUserProviderData[] | null> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
+    const client = await pool.connect()
    
     try {
         const query = `
@@ -195,7 +188,7 @@ export async function getUsersProvidersByEmail(event: H3Event, email: string): P
             ORDER BY username
         `
 
-        const result = await pool.query(query, [email])
+        const result = await client.query(query, [email])
         
         if (result.rows.length === 0) return null
 
@@ -229,8 +222,8 @@ export async function getUsersProvidersByEmail(event: H3Event, email: string): P
 
 
 export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: string): Promise<boolean> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
+    const client = await pool.connect()
 
     // Input validation
     if (!provider || !provider_id) {
@@ -259,7 +252,7 @@ export async function getProviderUserExists(event: H3Event, provider: Provider, 
             );`
 
         const values = [provider, provider_id]
-        const result = await pool.query(query, values)
+        const result = await client.query(query, values)
         return result.rows[0].exists
     }
     catch (error) {
@@ -270,8 +263,8 @@ export async function getProviderUserExists(event: H3Event, provider: Provider, 
 }
 
 export async function updateProviderEmail(event: H3Event, provider: Provider, provider_id: string, new_email: string, new_provider_verified_status: boolean): Promise<boolean> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
+    const client = await pool.connect()
 
     if (!provider || !provider_id || !new_email) {
         setResponseStatus(event, 400)
@@ -298,7 +291,7 @@ export async function updateProviderEmail(event: H3Event, provider: Provider, pr
         `
 
         const values = [new_email, new_provider_verified_status, provider, provider_id]
-        await pool.query(query, values)
+        await client.query(query, values)
         return true
     }
     catch (error) {
@@ -323,9 +316,7 @@ export async function createUser(
     picture: string,
     password_hash?: string
 ): Promise<UserCreationResponse> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
-
+    const pool = getPool()
     const client = await pool.connect()
 
     try {
@@ -451,14 +442,15 @@ export async function createUser(
  * @warning This function does NOT sanitise or validate input data.
  */
 export async function createUserProvider(event: H3Event, user_id: string, session: UserSession): Promise<UserProviderCreationResponse> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
     const client = await pool.connect()
     
     try {
         const user = session.user as UnregisteredUser
         const isCredentialsProvider = user.provider === Provider.Credentials
         const hasHashedPassword = session.confirmed_password === true && (session.secure as SecureUnregisteredCredSessionData).password_hash
+
+        await client.query('BEGIN')
 
         if (isCredentialsProvider && hasHashedPassword) {
             const credentialsProviderQuery = `
@@ -483,9 +475,7 @@ export async function createUserProvider(event: H3Event, user_id: string, sessio
                 (session.secure as SecureUnregisteredCredSessionData).password_hash
             ]
 
-            await client.query('BEGIN')
-
-            await pool.query(credentialsProviderQuery, credentialsProviderValues)
+            await client.query(credentialsProviderQuery, credentialsProviderValues)
         }
         else {
             const providerQuery = `
@@ -508,9 +498,7 @@ export async function createUserProvider(event: H3Event, user_id: string, sessio
                 user.provider_verified
             ]
 
-            await client.query('BEGIN')
-
-            await pool.query(providerQuery, values)
+            await client.query(providerQuery, values)
         }
 
         const userQuery = `

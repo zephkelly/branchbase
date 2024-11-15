@@ -1,5 +1,5 @@
 import { H3Event } from "h3";
-import { UnregisteredCredUser, UnregisteredCredSession, isUnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered";
+import { UnregisteredCredSession, isUnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered";
 import { UnregisteredOAuthSession, isUnregisteredOAuthSession } from "~~/types/auth/user/session/oauth/unregistered";
 
 export async function createVerifiedUnregisteredSession(event: H3Event, session: UnregisteredCredSession | UnregisteredOAuthSession) {

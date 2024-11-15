@@ -7,6 +7,7 @@
         "sanitised",
         "Sanitiser",
         "uncasted",
-        "Upbranched"
+        "Upbranched",
+        "uuidv"
     ]
 }

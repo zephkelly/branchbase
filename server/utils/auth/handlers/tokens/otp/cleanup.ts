@@ -1,8 +1,8 @@
 import { H3Event } from 'h3'
+import { getPool } from '~~/server/utils/database'
 
 export async function cleanupOTP(event: H3Event, otp_id: string, email: string): Promise<boolean> {
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
     const client = await pool.connect()
 
     // Input validation

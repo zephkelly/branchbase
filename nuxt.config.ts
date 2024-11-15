@@ -25,9 +25,6 @@ export default defineNuxtConfig({
 
     modules: ['nuxt-auth-utils'],
     runtimeConfig: {
-        session: {
-            maxAge: 60 * 60 * 24 * 7
-        },
         databaseConnectionString: process.env.POSTGRES_CONNECTION_STRING,
         oauth: {
             google: {
@@ -54,7 +51,7 @@ export default defineNuxtConfig({
             user: process.env.AMAZON_SES_SMTP_USER,
             password: process.env.AMAZON_SES_SMTP_PASS,
 
-            from_no_reply: process.env.EMAIL_FROM_NO_REPLY
+            from_noreply: process.env.EMAIL_FROM_NOREPLY
         }
     },
 
@@ -76,5 +73,6 @@ export default defineNuxtConfig({
 
             '/register/**': { static: true },
         },
+        
     },
 })

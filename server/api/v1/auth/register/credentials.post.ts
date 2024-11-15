@@ -5,7 +5,7 @@ import { isRegisteredUser } from "~~/types/auth/user/session/registered"
 import { VerifiedUnregisteredCredLinkableSession, UnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered"
 
 import { createUser } from "~~/server/utils/auth/database/user"
-import { createRegisteredSession } from "~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession"
+import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/createRegisteredSession"
 import { getOTPVerified } from "~~/server/utils/auth/handlers/tokens/otp/verify"
 import { cleanupOTP } from '~~/server/utils/auth/handlers/tokens/otp/cleanup'
 
@@ -79,7 +79,7 @@ export default defineEventHandler(async (event) => {
 
 
         // Cleanup OTP from database used for email verification
-        const otpVerificationResponse = await getOTPVerified(event, parseInt(otp_id))
+        const otpVerificationResponse = await getOTPVerified(event, otp_id)
 
         if (otpVerificationResponse.verified === false || !otpVerificationResponse.email) {
             throw createError({
@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        const is_otp_cleaned = await cleanupOTP(event, parseInt(otp_id), otpVerificationResponse.email)
+        const is_otp_cleaned = await cleanupOTP(event, otp_id, otpVerificationResponse.email)
 
         if (is_otp_cleaned === false) {
             throw createError({
@@ -150,7 +150,6 @@ export default defineEventHandler(async (event) => {
         
         const registeredUser = userCreationResponse.data
 
-        // Login user with a registered session
         await createRegisteredSession(event, registeredUser)
 
         setResponseStatus(event, 201, 'Created')

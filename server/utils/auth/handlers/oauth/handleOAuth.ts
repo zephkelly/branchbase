@@ -5,9 +5,9 @@ import { UnregisteredUser } from '~~/types/auth/user/session/unregistered'
 
 import { getProviderUser, getUsersProvidersByEmail, updateProviderEmail } from '~~/server/utils/auth/database/user'
 
-import { createUnverifiedLinkableSession } from '~~/server/utils/auth/handlers/sessions/unregistered/createUnverifiedLinkableSession'
-import { createUnregisteredSession } from '~~/server/utils/auth/handlers/sessions/unregistered/createUnregisteredSession'
-import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession'
+import { createUnverifiedLinkableSession } from '~~/server/utils/auth/sessions/unregistered/createUnverifiedLinkableSession'
+import { createUnregisteredSession } from '~~/server/utils/auth/sessions/unregistered/createUnregisteredSession'
+import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/createRegisteredSession'
 
 export async function handleOAuthLogin(
     event: H3Event, 

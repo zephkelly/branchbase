@@ -3,6 +3,8 @@ import { H3Event } from 'h3'
 import { RateLimitType } from "~~/server/types/ratelimit"
 import { OTPPurpose } from "~~/server/types/otp"
 
+import { getPool } from "~~/server/utils/database"
+
 export function generateOTPCode(length: number = 6): string {
     return Array.from(
       { length },
@@ -11,8 +13,7 @@ export function generateOTPCode(length: number = 6): string {
 }
 
 export async function createOTP(event: H3Event, email: string, purpose: OTPPurpose): Promise<string>{
-    const nitroApp = useNitroApp()
-    const pool = nitroApp.database
+    const pool = getPool()
     const client = await pool.connect()
 
     const otp_code = generateOTPCode()
