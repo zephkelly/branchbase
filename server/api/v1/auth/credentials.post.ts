@@ -1,32 +1,34 @@
+import { useTypeValidator } from '~/composables/useTypeValidator'
 import { handleRegisterCredentials } from "~~/server/utils/auth/handlers/credentials/handleRegister";
 import { handleLoginCredentials } from "~~/server/utils/auth/handlers/credentials/handleLogin";
 
 interface CredentialsLoginRequest {
     email: string;
     password: string;
-    confirm_password: string;
+    confirm_password?: string;
 }
 
 export default defineEventHandler(async (event) => {
+    const { validateInterface } = useTypeValidator();
+
     try {
         const body = await readBody<CredentialsLoginRequest>(event)
 
-        const { email, password, confirm_password } = body;
-
-        if (!email || !password) {
-            throw createError({
-                statusCode: 400,
-                message: 'Invalid or missing credentials'
-            })
+        const template: CredentialsLoginRequest = {
+            email: '',           // Empty string indicates string type
+            password: '',        // Empty string indicates string type
+            confirm_password: undefined
         }
 
+        const typedBody = validateInterface<CredentialsLoginRequest>(body, template)
+
         // User is trying to register
-        if (confirm_password) {
+        if (typedBody.confirm_password) {
             await handleRegisterCredentials(event, {
-                email,
-                password,
-                confirm_password
-            })
+                email: typedBody.email,
+                password: typedBody.password,
+                confirm_password: typedBody.confirm_password
+            });
 
             setResponseStatus(event, 201, 'Created')
             return {
@@ -37,9 +39,9 @@ export default defineEventHandler(async (event) => {
 
         // User is trying to log in
         await handleLoginCredentials(event, {
-            email,
-            password
-        })
+            email: typedBody.email,
+            password: typedBody.password
+        });
 
         setResponseStatus(event, 200, 'OK')
         return {

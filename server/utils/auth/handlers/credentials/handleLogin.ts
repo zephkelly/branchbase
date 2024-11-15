@@ -4,6 +4,8 @@ import { Provider } from '~~/types/auth/user/providers'
 import { getEmailProviderUser } from '~~/server/utils/auth/database/user'
 import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession'
 
+import { useTypeValidator } from '~/composables/useTypeValidator'
+
 export async function handleLoginCredentials(
     event: H3Event,
     body: {
@@ -13,14 +15,7 @@ export async function handleLoginCredentials(
 ) {
     try {
         const { email, password } = body
-    
-        if (!password || !email) {
-            throw createError({
-                statusCode: 400,
-                message: 'Invalid or missing credentials'
-            })
-        }
-    
+
         const existingUser = await getEmailProviderUser(event, Provider.Credentials, email)
 
         if (!existingUser) {

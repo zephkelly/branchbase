@@ -151,7 +151,6 @@ const registerWithCredentials = async () => {
         });
 
         await getNewSession();
-        console.log(session.value);
         navigateTo('/register/credentials');
     }
     catch (error: any) {

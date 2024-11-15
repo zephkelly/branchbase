@@ -86,7 +86,7 @@ export const useTypeValidator = () => {
     };
 
     // Interface validator
-    const validateInterface = <T extends object>(value: unknown, path: string = 'object'): T => {
+    const validateInterface = <T extends object>(value: unknown, template: T, path: string = 'object'): T => {
         if (value === undefined || value === null) {
             throw createError({
                 statusCode: 400,
@@ -94,7 +94,7 @@ export const useTypeValidator = () => {
                 data: [`${path} is required and must be an object`]
             });
         }
-
+    
         if (typeof value !== 'object') {
             throw createError({
                 statusCode: 400,
@@ -102,23 +102,30 @@ export const useTypeValidator = () => {
                 data: [`${path} must be an object, got ${getTypeOf(value)}`]
             });
         }
-
+    
         const errors: string[] = [];
-        const template = {} as T;
         
         const validateObject = (
             value: unknown,
             template: unknown,
-            path: string[] = []
+            path: string[] = [],
+            requiredKeys: Set<string> = new Set()
         ): void => {
             if (!value || typeof value !== 'object') {
                 errors.push(`Expected object at ${path.join('.') || 'root'}`);
                 return;
             }
-
+    
             const valueObj = value as Record<string, unknown>;
             const templateObj = template as Record<string, unknown>;
-
+    
+            // Get required keys from template type
+            Object.entries(templateObj).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    requiredKeys.add(key);
+                }
+            });
+    
             // Check for extra properties
             const extraKeys = Object.keys(valueObj).filter(
                 key => !(key in templateObj)
@@ -131,75 +138,61 @@ export const useTypeValidator = () => {
                     );
                 });
             }
-
+    
             // Check all template properties
             Object.entries(templateObj).forEach(([key, templateValue]) => {
                 const currentPath = [...path, key];
                 const currentValue = valueObj[key];
                 
-                // Handle optional fields
-                if (currentValue === undefined) {
-                    const isOptional = templateValue === undefined || 
-                        (typeof templateValue === 'object' && 
-                         templateValue !== null && 
-                         'optional' in templateValue && 
-                         templateValue.optional === true);
-                    
-                    if (!isOptional) {
-                        errors.push(`Missing required property: ${currentPath.join('.')}`);
-                    }
+                // Skip validation if field is optional (undefined in template) and value is undefined
+                if (!requiredKeys.has(key) && currentValue === undefined) {
                     return;
                 }
-
-                // Treat null the same as undefined
-                if (currentValue === null) {
+    
+                // Skip if value is undefined or null for optional fields
+                if ((currentValue === undefined || currentValue === null) && !requiredKeys.has(key)) {
                     return;
                 }
-
+    
+                // Required field is missing
+                if ((currentValue === undefined || currentValue === null) && requiredKeys.has(key)) {
+                    errors.push(`Missing required property: ${currentPath.join('.')}`);
+                    return;
+                }
+    
                 const currentType = getTypeOf(currentValue);
                 const expectedType = getTypeOf(templateValue);
-
+    
                 // Handle nested objects
                 if (expectedType === 'object' && currentType === 'object') {
-                    const templateValueObj = templateValue as Record<string, unknown>;
-                    const actualTemplate = 'optional' in templateValueObj && 
-                        'value' in templateValueObj ? 
-                        templateValueObj.value : 
-                        templateValue;
-                    
-                    validateObject(currentValue, actualTemplate, currentPath);
+                    validateObject(currentValue, templateValue, currentPath, new Set());
                     return;
                 }
-
+    
                 // Handle arrays
                 if (expectedType === 'array' && currentType === 'array') {
                     (currentValue as unknown[]).forEach((item, index) => {
                         if (Array.isArray(templateValue) && templateValue.length > 0) {
-                            validateObject(item, templateValue[0], [...currentPath, `[${index}]`]);
+                            validateObject(item, templateValue[0], [...currentPath, `[${index}]`], new Set());
                         }
                     });
                     return;
                 }
-
+    
                 // Handle primitive types
                 if (currentType !== expectedType) {
-                    const actualExpectedType = typeof templateValue === 'object' && 
-                        templateValue !== null && 
-                        'type' in templateValue ? 
-                        getTypeOf(templateValue.type) : 
-                        expectedType;
-
-                    if (currentType !== actualExpectedType) {
+                    // If the template value is undefined, accept either undefined or string
+                    if (!(expectedType === 'undefined' && currentType === 'string')) {
                         errors.push(
-                            `Type mismatch at ${currentPath.join('.')}: expected ${actualExpectedType}, got ${currentType}`
+                            `Type mismatch at ${currentPath.join('.')}: expected ${expectedType}, got ${currentType}`
                         );
                     }
                 }
             });
         };
-
+    
         validateObject(value, template);
-
+    
         if (errors.length > 0) {
             throw createError({
                 statusCode: 400,
@@ -207,7 +200,7 @@ export const useTypeValidator = () => {
                 data: errors
             });
         }
-
+    
         return value as T;
     };
 
