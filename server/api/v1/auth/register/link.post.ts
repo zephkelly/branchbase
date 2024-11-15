@@ -6,7 +6,7 @@ import { useFormValidation } from '~/composables/form/useFormValidation';
 import { cleanupOTP } from '~~/server/utils/auth/handlers/tokens/otp/cleanup';
 import { getOTPVerified } from '~~/server/utils/auth/handlers/tokens/otp/verify';
 import { getProviderUser, createUserProvider } from '~~/server/utils/auth/database/user';
-import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/createRegisteredSession';
+import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession';
 
 import { isRegisteredUser } from '~~/types/auth/user/session/registered';
 import { isDatabaseError, isValidationError } from '~~/server/types/error';

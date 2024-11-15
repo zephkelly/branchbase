@@ -1,6 +1,7 @@
+import { UUIDv7 } from '~~/server/types/uuidv7';
 import { getPool } from '~~/server/utils/database';
 
-async function invalidateUserSession(user_id: string) {
+export async function invalidateUserSession(user_id: string) {
     const pool = getPool();
     const client = await pool.connect();
 
@@ -8,5 +9,7 @@ async function invalidateUserSession(user_id: string) {
         UPDATE private.users
         SET current_session_version = $1
         WHERE id = $2
-    `, [Date.now(), user_id]);
+    `, [new UUIDv7().generate(), user_id]);
+
+    client.release();
 }

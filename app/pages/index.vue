@@ -7,7 +7,8 @@
                 <img :src="user.picture" alt="User Picture" />
                 <p>Provider: {{ user.provider }}</p>
                 <button @click="signOut">Sign Out</button>
-                <button @click="makeTestCall">Make Test Call</button>
+                <button @click="invalidateSession">Invalidate session</button>
+                <button @click="makeTestCall">Test Session</button>
             </template>
             <template #unregistered="{ user }">
                 <h2>Complete Your Registration</h2>
@@ -104,9 +105,19 @@ const signInWithCredentials = async () => {
     }
 }
 
-async function makeTestCall() {
+async function invalidateSession() {
     try {
         const response = await $fetch('/api/v1/branch');
+        console.log(response);
+    }
+    catch (error: any) {
+        console.error('Error making test call:', error);
+    }
+}
+
+async function makeTestCall() {
+    try {
+        const response = await $fetch('/api/v1/branch/t');
         console.log(response);
     }
     catch (error: any) {

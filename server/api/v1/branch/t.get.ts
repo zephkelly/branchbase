@@ -1,3 +1,5 @@
+import { H3Event, H3Error, defineEventHandler, createError } from "h3";
+
 import { isValidSession } from "~~/server/utils/auth/handlers/sessions/isValidSession";
 import { invalidateUserSession } from "~~/server/utils/auth/handlers/sessions/invalidateUserSession"
 
@@ -10,10 +12,8 @@ export default defineEventHandler({
         try {
             const session: any = await getUserSession(event);
 
-            await invalidateUserSession(session.user.id)
-
             return {
-                message: 'You have now invalidated your session'
+                message: 'Testing'
             }
         }
         catch (error: any) {
@@ -23,7 +23,7 @@ export default defineEventHandler({
 
             throw createError({
                 statusCode: 500,
-                message: 'Error logging out'
+                message: 'Error validating session'
             });
         }
     }

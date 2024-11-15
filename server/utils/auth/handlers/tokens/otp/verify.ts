@@ -1,8 +1,8 @@
 import { H3Event } from 'h3'
 import { OTPPurpose } from '~~/server/types/otp';
 
-import { createVerifiedLinkableSession } from "~~/server/utils/auth/sessions/unregistered/createVerifiedLinkableSession";
-import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/sessions/unregistered/createVerifiecUnregisteredSession";
+import { createVerifiedLinkableSession } from "~~/server/utils/auth/handlers/sessions/unregistered/createVerifiedLinkableSession";
+import { createVerifiedUnregisteredSession } from "~~/server/utils/auth/handlers/sessions/unregistered/createVerifiecUnregisteredSession";
 import { UnregisteredCredLinkableSession, UnregisteredCredSession } from '~~/types/auth/user/session/credentials/unregistered';
 import { UnregisteredOAuthLinkableSession, UnregisteredOAuthSession } from '~~/types/auth/user/session/oauth/unregistered';
 

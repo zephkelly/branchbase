@@ -5,7 +5,7 @@ import { isRegisteredUser } from "~~/types/auth/user/session/registered"
 import { VerifiedUnregisteredCredLinkableSession, UnregisteredCredSession } from "~~/types/auth/user/session/credentials/unregistered"
 
 import { createUser } from "~~/server/utils/auth/database/user"
-import { createRegisteredSession } from "~~/server/utils/auth/sessions/registered/createRegisteredSession"
+import { createRegisteredSession } from "~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession"
 import { getOTPVerified } from "~~/server/utils/auth/handlers/tokens/otp/verify"
 import { cleanupOTP } from '~~/server/utils/auth/handlers/tokens/otp/cleanup'
 

@@ -15,7 +15,7 @@ import {
 
 import { getRandomAvatar } from '~~/server/utils/avatarSelector';
 import { getProviderUserExists, createUser } from '~~/server/utils/auth/database/user'
-import { createRegisteredSession } from '~~/server/utils/auth/sessions/registered/createRegisteredSession';
+import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession';
 
 interface RegisterOAuthRequest {
     username: string

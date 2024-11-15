@@ -37,11 +37,11 @@ export interface SecureUnregisteredLinkableSessionData extends SecureSessionData
 
 // Guard functions
 export function isUnregisteredUser(user: any): user is UnregisteredUser {
-    if (user === null) {
+    if (user === null || user === undefined) {
         return false;
     }
 
-    if (user.id !== undefined || user.id !== null) {
+    if (user.id !== null) {
         return false;
     }
 
