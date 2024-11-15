@@ -117,10 +117,48 @@ export async function createTablesIfNotExist() {
                 CONSTRAINT unique_email_rate_limit
                     UNIQUE (email, limit_type)
             );
+
+
+            CREATE TABLE IF NOT EXISTS private.applications (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
+                owner_id UUID NOT NULL REFERENCES private.users(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                client_id TEXT NOT NULL,
+                client_secret TEXT NOT NULL,
+                scopes TEXT[] NOT NULL,
+                type TEXT NOT NULL DEFAULT 'third-party',
+                redirect_uris TEXT[] NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                
+                CONSTRAINT applications_client_id_key
+                    UNIQUE (client_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS private.application_access_tokens (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                token VARCHAR(255) NOT NULL UNIQUE,
+                application_id UUID NOT NULL REFERENCES private.applications(id) ON DELETE CASCADE,
+                scope TEXT[] NOT NULL DEFAULT '{}',
+                expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                user_id UUID REFERENCES private.users(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS private.application_refresh_tokens (
+                id UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
+                token VARCHAR(255) NOT NULL UNIQUE,
+                application_id UUID NOT NULL REFERENCES private.applications(id) ON DELETE CASCADE,
+                user_id UUID NOT NULL REFERENCES private.users(id) ON DELETE CASCADE,
+                expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                revoked_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
+            );
         `)
 
         console.log('Tables created or already exist')
-    } finally {
+    }
+    finally {
         client.release()
     }
 }

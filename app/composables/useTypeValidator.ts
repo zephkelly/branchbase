@@ -13,16 +13,14 @@ export const useTypeValidator = () => {
         if (value === undefined || value === null) {
             throw createError({
                 statusCode: 400,
-                message: 'Validation Error',
-                data: [`${fieldName} is required`]
+                message: `${fieldName} is required`,
             });
         }
         
         if (typeof value !== 'string') {
             throw createError({
                 statusCode: 400,
-                message: 'Validation Error',
-                data: [`${fieldName} must be a string, got ${getTypeOf(value)}`]
+                message: `${fieldName} must be a string, got ${getTypeOf(value)}`,
             });
         }
         
@@ -33,16 +31,14 @@ export const useTypeValidator = () => {
         if (value === undefined || value === null) {
             throw createError({
                 statusCode: 400,
-                message: 'Validation Error',
-                data: [`${fieldName} is required`]
+                message: `${fieldName} is required`,
             });
         }
         
         if (typeof value !== 'number' || isNaN(value)) {
             throw createError({
                 statusCode: 400,
-                message: 'Validation Error',
-                data: [`${fieldName} must be a number, got ${getTypeOf(value)}`]
+                message: `${fieldName} must be a number, got ${getTypeOf(value)}`,
             });
         }
         
@@ -90,16 +86,14 @@ export const useTypeValidator = () => {
         if (value === undefined || value === null) {
             throw createError({
                 statusCode: 400,
-                message: 'Validation Error',
-                data: [`${path} is required and must be an object`]
+                message: `${path} is required and must be an object`,
             });
         }
     
         if (typeof value !== 'object') {
             throw createError({
                 statusCode: 400,
-                message: 'Validation Error',
-                data: [`${path} must be an object, got ${getTypeOf(value)}`]
+                message: `${path} must be an object, got ${getTypeOf(value)}`,
             });
         }
     

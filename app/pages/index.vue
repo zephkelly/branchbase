@@ -9,6 +9,12 @@
                 <button @click="signOut">Sign Out</button>
                 <button @click="invalidateSession">Invalidate session</button>
                 <button @click="makeTestCall">Test Session</button>
+
+                <div>
+                    <button @click="createApplication">Create application</button>
+                    <button @click="generateAccessToken">Generate access token</button>
+                    <button @click="refreshAccessToken">Refresh access token</button>
+                </div>
             </template>
             <template #unregistered="{ user }">
                 <h2>Complete Your Registration</h2>
@@ -122,6 +128,60 @@ async function makeTestCall() {
     }
     catch (error: any) {
         console.error('Error making test call:', error);
+    }
+}
+
+async function createApplication() {
+    try {
+        const response = await $fetch('/api/v1/application/register', {
+            method: 'POST',
+            body: {
+                name: 'Test Application',
+                redirectUris: ['https://example.com'],
+            },
+        });
+
+        console.log(response);
+    }
+    catch (error: any) {
+        console.error('Error creating application:', error);
+    }
+}
+
+async function generateAccessToken() {
+    try {
+        const response = await $fetch('/api/v1/oauth/token', {
+            method: 'POST',
+            body: {
+                grant_type: 'client_credentials',
+                client_id: 'app_01932fe7-b0c3-7000-921f-411c8565d165',
+                client_secret: 'l0nUFthVG9MsnPE2t8_S1ES91jImuy3F1-K4eDAtxu4',
+            },
+        });
+
+        console.log(response);
+    }
+    catch (error: any) {
+        console.error('Error generating access token:', error);
+    }
+}
+
+async function refreshAccessToken() {
+    try {
+        const response = await $fetch('/api/v1/oauth/token', {
+            method: 'POST',
+            body: {
+                grant_type: 'refresh_token',
+                client_id: 'app_01932fe7-b0c3-7000-921f-411c8565d165',
+                client_secret: 'l0nUFthVG9MsnPE2t8_S1ES91jImuy3F1-K4eDAtxu4',
+                refresh_token: 'oivyFfLt1ibzgAP4a4xyIZcDTfpboaswl8C_nRKfbLw',
+            },
+        });
+
+        console.log(response);
+    }
+    catch (error: any) {
+        console.error('Error refreshing access token:', error);
     }
 }
 </script>
