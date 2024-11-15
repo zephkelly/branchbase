@@ -1,6 +1,6 @@
 import { H3Event } from 'h3'
 
-export async function cleanupOTP(event: H3Event, otp_id: number, email: string): Promise<boolean> {
+export async function cleanupOTP(event: H3Event, otp_id: string, email: string): Promise<boolean> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()

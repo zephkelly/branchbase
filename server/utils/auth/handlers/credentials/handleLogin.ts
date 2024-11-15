@@ -23,15 +23,12 @@ export async function handleLoginCredentials(
     
         const existingUser = await getEmailProviderUser(event, Provider.Credentials, email)
 
-        console.log("Is existing user", existingUser)
-    
         if (!existingUser) {
             throw createError({
                 statusCode: 404,
                 message: 'User not found'
             })
         }
-    
     
         if (await verifyPassword(existingUser.password_hash, password) === false) {
             throw createError({

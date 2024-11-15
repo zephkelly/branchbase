@@ -1,10 +1,10 @@
-import { verifyOTP } from "~~/server/utils/auth/database/tokens/otp/verify";
+import { verifyOTP } from "~~/server/utils/auth/handlers/tokens/otp/verify";
 
 const MAXIMUM_VERIFICATION_ATTEMPTS = 5
 
 export default defineEventHandler(async (event) => {
     try {
-        const body = await readBody(event)
+        const body = await readBody<{ otp: string }>(event)
         const { otp } = body
         
         if (!otp) {

@@ -3,8 +3,8 @@ import { H3Event } from 'h3';
 
 import { useFormValidation } from '~/composables/form/useFormValidation';
 
-import { cleanupOTP } from '~~/server/utils/auth/database/tokens/otp/cleanup';
-import { getOTPVerified } from '~~/server/utils/auth/database/tokens/otp/verify';
+import { cleanupOTP } from '~~/server/utils/auth/handlers/tokens/otp/cleanup';
+import { getOTPVerified } from '~~/server/utils/auth/handlers/tokens/otp/verify';
 import { getProviderUser, createUserProvider } from '~~/server/utils/auth/database/user';
 import { createRegisteredSession } from '~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession';
 
@@ -17,7 +17,7 @@ import { VerifiedUnregisteredOAuthLinkableSession } from '~~/types/auth/user/ses
 type IUnregisteredLinkableSession = VerifiedUnregisteredCredLinkableSession | VerifiedUnregisteredOAuthLinkableSession
 
 interface ILinkProviderRequest {
-    otp_id: number;
+    otp_id: string;
     existing_user_index: number;
 }
 export default defineEventHandler(async (event) => {
@@ -125,12 +125,12 @@ function validateSession(session: VerifiedUnregisteredCredLinkableSession | Veri
 
 
 interface IValidateInput {
-    otp_id: Ref<number>;
+    otp_id: Ref<string>;
     existing_user_index: Ref<number>;
 }
 function validateInput(data: IValidateInput) {
     const validator = useFormValidation<ILinkProviderRequest>({
-        otp_id: Number(data.otp_id.value),
+        otp_id: data.otp_id.value,
         existing_user_index: data.existing_user_index.value
     })
     
@@ -139,8 +139,8 @@ function validateInput(data: IValidateInput) {
     
     validator.setFieldRules(
         'otp_id',
-        validator.rules.required('OTP code is required'),
-        validator.rules.isNumber('OTP code must be a number'),
+        validator.rules.required('OTP id is required'),
+        validator.rules.isString('OTP id must be a string'),
     )
     
     validator.setFieldRules(
@@ -160,7 +160,7 @@ function validateInput(data: IValidateInput) {
 }
 
 
-async function verifyAndCleanOTP(event: H3Event, otp_id: number) {
+async function verifyAndCleanOTP(event: H3Event, otp_id: string) {
     const otpVerificationResponse = await getOTPVerified(event, otp_id)
     if (otpVerificationResponse.verified === false || !otpVerificationResponse.email) {
         throw createError({

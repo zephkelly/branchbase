@@ -8,7 +8,7 @@ import { UnregisteredOAuthLinkableSession, UnregisteredOAuthSession } from '~~/t
 
 const DEFAULT_MAX_VERIFICATION_ATTEMPTS = 5
 
-export async function verifyOTP(event: H3Event, otp: number, verification_attempts: number = DEFAULT_MAX_VERIFICATION_ATTEMPTS): Promise<number> {
+export async function verifyOTP(event: H3Event, otp: string, verification_attempts: number = DEFAULT_MAX_VERIFICATION_ATTEMPTS): Promise<string> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
@@ -122,7 +122,7 @@ export async function verifyOTP(event: H3Event, otp: number, verification_attemp
         
         await client.query('COMMIT')
 
-        return parseInt(token.id)
+        return token.id
     }
     catch (err) {
         await client.query('ROLLBACK')
@@ -140,7 +140,7 @@ interface OTPVerificationResult {
     email: string;
 }
 
-export async function getOTPVerified(event: H3Event, otp_id: number): Promise<OTPVerificationResult> {
+export async function getOTPVerified(event: H3Event, otp_id: string): Promise<OTPVerificationResult> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()
@@ -152,7 +152,7 @@ export async function getOTPVerified(event: H3Event, otp_id: number): Promise<OT
             message: 'Missing required parameters'
         })
     }
-    if (typeof otp_id !== 'number') {
+    if (typeof otp_id !== 'string') {
         throw createError({
             statusCode: 400,
             message: 'Invalid OTP ID'

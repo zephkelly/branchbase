@@ -160,6 +160,7 @@ export async function getEmailProviderUser(event: H3Event, provider: Provider, p
     }
 }
 
+
 export async function getUsersProvidersByEmail(event: H3Event, email: string): Promise<LinkableUserProviderData[] | null> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
@@ -226,9 +227,6 @@ export async function getUsersProvidersByEmail(event: H3Event, email: string): P
     }
 }
 
-export async function getCredentialUserExists(event: H3Event, email: string): Promise<boolean> {
-    return false;
-}
 
 export async function getProviderUserExists(event: H3Event, provider: Provider, provider_id: string): Promise<boolean> {
     const nitroApp = useNitroApp()
@@ -381,7 +379,7 @@ export async function createUser(
         await client.query('COMMIT')
 
         const newUser: RegisteredUser & SecureSessionData = {
-            id: parseInt(userId),
+            id: userId,
             username: username as string,
             picture: userResult.rows[0].picture,
             provider,
@@ -452,7 +450,7 @@ export async function createUser(
  * Used when a user links a new provider to their existing account.
  * @warning This function does NOT sanitise or validate input data.
  */
-export async function createUserProvider(event: H3Event, user_id: number, session: UserSession): Promise<UserProviderCreationResponse> {
+export async function createUserProvider(event: H3Event, user_id: string, session: UserSession): Promise<UserProviderCreationResponse> {
     const nitroApp = useNitroApp()
     const pool = nitroApp.database
     const client = await pool.connect()

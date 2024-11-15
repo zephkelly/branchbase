@@ -24,9 +24,34 @@ export default defineNitroPlugin(async (nitroApp) => {
     async function createTablesIfNotExist() {
         const client = await pool.connect()
         try {
+            await client.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
+
+            await client.query(`
+                create or replace function uuid_generate_v7()
+                returns uuid
+                as $$
+                begin
+                    return encode(
+                        set_bit(
+                            set_bit(
+                                overlay(uuid_send(gen_random_uuid())
+                                    placing substring(int8send(floor(extract(epoch from clock_timestamp()) * 1000)::bigint) from 3)
+                                    from 1 for 6
+                                ),
+                                52, 1
+                            ),
+                            53, 1
+                        ),
+                    'hex')::uuid;
+                end
+                $$
+                language plpgsql
+                volatile;
+            `)
+
             await client.query(`
                 CREATE TABLE IF NOT EXISTS private.users (
-                    id BIGSERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
                     username TEXT NOT NULL,
                     picture TEXT,
                     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -36,8 +61,8 @@ export default defineNitroPlugin(async (nitroApp) => {
                 );
                     
                 CREATE TABLE IF NOT EXISTS private.user_providers (
-                    id BIGSERIAL PRIMARY KEY,
-                    user_id BIGINT NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
+                    user_id UUID NOT NULL,
                     provider TEXT NOT NULL,
                     provider_id TEXT DEFAULT NULL,
                     provider_email TEXT NOT NULL,
@@ -60,7 +85,7 @@ export default defineNitroPlugin(async (nitroApp) => {
                 );
 
                 CREATE TABLE IF NOT EXISTS private.otp_tokens (
-                    id BIGSERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
                     email TEXT NOT NULL,
                     otp TEXT NOT NULL,
                     purpose TEXT NOT NULL,

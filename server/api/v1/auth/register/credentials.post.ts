@@ -6,8 +6,8 @@ import { VerifiedUnregisteredCredLinkableSession, UnregisteredCredSession } from
 
 import { createUser } from "~~/server/utils/auth/database/user"
 import { createRegisteredSession } from "~~/server/utils/auth/handlers/sessions/registered/createRegisteredSession"
-import { getOTPVerified } from "~~/server/utils/auth/database/tokens/otp/verify"
-import { cleanupOTP } from '~~/server/utils/auth/database/tokens/otp/cleanup'
+import { getOTPVerified } from "~~/server/utils/auth/handlers/tokens/otp/verify"
+import { cleanupOTP } from '~~/server/utils/auth/handlers/tokens/otp/cleanup'
 
 import { 
     isValidEmail,

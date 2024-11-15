@@ -2,7 +2,7 @@ import { Provider } from "~~/types/auth/user/providers";
 import { type SecureSessionData } from "~~/types/auth/user/session/secure";
 
 export interface RegisteredUser {
-    id: number;
+    id: string;
     username: string;
     provider_id: string | null;
     picture: string;
